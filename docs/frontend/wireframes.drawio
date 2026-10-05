@@ -1,0 +1,828 @@
+<mxfile host="app.diagrams.net" agent="ChatGPT" pages="14">
+  <diagram id="page-1" name="SCR-01">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#ffffff;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="740" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="SCR-01 원두 목록" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#eeeeee;fontStyle=1;fontSize=22;align=left;spacingLeft=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="BeanShop" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="110" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="원두 목록    장바구니    마이페이지" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;align=right;" parent="1" vertex="1">
+          <mxGeometry x="720" y="110" width="360" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="검색" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="175" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="원두 이름 검색" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="175" width="520" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="검색" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="752" y="175" width="100" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="필터" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="227" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="원산지 ▼" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="227" width="180" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="가격 ▼" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="412" y="227" width="180" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="로스팅 정도 ▼" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="604" y="227" width="180" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="초기화" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="796" y="227" width="100" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="판매 중인 원두" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=16;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="279" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="[원두 이미지]&#xa;브라질 산토스&#xa;브라질 · 중배전&#xa;15,000원&#xa;[상세보기]" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#fafafa;fontSize=13;align=left;verticalAlign=top;spacing=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="315" width="235" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="16" value="[원두 이미지]&#xa;콜롬비아 수프리모&#xa;콜롬비아 · 중강배전&#xa;18,000원&#xa;[상세보기]" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#fafafa;fontSize=13;align=left;verticalAlign=top;spacing=10;" parent="1" vertex="1">
+          <mxGeometry x="320" y="315" width="235" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="17" value="[원두 이미지]&#xa;에티오피아 예가체프&#xa;에티오피아 · 약배전&#xa;17,000원&#xa;[상세보기]" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#fafafa;fontSize=13;align=left;verticalAlign=top;spacing=10;" parent="1" vertex="1">
+          <mxGeometry x="570" y="315" width="235" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="18" value="[원두 이미지]&#xa;케냐 AA&#xa;케냐 · 중배전&#xa;16,000원&#xa;[상세보기]" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#fafafa;fontSize=13;align=left;verticalAlign=top;spacing=10;" parent="1" vertex="1">
+          <mxGeometry x="820" y="315" width="235" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="19" value="페이지" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="475" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="20" value="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#333333;fillColor=#d9d9d9;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="475" width="45" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="21" value="2" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="277" y="475" width="45" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="22" value="3" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="334" y="475" width="45" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="23" value="…" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;" parent="1" vertex="1">
+          <mxGeometry x="391" y="475" width="45" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="24" value="다음" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="448" y="475" width="80" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="25" value="※ 목록은 페이지당 20개 표시. 판매 중지 상품은 주문할 수 없으며, 품절 옵션은 상세 화면에서 품절로 표시한다." style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#666666;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="527" width="1010" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-2" name="SCR-02">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#ffffff;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="740" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="SCR-02 원두 상세" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#eeeeee;fontStyle=1;fontSize=22;align=left;spacingLeft=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="BeanShop" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="110" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="원두 목록    장바구니    마이페이지" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;align=right;" parent="1" vertex="1">
+          <mxGeometry x="720" y="110" width="360" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="상품 이미지 / 기본 정보" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="175" width="1010" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="[원두 이미지]      원두명: 브라질 산토스&#xa;원산지: 브라질     로스팅 정도: 중배전&#xa;테이스팅 노트: 초콜릿, 견과류     기본 가격: 15,000원" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="213" width="970" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="상품 설명" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="306" width="1010" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="원두에 대한 상세 설명" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="344" width="970" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="용량" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="392" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="200g" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="392" width="150" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="500g" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="382" y="392" width="150" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="분쇄도" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="444" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="원두(홀빈) ▼" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="444" width="240" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="선택 옵션" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="496" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="16" value="추가금액 +0원" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;" parent="1" vertex="1">
+          <mxGeometry x="220" y="496" width="190" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="17" value="재고 10개" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#888888;fillColor=#f2f2f2;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="422" y="496" width="150" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="18" value="판매 가능" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#888888;fillColor=#f2f2f2;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="584" y="496" width="130" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="19" value="수량" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="548" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="20" value="−" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="548" width="45" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="21" value="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="277" y="548" width="65" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="22" value="+" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="354" y="548" width="45" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="23" value="총 15,000원" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;" parent="1" vertex="1">
+          <mxGeometry x="411" y="548" width="180" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="24" value="장바구니 담기" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#333333;fillColor=#d9d9d9;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="70" y="600" width="240" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="25" value="※ 옵션별(용량·분쇄도) 재고가 0이면 “품절”로 표시하고 장바구니에 담을 수 없다." style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#666666;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="652" width="1010" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-3" name="SCR-03">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#ffffff;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="740" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="SCR-03 로그인" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#eeeeee;fontStyle=1;fontSize=22;align=left;spacingLeft=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="BeanShop" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="110" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="원두 목록    장바구니    마이페이지" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;align=right;" parent="1" vertex="1">
+          <mxGeometry x="720" y="110" width="360" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="이메일" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="175" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="example@email.com" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="175" width="520" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="비밀번호" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="227" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="비밀번호 입력" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="227" width="520" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="로그인" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#333333;fillColor=#d9d9d9;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="70" y="279" width="300" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="회원가입" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="70" y="331" width="145" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="※ 로그인 후 보호된 기능(장바구니, 주문, 배송지, 내 주문 등)을 이용한다." style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#666666;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="383" width="1010" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-4" name="SCR-04">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#ffffff;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="740" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="SCR-04 회원가입" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#eeeeee;fontStyle=1;fontSize=22;align=left;spacingLeft=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="BeanShop" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="110" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="원두 목록    장바구니    마이페이지" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;align=right;" parent="1" vertex="1">
+          <mxGeometry x="720" y="110" width="360" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="이메일" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="175" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="이메일 입력" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="175" width="520" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="비밀번호" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="227" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="비밀번호 입력" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="227" width="520" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="비밀번호 확인" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="279" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="비밀번호 재입력" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="279" width="520" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="이름" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="331" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="이름 입력" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="331" width="520" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="연락처" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="383" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="연락처 입력" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="383" width="520" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="16" value="회원가입" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#333333;fillColor=#d9d9d9;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="70" y="435" width="300" height="38" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-5" name="SCR-05">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#ffffff;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="740" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="SCR-05 장바구니" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#eeeeee;fontStyle=1;fontSize=22;align=left;spacingLeft=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="BeanShop" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="110" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="원두 목록    장바구니    마이페이지" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;align=right;" parent="1" vertex="1">
+          <mxGeometry x="720" y="110" width="360" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="장바구니 상품 1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="175" width="1010" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="[이미지] 브라질 산토스 / 200g / 원두(홀빈)     15,000원&#xa;수량  [−]  2  [+]       소계 30,000원                         [삭제]" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="213" width="970" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="장바구니 상품 2" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="276" width="1010" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="[이미지] 콜롬비아 수프리모 / 500g / 핸드드립     18,000원&#xa;수량  [−]  1  [+]       소계 18,000원                         [삭제]" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="314" width="970" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="상품 금액" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="377" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="48,000원" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;" parent="1" vertex="1">
+          <mxGeometry x="220" y="377" width="220" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="예상 배송비" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="429" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="3,000원" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;" parent="1" vertex="1">
+          <mxGeometry x="220" y="429" width="220" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="예상 결제금액" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="481" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="51,000원" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;" parent="1" vertex="1">
+          <mxGeometry x="220" y="481" width="220" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="16" value="주문하기" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#333333;fillColor=#d9d9d9;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="70" y="533" width="300" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="17" value="※ 수량 변경 시 옵션별 재고를 초과할 수 없다." style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#666666;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="585" width="1010" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-6" name="SCR-06">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#ffffff;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="740" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="SCR-06 주문 / 결제" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#eeeeee;fontStyle=1;fontSize=22;align=left;spacingLeft=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="BeanShop" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="110" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="원두 목록    장바구니    마이페이지" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;align=right;" parent="1" vertex="1">
+          <mxGeometry x="720" y="110" width="360" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="주문 상품" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="175" width="1010" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="브라질 산토스 / 200g / 원두(홀빈) × 2     30,000원&#xa;콜롬비아 수프리모 / 500g / 핸드드립 × 1     18,000원" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="213" width="970" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="배송지" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="276" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="기본 배송지 ▼" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="276" width="420" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="새 배송지 입력" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="652" y="276" width="160" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="배송 정보" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="328" width="1010" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="수령인 / 연락처 / 우편번호 / 기본주소 / 상세주소" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="366" width="970" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="상품 금액" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="414" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="48,000원" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;" parent="1" vertex="1">
+          <mxGeometry x="220" y="414" width="180" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="배송비" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="466" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="16" value="3,000원" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;" parent="1" vertex="1">
+          <mxGeometry x="220" y="466" width="180" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="17" value="최종 결제금액" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="518" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="18" value="51,000원" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;" parent="1" vertex="1">
+          <mxGeometry x="220" y="518" width="180" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="19" value="결제 수단" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="570" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="20" value="외부 PG 결제" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="570" width="260" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="21" value="51,000원 결제하기" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#333333;fillColor=#d9d9d9;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="70" y="622" width="300" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="22" value="※ 결제 실패 시 실패 사유를 안내하고 “결제 다시 시도” 기능을 제공한다. 카드 정보는 시스템에 저장하지 않는다." style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#666666;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="674" width="1010" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-7" name="SCR-07">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#ffffff;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="740" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="SCR-07 주문 목록" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#eeeeee;fontStyle=1;fontSize=22;align=left;spacingLeft=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="BeanShop" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="110" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="원두 목록    장바구니    마이페이지" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;align=right;" parent="1" vertex="1">
+          <mxGeometry x="720" y="110" width="360" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="상태" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="175" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="전체" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#333333;fillColor=#d9d9d9;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="175" width="100" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="결제완료" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="332" y="175" width="110" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="배송준비" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="454" y="175" width="110" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="배송중" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="576" y="175" width="100" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="배송완료" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="688" y="175" width="110" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="취소" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="810" y="175" width="90" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="ORD-2026-00123" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="227" width="1010" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="주문일 2026-09-30   결제금액 51,000원   상태: 배송중                         [상세보기]" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="265" width="970" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="ORD-2026-00122" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="313" width="1010" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="16" value="주문일 2026-09-28   결제금액 33,000원   상태: 배송완료                       [상세보기]" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="351" width="970" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="17" value="ORD-2026-00121" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="399" width="1010" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="18" value="주문일 2026-09-26   결제금액 27,000원   상태: 취소완료                       [상세보기]" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="437" width="970" height="25" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-8" name="SCR-08">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#ffffff;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="740" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="SCR-08 주문 상세" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#eeeeee;fontStyle=1;fontSize=22;align=left;spacingLeft=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="BeanShop" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="110" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="원두 목록    장바구니    마이페이지" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;align=right;" parent="1" vertex="1">
+          <mxGeometry x="720" y="110" width="360" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="주문 정보" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="175" width="1010" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="주문번호 ORD-2026-00123     주문일 2026-09-30&#xa;주문 상태: 배송중" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="213" width="970" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="주문 상품" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="266" width="1010" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="브라질 산토스 / 200g / 원두(홀빈) × 2     주문 당시 가격 30,000원&#xa;콜롬비아 수프리모 / 500g / 핸드드립 × 1     주문 당시 가격 18,000원" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="304" width="970" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="결제 정보" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="367" width="1010" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="상품 금액 48,000원 / 배송비 3,000원 / 최종 결제금액 51,000원" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="405" width="970" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="배송 정보" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="448" width="1010" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="수령인 / 연락처 / 배송주소&#xa;택배사: 대한통운     송장번호: 1234567890      [배송 조회]" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="486" width="970" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="주문 취소 요청" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="70" y="544" width="220" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="※ 배송 상태에 따라 취소 가능 여부가 달라지며, 취소 요청은 관리자 승인 후 최종 취소된다." style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#666666;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="596" width="1010" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-9" name="SCR-09">
+    <mxGraphModel dx="1334" dy="799" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#ffffff;" value="" vertex="1">
+          <mxGeometry height="740" width="1080" x="40" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#eeeeee;fontStyle=1;fontSize=22;align=left;spacingLeft=16;" value="SCR-09 회원정보 관리" vertex="1">
+          <mxGeometry height="60" width="1080" x="40" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="4" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;align=left;" value="BeanShop" vertex="1">
+          <mxGeometry height="40" width="180" x="70" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="5" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;align=right;" value="원두 목록    장바구니    마이페이지" vertex="1">
+          <mxGeometry height="40" width="360" x="720" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="6" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" value="이메일" vertex="1">
+          <mxGeometry height="34" width="150" x="70" y="175" as="geometry" />
+        </mxCell>
+        <mxCell id="7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" value="example@email.com (수정 불가)" vertex="1">
+          <mxGeometry height="38" width="520" x="220" y="175" as="geometry" />
+        </mxCell>
+        <mxCell id="8" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" value="이름" vertex="1">
+          <mxGeometry height="34" width="150" x="70" y="227" as="geometry" />
+        </mxCell>
+        <mxCell id="9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" value="000" vertex="1">
+          <mxGeometry height="38" width="520" x="220" y="227" as="geometry" />
+        </mxCell>
+        <mxCell id="10" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" value="연락처" vertex="1">
+          <mxGeometry height="34" width="150" x="70" y="279" as="geometry" />
+        </mxCell>
+        <mxCell id="11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" value="010-1234-5678" vertex="1">
+          <mxGeometry height="38" width="520" x="220" y="279" as="geometry" />
+        </mxCell>
+        <mxCell id="12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#333333;fillColor=#d9d9d9;fontStyle=1;fontSize=14;" value="수정 저장" vertex="1">
+          <mxGeometry height="38" width="260" x="70" y="331" as="geometry" />
+        </mxCell>
+        <mxCell id="13" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#666666;align=left;" value="※ 비밀번호는 해시 형태로 저장되며 화면에서 기존 비밀번호를 표시하지 않는다." vertex="1">
+          <mxGeometry height="30" width="1010" x="70" y="383" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-10" name="SCR-10">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#ffffff;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="740" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="SCR-10 배송지 관리" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#eeeeee;fontStyle=1;fontSize=22;align=left;spacingLeft=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="BeanShop" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="110" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="원두 목록    장바구니    마이페이지" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;align=right;" parent="1" vertex="1">
+          <mxGeometry x="720" y="110" width="360" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="새 배송지 추가" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#333333;fillColor=#d9d9d9;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="70" y="175" width="180" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="기본 배송지" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="227" width="1010" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="● 김현아 / 010-1234-5678&#xa;[우편번호] 충청북도 청주시 … 상세주소                       [수정] [기본 배송지]" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="265" width="970" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="배송지 2" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="333" width="1010" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="○ 김현아 / 010-9876-5432&#xa;[우편번호] 서울특별시 … 상세주소                           [수정] [기본으로 설정]" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="371" width="970" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="※ 배송지는 여러 개 저장할 수 있으며 하나를 기본 배송지로 지정한다." style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#666666;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="439" width="1010" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-11" name="SCR-11">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#ffffff;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="740" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="SCR-11 관리자 원두 목록 / 관리" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#eeeeee;fontStyle=1;fontSize=22;align=left;spacingLeft=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="BeanShop" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="110" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="원두 목록    장바구니    마이페이지" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;align=right;" parent="1" vertex="1">
+          <mxGeometry x="720" y="110" width="360" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="검색" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="175" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="원두 이름 검색" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="175" width="420" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="검색" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="652" y="175" width="90" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="원두 등록" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#333333;fillColor=#d9d9d9;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="754" y="175" width="130" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="상태" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="227" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="전체 ▼" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="227" width="160" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="판매중 ▼" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="392" y="227" width="160" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="상품 목록" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="279" width="1010" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="ID | 원두명 | 원산지 | 로스팅 | 기본가격 | 옵션/재고 | 판매상태 | 관리&#xa;01 | 브라질 산토스 | 브라질 | 중배전 | 15,000 | 4개 옵션 | 판매중 | [수정]&#xa;02 | 콜롬비아 수프리모 | 콜롬비아 | 중강배전 | 18,000 | 4개 옵션 | 품절 | [수정]" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="317" width="970" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="※ 판매 상태: 판매중(ON_SALE) / 품절(SOLD_OUT) / 판매중지(STOPPED)." style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#666666;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="445" width="1010" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-12" name="SCR-12">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#ffffff;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="740" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="SCR-12 관리자 원두 등록 / 수정" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#eeeeee;fontStyle=1;fontSize=22;align=left;spacingLeft=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="BeanShop" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="110" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="원두 목록    장바구니    마이페이지" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;align=right;" parent="1" vertex="1">
+          <mxGeometry x="720" y="110" width="360" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="원두명" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="175" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="원두명 입력" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="175" width="450" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="원산지" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="227" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="원산지 입력" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="227" width="450" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="로스팅 정도" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="279" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="로스팅 정도 선택 ▼" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="279" width="300" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="기본 가격" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="331" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="0" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="331" width="220" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="테이스팅 노트" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="383" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="테이스팅 노트 입력" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="383" width="520" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="16" value="설명" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="435" width="1010" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="17" value="원두 설명 입력" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="473" width="970" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="18" value="옵션별 재고" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="516" width="1010" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="19" value="용량 | 분쇄도 | 추가금액 | 재고수량 | 상태&#xa;200g | 원두(홀빈) ▼ | 0원 | 10 | 판매 가능&#xa;500g | 핸드드립 ▼ | 3,000원 | 0 | 품절      [+ 옵션 추가]" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="554" width="970" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="20" value="판매 상태" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="637" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="21" value="판매중 ▼" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="637" width="200" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="22" value="저장" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#333333;fillColor=#d9d9d9;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="70" y="689" width="180" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="23" value="취소" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="262" y="689" width="120" height="38" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-13" name="SCR-13">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#ffffff;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="740" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="SCR-13 관리자 주문 목록" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#eeeeee;fontStyle=1;fontSize=22;align=left;spacingLeft=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="30" width="1080" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="BeanShop" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="110" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="원두 목록    장바구니    마이페이지" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;align=right;" parent="1" vertex="1">
+          <mxGeometry x="720" y="110" width="360" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="검색" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="175" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="주문번호 / 회원 검색" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="175" width="420" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="검색" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="652" y="175" width="90" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="상태" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="70" y="227" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="전체" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#333333;fillColor=#d9d9d9;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="220" y="227" width="90" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="결제대기" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="322" y="227" width="100" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="결제완료" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="434" y="227" width="100" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="배송준비" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="546" y="227" width="100" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="배송중" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="658" y="227" width="90" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="배송완료" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="760" y="227" width="100" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="16" value="취소요청" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="872" y="227" width="100" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="17" value="전체 주문" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="70" y="279" width="1010" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="18" value="주문번호 | 주문일 | 회원 | 결제금액 | 주문상태 | 관리&#xa;ORD-00123 | 09-30 | 김현아 | 51,000 | 배송중 | [상세]&#xa;ORD-00122 | 09-28 | 이서연 | 33,000 | 결제완료 | [상세]&#xa;ORD-00121 | 09-26 | 박지민 | 27,000 | 취소요청 | [상세]" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="90" y="317" width="970" height="105" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-14" name="SCR-14">
+    <mxGraphModel dx="961" dy="781" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#ffffff;" value="" vertex="1">
+          <mxGeometry height="740" width="1080" x="40" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#eeeeee;fontStyle=1;fontSize=22;align=left;spacingLeft=16;" value="SCR-14 관리자 주문 상세 / 배송 처리" vertex="1">
+          <mxGeometry height="60" width="1080" x="40" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="4" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;align=left;" value="BeanShop" vertex="1">
+          <mxGeometry height="40" width="180" x="70" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="5" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;align=right;" value="원두 목록    장바구니    마이페이지" vertex="1">
+          <mxGeometry height="40" width="360" x="720" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" value="주문 / 회원 정보" vertex="1">
+          <mxGeometry height="80" width="1010" x="70" y="175" as="geometry" />
+        </mxCell>
+        <mxCell id="7" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" value="주문번호 ORD-2026-00123     주문상태: 결제완료&#xa;회원 / 수령인 / 연락처 / 배송주소" vertex="1">
+          <mxGeometry height="35" width="970" x="90" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" value="주문 상품" vertex="1">
+          <mxGeometry height="70" width="1010" x="70" y="271" as="geometry" />
+        </mxCell>
+        <mxCell id="9" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" value="상품명 / 용량 / 분쇄도 / 주문 당시 가격 / 수량 / 소계" vertex="1">
+          <mxGeometry height="25" width="970" x="90" y="309" as="geometry" />
+        </mxCell>
+        <mxCell id="10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#f7f7f7;fontStyle=1;fontSize=15;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" value="결제 정보" vertex="1">
+          <mxGeometry height="70" width="1010" x="70" y="357" as="geometry" />
+        </mxCell>
+        <mxCell id="11" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;verticalAlign=top;whiteSpace=wrap;" value="최종 결제금액 / PG 거래 ID / 결제 상태 / 실패 사유(있는 경우)" vertex="1">
+          <mxGeometry height="25" width="970" x="90" y="395" as="geometry" />
+        </mxCell>
+        <mxCell id="12" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" value="배송 처리" vertex="1">
+          <mxGeometry height="34" width="150" x="70" y="443" as="geometry" />
+        </mxCell>
+        <mxCell id="13" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" value="택배사 선택 ▼" vertex="1">
+          <mxGeometry height="38" width="220" x="220" y="443" as="geometry" />
+        </mxCell>
+        <mxCell id="14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" value="송장번호 입력" vertex="1">
+          <mxGeometry height="38" width="280" x="452" y="443" as="geometry" />
+        </mxCell>
+        <mxCell id="15" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" value="배송 준비" vertex="1">
+          <mxGeometry height="38" width="120" x="744" y="443" as="geometry" />
+        </mxCell>
+        <mxCell id="16" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" value="배송 상태" vertex="1">
+          <mxGeometry height="34" width="150" x="70" y="495" as="geometry" />
+        </mxCell>
+        <mxCell id="17" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fillColor=#ffffff;align=left;spacingLeft=10;fontSize=14;" value="결제완료 ▼" vertex="1">
+          <mxGeometry height="38" width="220" x="220" y="495" as="geometry" />
+        </mxCell>
+        <mxCell id="18" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#333333;fillColor=#d9d9d9;fontStyle=1;fontSize=14;" value="상태 변경" vertex="1">
+          <mxGeometry height="38" width="120" x="452" y="495" as="geometry" />
+        </mxCell>
+        <mxCell id="19" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=15;align=left;" value="취소 요청" vertex="1">
+          <mxGeometry height="34" width="150" x="70" y="547" as="geometry" />
+        </mxCell>
+        <mxCell id="20" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;align=left;" value="취소 요청 사유/상태" vertex="1">
+          <mxGeometry height="38" width="360" x="220" y="547" as="geometry" />
+        </mxCell>
+        <mxCell id="21" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#555555;fillColor=#e6e6e6;fontStyle=1;fontSize=14;" value="취소 승인" vertex="1">
+          <mxGeometry height="38" width="120" x="592" y="547" as="geometry" />
+        </mxCell>
+        <mxCell id="22" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#666666;align=left;" value="※ 취소 승인 시 결제를 취소하고 재고를 복구한다. 배송 상태는 허용된 순서로만 변경한다." vertex="1">
+          <mxGeometry height="30" width="1010" x="70" y="599" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
