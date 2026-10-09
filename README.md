@@ -105,6 +105,7 @@ environment and run `python manage.py createsuperuser` from `backend/`.
 ## Documents
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) - issues, git workflow, pull requests, commit messages
+- [docs/architecture.md](docs/architecture.md) - system structure and request flow
 - [docs/tech-stack.md](docs/tech-stack.md) - technology choices
 - [docs/deliverables.md](docs/deliverables.md) - required course deliverables per role
 
