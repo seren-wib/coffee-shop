@@ -67,6 +67,14 @@ one Google Doc and submitted from there. The compiled document is not committed.
 - `docs/` is Markdown first: documents as Markdown, with images and diagram sources next to
   them. Any other format needs a reason in the PR description.
 
+## Language
+
+- Code, comments, commit messages, PR titles, issue titles, and config files are in English.
+- Course deliverable documents in `docs/` are in Korean, matching the submission.
+  Identifiers such as table, column, class, and method names and status values stay in English.
+- Issue and PR bodies for course deliverables are in Korean. Other issue and PR bodies are
+  in English.
+
 ## Notifications
 
 A Discord webhook posts on push, pull request, pull request review, and issues.
