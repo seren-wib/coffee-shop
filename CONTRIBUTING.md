@@ -31,6 +31,8 @@
 - Required approvals: 0. Reviews are recommended, not mandatory.
 - If nobody reviews within 24 hours, the author merges.
 - PR title follows the commit message format below (it becomes the squash commit message).
+- The body comes from [.github/pull_request_template.md](.github/pull_request_template.md).
+  Keep the Summary to one or two sentences, tick the checklist, and fill in `Closes #N`.
 
 ## Commit messages
 
