@@ -60,10 +60,10 @@ chore: update prettier config
 
 ## Documentation
 
-Google Docs is the workspace, `docs/` is the confirmed version. Draft and revise in Google
-Docs; once a document is settled it gets copied into `docs/` as Markdown.
+`docs/` is the source of truth. Documents are written and revised in `docs/` through issues
+and pull requests, like code. For each course submission, the documents are compiled into
+one Google Doc and submitted from there. The compiled document is not committed.
 
-- [Heisnotanimposter](https://github.com/Heisnotanimposter) maintains the Google Docs workspace.
 - `docs/` is Markdown first: documents as Markdown, with images and diagram sources next to
   them. Any other format needs a reason in the PR description.
 
