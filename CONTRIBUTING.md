@@ -2,15 +2,28 @@
 
 ## Workflow: GitHub Flow
 
-1. Branch off `main`. Branch names are free-form, but must describe the work on the branch.
+1. Open an issue for the work, or pick up an existing one. See Issues below.
+2. Branch off `main`. Branch names are free-form, but must describe the work on the branch.
    `cart-api`, `usecase-diagram`, `fix-login-401` are fine. Initials, nicknames, and
    unrelated words are not.
-2. Open a pull request.
-3. Squash merge into `main`.
+3. Open a pull request that closes the issue.
+4. Squash merge into `main`.
 
 - Keep branches short-lived. Merge within 2 days.
 - Never push directly to `main`.
 - `main` must always run locally.
+
+## Issues
+
+- Every change starts from an issue. Do not open a duplicate if one already exists.
+- Assign yourself and add a label: `documentation` for docs, `enhancement` for features,
+  `bug` for fixes.
+- Set the milestone of the deliverable the issue belongs to. Milestones go on issues only,
+  not on pull requests, so progress is not counted twice. Each milestone description lists
+  where its outputs live.
+- Issues have no reviewer field. End the issue body with `Reviewer: @handle`, and request
+  that person as reviewer when you open the pull request.
+- GitHub Projects is not used.
 
 ## Pull requests
 
