@@ -2,15 +2,28 @@
 
 ## Workflow: GitHub Flow
 
-1. Branch off `main`. Branch names are free-form, but must describe the work on the branch.
+1. Open an issue for the work, or pick up an existing one. See Issues below.
+2. Branch off `main`. Branch names are free-form, but must describe the work on the branch.
    `cart-api`, `usecase-diagram`, `fix-login-401` are fine. Initials, nicknames, and
    unrelated words are not.
-2. Open a pull request.
-3. Squash merge into `main`.
+3. Open a pull request that closes the issue.
+4. Squash merge into `main`.
 
 - Keep branches short-lived. Merge within 2 days.
 - Never push directly to `main`.
 - `main` must always run locally.
+
+## Issues
+
+- Every change starts from an issue. Do not open a duplicate if one already exists.
+- Assign yourself and add a label: `documentation` for docs, `enhancement` for features,
+  `bug` for fixes.
+- Set the milestone of the deliverable the issue belongs to. Milestones go on issues only,
+  not on pull requests, so progress is not counted twice. Each milestone description lists
+  where its outputs live.
+- Issues have no reviewer field. End the issue body with `Reviewer: @handle`, and request
+  that person as reviewer when you open the pull request.
+- GitHub Projects is not used.
 
 ## Pull requests
 
@@ -18,6 +31,8 @@
 - Required approvals: 0. Reviews are recommended, not mandatory.
 - If nobody reviews within 24 hours, the author merges.
 - PR title follows the commit message format below (it becomes the squash commit message).
+- The body comes from [.github/pull_request_template.md](.github/pull_request_template.md).
+  Keep the Summary to one or two sentences, tick the checklist, and fill in `Closes #N`.
 
 ## Commit messages
 
@@ -47,12 +62,20 @@ chore: update prettier config
 
 ## Documentation
 
-Google Docs is the workspace, `docs/` is the confirmed version. Draft and revise in Google
-Docs; once a document is settled it gets copied into `docs/` as Markdown.
+`docs/` is the source of truth. Documents are written and revised in `docs/` through issues
+and pull requests, like code. For each course submission, the documents are compiled into
+one Google Doc and submitted from there. The compiled document is not committed.
 
-- [Heisnotanimposter](https://github.com/Heisnotanimposter) maintains the Google Docs workspace.
 - `docs/` is Markdown first: documents as Markdown, with images and diagram sources next to
   them. Any other format needs a reason in the PR description.
+
+## Language
+
+- Code, comments, commit messages, PR titles, issue titles, and config files are in English.
+- Course deliverable documents in `docs/` are in Korean, matching the submission.
+  Identifiers such as table, column, class, and method names and status values stay in English.
+- Issue and PR bodies for course deliverables are in Korean. Other issue and PR bodies are
+  in English.
 
 ## Notifications
 

@@ -104,6 +104,20 @@ environment and run `python manage.py createsuperuser` from `backend/`.
 
 ## Documents
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) - git workflow, pull requests, commit messages
+- [CONTRIBUTING.md](CONTRIBUTING.md) - issues, git workflow, pull requests, commit messages
+- [docs/architecture.md](docs/architecture.md) - system structure and request flow
 - [docs/tech-stack.md](docs/tech-stack.md) - technology choices
 - [docs/deliverables.md](docs/deliverables.md) - required course deliverables per role
+
+### Back-end
+
+- [docs/backend/requirements.md](docs/backend/requirements.md) - requirements definition
+- [docs/backend/class-diagram.drawio.svg](docs/backend/class-diagram.drawio.svg) - class diagram
+- [docs/backend/table-specification.md](docs/backend/table-specification.md) - database schema and table specification
+
+### Front-end
+
+- [docs/frontend/usecase-diagram.drawio.svg](docs/frontend/usecase-diagram.drawio.svg) - use case diagram
+- [docs/frontend/screen-list.md](docs/frontend/screen-list.md) - screen list
+- [docs/frontend/wireframes/](docs/frontend/wireframes/) - wireframes for each screen
+- [docs/frontend/sequence-diagrams/](docs/frontend/sequence-diagrams/) - sequence diagrams
