@@ -16,7 +16,7 @@ A small online shop for selling coffee beans. Runs locally for demonstration onl
 ### Prerequisites
 
 - Git
-- Node.js 20 LTS
+- Node.js 24 LTS
 - Python 3.12
 - VS Code (optional). Install the recommended extensions when prompted.
 

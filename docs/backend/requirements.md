@@ -52,7 +52,7 @@
 
 - 시스템은 수업 시연용으로 로컬 PC에서만 실행하며, 외부 서버에 배포하지 않는다.
 - 프론트엔드는 React(Vite), 백엔드는 Django와 Django REST Framework, 데이터베이스는 SQLite로 구현한다.
-- 실행 환경은 Python 3.12, Node.js 20 LTS이며, Windows와 macOS에서 같은 절차로 설치하고 실행할 수 있어야 한다.
+- 실행 환경은 Python 3.12, Node.js 24 LTS이며, Windows와 macOS에서 같은 절차로 설치하고 실행할 수 있어야 한다.
 - 화면은 최신 버전의 Chrome 브라우저에서 정상 동작해야 한다.
 - 프론트엔드와 백엔드는 REST API를 통해 JSON 형식으로만 데이터를 주고받는다.
 
