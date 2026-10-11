@@ -1,6 +1,6 @@
-# 3. 메소드 알고리즘 설계 (Method Algorithm Design)
+# 2.4 메소드 알고리즘 설계 (Method Algorithm Design)
 
-커피 원두 쇼핑몰 시스템의 백엔드 핵심 비즈니스 로직에 대한 **메소드 알고리즘 설계서**이다. SDD(소프트웨어 설계 명세서) 제3절 및 `docs/deliverables.md`의 **"Method algorithm design and implementation"** 산출물에 해당한다.
+커피 원두 쇼핑몰 시스템의 백엔드 핵심 비즈니스 로직에 대한 **메소드 알고리즘 설계서**이다. HW1 요구사항 명세서 2.4절 및 `docs/deliverables.md`의 **"Method algorithm design and implementation"** 산출물에 해당한다.
 
 클래스 명세(`class-specification.md`)와 데이터베이스 스키마(`table-specification.md`)에서 정의된 인터페이스를 바탕으로, 트랜잭션 일관성, 재고 동시성 제어, 불변 스냅샷 생성, 결제 및 배송 상태 머신 전이를 담당하는 **핵심 6대 알고리즘**을 상세히 기술한다.
 
