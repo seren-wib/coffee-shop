@@ -4,7 +4,7 @@
 
 This document specifies the relational database schema and table specifications for the back-end system of the **Coffee Bean Shopping Mall System** (`<Coffee Bean Shopping Mall System>`), addressing the **Database schema and table specification** deliverable in `docs/deliverables.md`.
 
-The physical database is designed for **SQLite 3** (`PRAGMA foreign_keys = ON;`) and maps to the back-end domain models in `backend/orders/models.py`, `backend/products/models.py`, and `backend/users/models.py`. Some items are specified here ahead of the code and are not in the models yet: `orders.status_before_cancel`, `orders.cancel_reason`, the `roast_level` check constraint, and the `uq_payments_order_success` partial index.
+The physical database is designed for **SQLite 3** (`PRAGMA foreign_keys = ON;`) and maps to the back-end domain models in `backend/orders/models.py`, `backend/products/models.py`, and `backend/users/models.py`. Some items are specified here ahead of the code and are not in the models or `backend/schema.sql` yet: `orders.status_before_cancel`, `orders.cancel_reason`, the `roast_level` check constraint, and the `uq_payments_order_success` partial index. `backend/schema.sql` also lacks `ON DELETE CASCADE` on `payments.order_id`.
 
 ### 1.1 Key Architecture Decisions
 1. **Consolidated Order & Fulfillment**: Single-destination shipment attributes (`courier_name`, `tracking_number`, `shipped_at`, `delivered_at`) are integrated directly into the `orders` table. This eliminates redundant 1:1 join overhead, avoids out-of-sync state duplicates between order and delivery lifecycles, and resolves the issue of creating pending delivery records prior to courier dispatch.
@@ -253,13 +253,13 @@ erDiagram
 | Column Name | Data Type | Nullable | Key | Default Value | Constraints | Description |
 |-------------|-----------|----------|-----|---------------|-------------|-------------|
 | `payment_id` | `INTEGER` | `NO` | `PK` | `AUTOINCREMENT` | Primary Key | Payment transaction record identifier |
-| `order_id` | `TEXT` | `NO` | `FK` | None | `REFERENCES orders(order_id)` | Associated order identifier (allows 1:N for retries) |
+| `order_id` | `TEXT` | `NO` | `FK` | None | `REFERENCES orders(order_id) ON DELETE CASCADE` | Associated order identifier (allows 1:N for retries) |
 | `pg_provider` | `TEXT` | `NO` | None | None | e.g. `'TOSS'`, `'INICIS'`, `'NAVERPAY'` | Payment Gateway operator |
 | `pg_tid` | `TEXT` | `YES` | `UK` | `NULL` | Unique transaction ID from PG | Gateway transaction/authorization identifier |
 | `payment_method` | `TEXT` | `NO` | None | None | `'CARD'`, `'EASY_PAY'`, `'TRANSFER'` | Payment instrument method |
 | `payment_status` | `TEXT` | `NO` | None | `'READY'` | `CHECK(payment_status IN ('READY', 'SUCCESS', 'FAILED', 'CANCELLED'))` | Gateway transaction lifecycle state |
 | `paid_amount` | `INTEGER` | `NO` | None | None | `CHECK(paid_amount >= 0)` | Actual charged transaction amount in KRW |
-| `failure_reason`| `TEXT` | `YES` | None | `NULL` | None | Diagnostic error message if payment was rejected |
+| `failure_reason`| `TEXT` | `YES` | None | `NULL` | None | Error message if payment was rejected, or the reason a payment was cancelled and refunded |
 | `approved_at` | `TEXT` | `YES` | None | `NULL` | ISO-8601 string | Gateway authorization approval timestamp |
 
 - **Partial Unique Constraint**: `UNIQUE (order_id) WHERE payment_status = 'SUCCESS'` allows any number of failed attempts per order but only one successful payment, even if two PG callbacks arrive at the same time.
@@ -268,7 +268,7 @@ erDiagram
 
 ## 4. Performance Indexes
 
-The following physical indexes are created in `backend/schema.sql` to optimize query execution and search filtering:
+The following physical indexes optimize query execution and search filtering. All except `uq_payments_order_success` are already created in `backend/schema.sql`:
 
 | Index Name | Target Table | Indexed Columns | Justification / Target Queries |
 |------------|--------------|-----------------|--------------------------------|
@@ -293,7 +293,7 @@ The following physical indexes are created in `backend/schema.sql` to optimize q
    │ (Payment done)                                ▲
    ▼                                               │ (Admin approves)
  [PAID] ──(Member requests)──> [CANCEL_REQUESTED] ─┘
-   │  ▲                          │   ▲   │
+   │  ▲                           │   ▲   │
    │  └──(Admin rejects, was PAID)┘   │   │
    ▼                                  │   │
 [PREPARING] ──(Member requests)───────┘   │
@@ -312,10 +312,10 @@ The following physical indexes are created in `backend/schema.sql` to optimize q
 - **`SHIPPED`**: Courier and tracking number registered (`courier_name`, `tracking_number`, `shipped_at` populated).
 - **`DELIVERED`**: Parcel delivered to recipient (`delivered_at` populated).
 - **`CANCEL_REQUESTED`**: Member requested cancellation while order was in `PAID` or `PREPARING` status. The previous status is stored in `status_before_cancel` and the member's reason in `cancel_reason`. If the admin rejects the request, the order returns to `status_before_cancel`.
-- **`CANCELLED`**: Order cancelled and voided. If previously paid, PG refund is processed and inventory is replenished.
+- **`CANCELLED`**: Order cancelled and voided. Inventory is replenished. If the order was paid, the successful payment is refunded through the PG.
 
 ### 5.2 Payment Lifecycle (`payment_status`)
 - **`READY`**: Payment initialized and awaiting PG approval callback.
 - **`SUCCESS`**: Authorized and confirmed by PG; advances parent order to `PAID`.
 - **`FAILED`**: PG authorization declined (records `failure_reason`); customer may initiate a new payment attempt (`Retry Payment`).
-- **`CANCELLED`**: Transaction refunded/voided upon order cancellation.
+- **`CANCELLED`**: Transaction refunded/voided, either because an admin approved the order's cancellation or because the PG reported success for an order that was no longer `PENDING` or with an amount different from `final_payment_amt`. The reason is stored in `failure_reason`.

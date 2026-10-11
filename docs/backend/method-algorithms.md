@@ -200,11 +200,12 @@ flowchart TD
     SetCancelled -- 1행 변경 --> RestoreStock[각 OrderItem 재고 원상 복구]
     RestoreStock --> CommitTx[트랜잭션 커밋] --> ReturnTrue([True 반환])
     
-    CheckStatus -- PAID 또는 PREPARING --> SaveBefore[status_before_cancel <- 현재 상태<br>cancel_reason <- reason]
-    SaveBefore --> SetReq[order_status <- CANCEL_REQUESTED]
-    SetReq --> SaveOrder[주문 상태 저장] --> ReturnTrue
+    CheckStatus -- PAID 또는 PREPARING --> SaveBefore[조건부 UPDATE<br>status_before_cancel <- 현재 상태<br>cancel_reason <- reason<br>order_status <- CANCEL_REQUESTED]
+    SaveBefore --> Changed{바뀐 행이 있는가?}
+    Changed -- 예 --> ReturnTrue
+    Changed -- 아니오 --> ReturnFalse
     
-    CheckStatus -- SHIPPED / DELIVERED / CANCELLED --> Reject[취소 불가 처리]
+    CheckStatus -- SHIPPED / DELIVERED / CANCEL_REQUESTED / CANCELLED --> Reject[취소 불가 처리]
     Reject --> ReturnFalse([False 반환])
 ```
 
@@ -376,8 +377,10 @@ BEGIN
             WHERE product = option.product AND stock_quantity > 0
         )
         // 판매 중인 원두만 품절로 바꾼다. 관리자가 판매 중지(STOPPED)한 상태는 유지한다.
-        IF has_remaining_stock IS FALSE AND option.product.sales_status == SalesStatus.ON_SALE THEN
-            option.product.change_sales_status(SalesStatus.SOLD_OUT)
+        // 조건부 UPDATE로 처리해, 그 사이 관리자가 판매 중지한 상태를 덮어쓰지 않는다.
+        IF has_remaining_stock IS FALSE THEN
+            UPDATE Product SET sales_status = SalesStatus.SOLD_OUT
+            WHERE product_id = option.product.product_id AND sales_status = SalesStatus.ON_SALE
         END IF
     END IF
 
@@ -395,9 +398,10 @@ BEGIN
     WHERE option_id = option.option_id
     REFRESH option FROM DATABASE
 
-    // 품절 상태였던 상품에 재고가 입고된 경우 판매 중 상태로 자동 복원
-    IF option.product.sales_status == SalesStatus.SOLD_OUT AND option.stock_quantity > 0 THEN
-        option.product.change_sales_status(SalesStatus.ON_SALE)
+    // 품절 상태였던 상품에 재고가 입고된 경우 판매 중 상태로 자동 복원 (판매 중지 상태는 유지)
+    IF option.stock_quantity > 0 THEN
+        UPDATE Product SET sales_status = SalesStatus.ON_SALE
+        WHERE product_id = option.product.product_id AND sales_status = SalesStatus.SOLD_OUT
     END IF
 END
 ```
@@ -499,11 +503,21 @@ END
 | 현재 상태 (Current State) | 전이 이벤트 (Trigger Event) | 다음 상태 (Next State) | 실행 알고리즘 |
 |---|---|---|---|
 | `(None)` | 장바구니 결제 요청 | `PENDING` | `ALG-01: Order.create_order` |
-| `PENDING` | PG 결제 성공 승인 콜백 | `PAID` | `Payment.process_payment` |
+| `PENDING` | PG 결제 성공 승인 콜백 (결제 금액 일치) | `PAID` | `Payment.process_payment` |
 | `PENDING` | 결제 전 사용자 주문 취소 | `CANCELLED` | `ALG-02: Order.request_cancellation` |
 | `PAID` | 관리자 주문 확인 및 패킹 시작 | `PREPARING` | `Order.update_status` |
 | `PAID` / `PREPARING` | 사용자 취소 신청 접수 | `CANCEL_REQUESTED` | `ALG-02: Order.request_cancellation` |
 | `CANCEL_REQUESTED` | 관리자 취소 승인 및 PG 환불 | `CANCELLED` | `ALG-03: Order.process_cancellation(approved=True)` |
 | `CANCEL_REQUESTED` | 관리자 취소 거절/반려 | `PAID` / `PREPARING` (요청 전 상태) | `ALG-03: Order.process_cancellation(approved=False)` |
 | `PREPARING` | 택배사 및 운송장 번호 등록 | `SHIPPED` | `ALG-05: Order.register_tracking` |
-| `SHIPPED` | 배송 완료 콜백 / 관리자 완료 처리 | `DELIVERED` | `ALG-05: Order.mark_as_delivered` |
+| `SHIPPED` | 관리자 배송 완료 처리 | `DELIVERED` | `ALG-05: Order.mark_as_delivered` |
+
+결제(`payment_status`) 상태 전이는 다음과 같다.
+
+| 현재 상태 (Current State) | 전이 이벤트 (Trigger Event) | 다음 상태 (Next State) | 실행 메서드 |
+|---|---|---|---|
+| `(None)` | 결제 요청 (최초 또는 재시도) | `READY` | 결제 시도 기록 생성 |
+| `READY` | PG 결제 성공, 주문이 `PENDING`이고 결제 금액 일치 | `SUCCESS` | `Payment.process_payment` |
+| `READY` | PG 결제 성공, 주문이 `PENDING`이 아니거나 결제 금액 불일치 (PG 환불) | `CANCELLED` | `Payment.process_payment` |
+| `READY` | PG 결제 실패 | `FAILED` | `Payment.process_payment` |
+| `SUCCESS` | 관리자 취소 승인 (PG 환불) | `CANCELLED` | `ALG-03: Payment.cancel_payment` |
