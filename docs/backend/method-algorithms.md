@@ -166,7 +166,7 @@ END
 #### 6. 복잡도 및 동시성 분석
 - **시간 복잡도**: $O(N)$ ($N$ = 장바구니 품목 수)
 - **공간 복잡도**: $O(N)$ (생성된 스냅샷 객체 수)
-- **동시성 제어**: `decrease_stock`은 단일 DB 트랜잭션 내에서 실행되며, SQLite/RDBMS의 Row-Level Lock 또는 격리 수준에 의해 동시에 동일 상품의 마지막 재고를 주문하더라도 한 쪽만 성공하고 다른 트랜잭션은 롤백된다.
+- **동시성 제어**: SQLite에는 행 단위 잠금이 없으므로, 재고를 읽어 비교한 뒤 저장하면 두 주문이 같은 재고를 동시에 통과할 수 있다. `decrease_stock`은 비교와 차감을 하나의 조건부 UPDATE(`WHERE stock_quantity >= quantity`)로 처리하고, 바뀐 행이 없으면 재고 부족으로 본다(ALG-04). 따라서 동시에 동일 옵션의 마지막 재고를 주문해도 한 쪽만 성공하고, 실패한 쪽은 트랜잭션 전체가 롤백된다.
 
 ---
 
@@ -195,8 +195,9 @@ flowchart TD
     Start([시작]) --> CheckStatus{주문 상태 판별}
     
     CheckStatus -- PENDING --> StartTx[트랜잭션 시작]
-    StartTx --> SetCancelled[order_status <- CANCELLED]
-    SetCancelled --> RestoreStock[각 OrderItem 재고 원상 복구]
+    StartTx --> SetCancelled{조건부 UPDATE<br>PENDING인 경우만 CANCELLED}
+    SetCancelled -- 바뀐 행 없음 --> RollbackDup[트랜잭션 롤백] --> ReturnFalse
+    SetCancelled -- 1행 변경 --> RestoreStock[각 OrderItem 재고 원상 복구]
     RestoreStock --> CommitTx[트랜잭션 커밋] --> ReturnTrue([True 반환])
     
     CheckStatus -- PAID 또는 PREPARING --> SaveBefore[status_before_cancel <- 현재 상태<br>cancel_reason <- reason]
@@ -211,11 +212,18 @@ flowchart TD
 ```text
 ALGORITHM Order_RequestCancellation(order, reason)
 BEGIN
+    // 상태 확인과 변경은 조건부 UPDATE 하나로 처리한다.
+    // 같은 요청이 두 번 들어와도 두 번째 UPDATE는 바뀐 행이 0이므로 재고를 다시 되돌리지 않는다.
     IF order.order_status == OrderStatus.PENDING THEN
         START TRANSACTION
         TRY
-            order.order_status <- OrderStatus.CANCELLED
-            UPDATE order SET order_status = OrderStatus.CANCELLED
+            affected <- UPDATE Order SET order_status = OrderStatus.CANCELLED
+                        WHERE order_id = order.order_id AND order_status = OrderStatus.PENDING
+            IF affected == 0 THEN
+                // 다른 요청이 먼저 상태를 바꿈
+                ROLLBACK TRANSACTION
+                RETURN FALSE
+            END IF
 
             // 결제 전 취소이므로 점유했던 재고 즉시 환원
             FOR EACH item IN order.items DO
@@ -232,13 +240,12 @@ BEGIN
     ELSE IF order.order_status IN [OrderStatus.PAID, OrderStatus.PREPARING] THEN
         // 이미 결제가 완료되었거나 상품을 준비 중이므로 관리자 승인 단계로 전이
         // 반려 시 되돌아갈 상태와 회원이 적은 사유를 함께 저장
-        order.status_before_cancel <- order.order_status
-        order.cancel_reason <- reason
-        order.order_status <- OrderStatus.CANCEL_REQUESTED
-        UPDATE order SET status_before_cancel = order.status_before_cancel,
-                         cancel_reason = order.cancel_reason,
-                         order_status = OrderStatus.CANCEL_REQUESTED
-        RETURN TRUE
+        current_status <- order.order_status
+        affected <- UPDATE Order SET status_before_cancel = current_status,
+                                     cancel_reason = reason,
+                                     order_status = OrderStatus.CANCEL_REQUESTED
+                    WHERE order_id = order.order_id AND order_status = current_status
+        RETURN affected == 1
 
     ELSE
         // 출고 완료(SHIPPED), 배송 완료(DELIVERED), 또는 이미 취소된 주문은 취소 불가
@@ -283,9 +290,15 @@ BEGIN
     START TRANSACTION
     TRY
         IF approved IS TRUE THEN
-            // 1. 주문 상태 취소 전이
-            order.order_status <- OrderStatus.CANCELLED
-            UPDATE order SET order_status = OrderStatus.CANCELLED
+            // 1. 주문 상태 취소 전이 (조건부 UPDATE)
+            //    승인이 두 번 들어와도 두 번째는 바뀐 행이 0이므로 재고를 다시 되돌리지 않는다.
+            affected <- UPDATE Order SET order_status = OrderStatus.CANCELLED
+                        WHERE order_id = order.order_id
+                          AND order_status = OrderStatus.CANCEL_REQUESTED
+            IF affected == 0 THEN
+                ROLLBACK TRANSACTION
+                RETURN FALSE
+            END IF
 
             // 2. 주문 상세 품목별 재고 복원
             FOR EACH item IN order.items DO
@@ -302,8 +315,13 @@ BEGIN
 
         ELSE
             // 관리자가 취소를 거절한 경우 취소 요청 전 상태(PAID 또는 PREPARING)로 복구
-            order.order_status <- order.status_before_cancel
-            UPDATE order SET order_status = order.status_before_cancel
+            affected <- UPDATE Order SET order_status = status_before_cancel
+                        WHERE order_id = order.order_id
+                          AND order_status = OrderStatus.CANCEL_REQUESTED
+            IF affected == 0 THEN
+                ROLLBACK TRANSACTION
+                RETURN FALSE
+            END IF
         END IF
 
         COMMIT TRANSACTION
@@ -339,29 +357,31 @@ BEGIN
         RETURN FALSE
     END IF
 
-    // 현재 재고가 요청 수량 이상인지 검증
-    IF option.stock_quantity >= quantity THEN
-        option.stock_quantity <- option.stock_quantity - quantity
-        UPDATE option SET stock_quantity = option.stock_quantity
-
-        // 만약 이번 차감으로 현재 옵션 재고가 0이 되었다면,
-        // 부모 원두 상품의 다른 옵션들도 전부 재고가 0인지 검사
-        IF option.stock_quantity == 0 THEN
-            has_remaining_stock <- EXISTS(
-                SELECT 1 FROM ProductOption 
-                WHERE product = option.product AND stock_quantity > 0
-            )
-            // 판매 중인 원두만 품절로 바꾼다. 관리자가 판매 중지(STOPPED)한 상태는 유지한다.
-            IF has_remaining_stock IS FALSE AND option.product.sales_status == SalesStatus.ON_SALE THEN
-                option.product.change_sales_status(SalesStatus.SOLD_OUT)
-            END IF
-        END IF
-
-        RETURN TRUE
-    ELSE
+    // 재고 비교와 차감을 하나의 조건부 UPDATE로 처리한다.
+    // 메모리 값을 읽어 비교한 뒤 저장하면, 동시에 들어온 두 주문이 같은 재고로 둘 다 통과할 수 있다.
+    affected <- UPDATE ProductOption SET stock_quantity = stock_quantity - quantity
+                WHERE option_id = option.option_id AND stock_quantity >= quantity
+    IF affected == 0 THEN
         // 재고 부족
         RETURN FALSE
     END IF
+
+    REFRESH option FROM DATABASE
+
+    // 만약 이번 차감으로 현재 옵션 재고가 0이 되었다면,
+    // 부모 원두 상품의 다른 옵션들도 전부 재고가 0인지 검사
+    IF option.stock_quantity == 0 THEN
+        has_remaining_stock <- EXISTS(
+            SELECT 1 FROM ProductOption 
+            WHERE product = option.product AND stock_quantity > 0
+        )
+        // 판매 중인 원두만 품절로 바꾼다. 관리자가 판매 중지(STOPPED)한 상태는 유지한다.
+        IF has_remaining_stock IS FALSE AND option.product.sales_status == SalesStatus.ON_SALE THEN
+            option.product.change_sales_status(SalesStatus.SOLD_OUT)
+        END IF
+    END IF
+
+    RETURN TRUE
 END
 
 ALGORITHM ProductOption_IncreaseStock(option, quantity)
@@ -370,8 +390,10 @@ BEGIN
         RETURN
     END IF
 
-    option.stock_quantity <- option.stock_quantity + quantity
-    UPDATE option SET stock_quantity = option.stock_quantity
+    // 현재 DB 값에 더한다. 메모리 값으로 덮어쓰면 동시에 일어난 차감이 사라진다.
+    UPDATE ProductOption SET stock_quantity = stock_quantity + quantity
+    WHERE option_id = option.option_id
+    REFRESH option FROM DATABASE
 
     // 품절 상태였던 상품에 재고가 입고된 경우 판매 중 상태로 자동 복원
     IF option.product.sales_status == SalesStatus.SOLD_OUT AND option.stock_quantity > 0 THEN

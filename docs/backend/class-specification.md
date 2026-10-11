@@ -275,7 +275,7 @@
 #### 메서드 (Operations)
 | 가시성 | 메서드 시그니처 | 반환형 | 설명 및 알고리즘 개요 |
 |---|---|---|---|
-| `+` | `decrease_stock(quantity: int)` | `bool` | **원자적 재고 차감**: 현재 `stock_quantity >= quantity`를 검증하고, 재고가 충분하면 `stock_quantity`를 차감한 뒤 저장한다. 차감 후 해당 상품의 모든 옵션 재고가 0이 되고 부모 상품이 `ON_SALE`이면 상태를 `SOLD_OUT`으로 전환한다. 판매 중지(`STOPPED`) 상태는 바꾸지 않는다. 성공 시 `True`, 재고 부족 시 `False` 반환. |
+| `+` | `decrease_stock(quantity: int)` | `bool` | **원자적 재고 차감**: 조건부 UPDATE(`SET stock_quantity = stock_quantity - quantity WHERE stock_quantity >= quantity`) 하나로 비교와 차감을 처리하여, 동시에 주문이 들어와도 재고가 0 밑으로 내려가지 않는다. 차감 후 해당 상품의 모든 옵션 재고가 0이 되고 부모 상품이 `ON_SALE`이면 상태를 `SOLD_OUT`으로 전환한다. 판매 중지(`STOPPED`) 상태는 바꾸지 않는다. 성공 시 `True`, 재고 부족 시 `False` 반환. |
 | `+` | `increase_stock(quantity: int)` | `void` | **재고 보충/복원**: 취소/반품 또는 관리자 입고 시 재고를 가산한다. 부모 상품이 `SOLD_OUT` 상태였고 재고가 1 이상이 되면 부모 상태를 `ON_SALE`로 자동 복구한다. |
 | `+` | `is_available(quantity: int)` | `bool` | **구매 가능 검증**: 요청 수량만큼의 재고가 남아있는지 확인한다 (`stock_quantity >= quantity`). |
 
