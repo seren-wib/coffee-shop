@@ -282,14 +282,16 @@ The following physical indexes are created in `backend/schema.sql` to optimize q
 
 ### 5.1 Order Lifecycle (`order_status`)
 ```
-[PENDING] ----------> [CANCELLED]
-   │ (Payment done)       ▲
-   ▼                      │
- [PAID]                   │ (Admin approves cancellation)
-   │                      │
-   ▼                      │
-[PREPARING] ──> [CANCEL_REQUESTED]
-   │
+[PENDING] ─────(Member cancels)─────────────> [CANCELLED]
+   │ (Payment done)                                ▲
+   ▼                                               │ (Admin approves)
+ [PAID] ──(Member requests)──> [CANCEL_REQUESTED] ─┘
+   │  ▲                          │   ▲   │
+   │  └──(Admin rejects, was PAID)┘   │   │
+   ▼                                  │   │
+[PREPARING] ──(Member requests)───────┘   │
+   │  ▲                                   │
+   │  └──(Admin rejects, was PREPARING)───┘
    ▼ (Tracking registered)
 [SHIPPED]
    │
