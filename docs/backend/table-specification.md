@@ -81,7 +81,7 @@ erDiagram
     }
 
     orders {
-        TEXT order_id PK "e.g., ORD-2026-X"
+        TEXT order_id PK "ORD-YYYYMMDD-NNN"
         INTEGER user_id FK "NOT NULL"
         TEXT order_status "NOT NULL DEFAULT 'PENDING'"
         TEXT status_before_cancel "NULL"
@@ -212,13 +212,13 @@ erDiagram
 
 | Column Name | Data Type | Nullable | Key | Default Value | Constraints | Description |
 |-------------|-----------|----------|-----|---------------|-------------|-------------|
-| `order_id` | `TEXT` | `NO` | `PK` | None | Primary Key (e.g. `'ORD-2026-X'`) | Unique business order identifier |
+| `order_id` | `TEXT` | `NO` | `PK` | None | Primary Key, format `ORD-YYYYMMDD-NNN` (e.g. `'ORD-20261011-001'`) | Unique business order identifier. `YYYYMMDD` is the order date and `NNN` is a daily sequence starting at 001 |
 | `user_id` | `INTEGER` | `NO` | `FK` | None | `REFERENCES users(user_id)` (RESTRICT / PROTECT) | Purchasing customer identifier |
 | `order_status` | `TEXT` | `NO` | None | `'PENDING'` | `CHECK(order_status IN ('PENDING', 'PAID', 'PREPARING', 'SHIPPED', 'DELIVERED', 'CANCEL_REQUESTED', 'CANCELLED'))` | Current lifecycle state of the order |
 | `status_before_cancel` | `TEXT` | `YES` | None | `NULL` | `CHECK(status_before_cancel IN ('PAID', 'PREPARING'))` | Status the order was in when the member requested cancellation; restored if the request is rejected |
 | `cancel_reason` | `TEXT` | `YES` | None | `NULL` | None | Reason the member entered when requesting cancellation |
 | `total_product_amt`| `INTEGER` | `NO` | None | None | `CHECK(total_product_amt >= 0)` | Sum of all ordered line item subtotals in KRW |
-| `shipping_fee` | `INTEGER` | `NO` | None | `0` | `CHECK(shipping_fee >= 0)` | Calculated shipping charge in KRW |
+| `shipping_fee` | `INTEGER` | `NO` | None | `0` | `CHECK(shipping_fee >= 0)` | Shipping charge in KRW: 3,000, or 0 when `total_product_amt` is 30,000 or more |
 | `final_payment_amt`| `INTEGER` | `NO` | None | None | `CHECK(final_payment_amt >= 0)` | Net payable charge (`total_product_amt + shipping_fee`) |
 | `recipient_name` | `TEXT` | `NO` | None | None | None | Snapshot recipient name for this shipment |
 | `recipient_phone`| `TEXT` | `NO` | None | None | None | Snapshot recipient telephone number |
@@ -262,6 +262,8 @@ erDiagram
 | `failure_reason`| `TEXT` | `YES` | None | `NULL` | None | Diagnostic error message if payment was rejected |
 | `approved_at` | `TEXT` | `YES` | None | `NULL` | ISO-8601 string | Gateway authorization approval timestamp |
 
+- **Partial Unique Constraint**: `UNIQUE (order_id) WHERE payment_status = 'SUCCESS'` allows any number of failed attempts per order but only one successful payment, even if two PG callbacks arrive at the same time.
+
 ---
 
 ## 4. Performance Indexes
@@ -279,6 +281,7 @@ The following physical indexes are created in `backend/schema.sql` to optimize q
 | `idx_orders_tracking` | `orders` | `(tracking_number)` | Enables immediate lookup by carrier shipment tracking number |
 | `idx_order_items_order_id` | `order_items` | `(order_id)` | Speeds up loading line items for order detail pages |
 | `idx_payments_order_id` | `payments` | `(order_id)` | Speeds up lookup of payment attempts and transaction history for an order |
+| `uq_payments_order_success` | `payments` | `(order_id) WHERE payment_status = 'SUCCESS'` | Unique partial index; guarantees at most one successful payment per order |
 
 ---
 

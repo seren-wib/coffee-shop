@@ -315,13 +315,13 @@
 #### 속성 (Attributes)
 | 가시성 | 속성명 | 타입 | 기본값 | 제약사항 | 설명 |
 |---|---|---|---|---|---|
-| `-` | `order_id` | `String` | None | PK, Max 50 | 고유 비즈니스 주문 번호 (예: ORD-2026-X) |
+| `-` | `order_id` | `String` | None | PK, Max 50 | 고유 비즈니스 주문 번호. 형식 `ORD-YYYYMMDD-NNN` (예: ORD-20261011-001) |
 | `-` | `user` | `User` | None | FK (PROTECT) | 주문을 접수한 회원 |
 | `-` | `order_status` | `OrderStatus` | `PENDING` | Choices | 주문 및 배송 종합 상태 |
 | `-` | `status_before_cancel` | `OrderStatus` | None | Nullable, Choices (`PAID`, `PREPARING`) | 취소 요청 직전 상태. 관리자가 취소를 반려하면 이 상태로 되돌린다 |
 | `-` | `cancel_reason` | `String` | None | Nullable, Text | 회원이 취소를 요청할 때 적은 사유 |
 | `-` | `total_product_amt` | `int` | None | Non-negative (>= 0) | 주문 상품 총액 합계 (KRW) |
-| `-` | `shipping_fee` | `int` | `0` | Non-negative (>= 0) | 적용된 배송비 (기본 3,000원 등) |
+| `-` | `shipping_fee` | `int` | `0` | Non-negative (>= 0) | 적용된 배송비. 3,000원이며 상품 금액이 30,000원 이상이면 0원 |
 | `-` | `final_payment_amt` | `int` | None | Non-negative (>= 0) | 최종 결제 대상 금액 (`total + fee`) |
 | `-` | `recipient_name` | `String` | None | Max 100 | 주문 시점의 수령인 성명 스냅샷 |
 | `-` | `recipient_phone` | `String` | None | Max 20 | 주문 시점의 수령인 연락처 스냅샷 |
@@ -335,7 +335,7 @@
 #### 메서드 (Operations)
 | 가시성 | 메서드 시그니처 | 반환형 | 설명 및 알고리즘 개요 |
 |---|---|---|---|
-| `+` | `create_order(user, order_id, recipient_name, recipient_phone, shipping_address, cart_items, shipping_fee=3000)` | `Order` | **주문 생성 (Class Method, Atomic)**: <br>1. 단일 데이터베이스 트랜잭션(`@transaction.atomic`) 시작.<br>2. 장바구니의 각 품목에 대해 단가 계산 및 `option.decrease_stock()` 원자적 호출 (재고 부족 시 `ValueError` 발생 후 롤백).<br>3. 품목별 불변 스냅샷 인스턴스(`OrderItem`) 준비.<br>4. 주문 마스터(`Order`) 인스턴스를 생성하고 상태를 `PENDING`으로 설정.<br>5. `OrderItem` 저장 및 결제 진행된 `CartItem` 삭제 후 생성된 `Order` 반환. |
+| `+` | `create_order(user, order_id, recipient_name, recipient_phone, shipping_address, cart_items)` | `Order` | **주문 생성 (Class Method, Atomic)**: <br>1. 단일 데이터베이스 트랜잭션(`@transaction.atomic`) 시작.<br>2. 장바구니의 각 품목에 대해 단가 계산 및 `option.decrease_stock()` 원자적 호출 (재고 부족 시 `ValueError` 발생 후 롤백).<br>3. 품목별 불변 스냅샷 인스턴스(`OrderItem`) 준비.<br>4. 상품 금액 합계로 배송비를 정하고(30,000원 이상 0원, 미만 3,000원) 주문 마스터(`Order`) 인스턴스를 생성하여 상태를 `PENDING`으로 설정.<br>5. `OrderItem` 저장 및 결제 진행된 `CartItem` 삭제 후 생성된 `Order` 반환. |
 | `+` | `request_cancellation(reason: String)` | `bool` | **회원 주문 취소 요청**: <br>- `order_status == PENDING`인 경우: 즉시 `CANCELLED` 처리 및 재고 롤백 수행.<br>- `order_status in [PAID, PREPARING]`인 경우: 관리자 확인이 필요하므로 현재 상태를 `status_before_cancel`에, 사유를 `cancel_reason`에 저장하고 상태를 `CANCEL_REQUESTED`로 전이.<br>- 배송 시작 이후(`SHIPPED`, `DELIVERED`)는 취소 불가 (`False` 반환). |
 | `+` | `process_cancellation(approved: bool)` | `bool` | **관리자 취소 요청 처리 (Atomic)**: <br>- 현재 상태가 `CANCEL_REQUESTED`인지 확인.<br>- `approved == True`인 경우: 주문 상태를 `CANCELLED`로 변경하고, 모든 `OrderItem`의 재고를 원상 복구(`increase_stock`)하며, 성공된 결제 건(`Payment`)의 `cancel_payment()`를 호출하여 환불 처리.<br>- `approved == False`인 경우: 취소 거절로 간주하여 주문 상태를 `status_before_cancel`(요청 전 상태)로 복귀. |
 | `+` | `register_tracking(courier: String, tracking_no: String)` | `void` | **송장 등록 및 출고 처리**: 주문 상태가 `PREPARING`일 때만 허용한다. 관리자가 택배사와 운송장 번호를 등록하면 `courier_name`, `tracking_number`, `shipped_at`을 설정하고 상태를 `SHIPPED`로 전이한다. |
@@ -393,6 +393,9 @@
 | `+` | `process_payment(pg_tid: String)` | `bool` | **결제 승인 완료**: 외부 PG사 승인 성공 콜백 접수 시, `pg_tid`를 저장하고 상태를 `SUCCESS`로 변경하며 승인 일시를 기록한다. 연관된 부모 주문(`order`)의 상태를 `PAID`로 전이시킨다. |
 | `+` | `cancel_payment(reason: String)` | `bool` | **결제 취소 및 환불**: 관리자 취소 승인에 따른 환불 처리 시 상태를 `CANCELLED`로 변경하고 취소 사유(`failure_reason`)를 기록한다. |
 
+#### 비즈니스 규칙 및 제약사항
+- 한 주문에 결제 기록은 여러 건 있을 수 있지만, `SUCCESS` 상태인 결제는 하나뿐이다 (부분 유니크 인덱스 `UNIQUE (order) WHERE payment_status = 'SUCCESS'`).
+
 ---
 
 ## 4. 핵심 비즈니스 로직 알고리즘 연계 (#17 연계 요약)
@@ -401,7 +404,7 @@
 
 ### 4.1 주문 생성 알고리즘 (`Order.create_order`)
 ```
-Input: user, order_id, recipient info, shipping_address, cart_items, shipping_fee
+Input: user, order_id, recipient info, shipping_address, cart_items
 Output: Order instance
 
 1. [트랜잭션 시작]
@@ -414,7 +417,8 @@ Output: Order instance
      d. IF NOT is_decreased THEN:
           ROLLBACK AND RAISE InsufficientStockException
      e. APPEND OrderItem(option, snapshot_name, snapshot_options, unit_price, quantity) TO order_item_instances
-5. final_payment_amt <- total_product_amt + shipping_fee
+5. shipping_fee <- 0 IF total_product_amt >= 30000 ELSE 3000
+   final_payment_amt <- total_product_amt + shipping_fee
 6. order <- CREATE Order(user, order_id, totals, recipient info, status=PENDING)
 7. FOR EACH oi IN order_item_instances:
      oi.order <- order

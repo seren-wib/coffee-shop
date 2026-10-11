@@ -31,12 +31,12 @@
 #### 2. 입출력 명세
 - **입력 (Input)**:
   - `user: User`: 주문을 생성하는 회원 객체
-  - `order_id: String`: 고유 주문 비즈니스 번호 (예: `ORD-20261008-001`)
+  - `order_id: String`: 고유 주문 비즈니스 번호. 형식 `ORD-YYYYMMDD-NNN` (예: `ORD-20261008-001`)
   - `recipient_name: String`: 수령인 성명
   - `recipient_phone: String`: 수령인 연락처
   - `shipping_address: String`: 배송지 주소
   - `cart_items: List[CartItem]`: 주문 대상 장바구니 품목 목록
-  - `shipping_fee: int`: 배송비 (기본값: 3,000 KRW)
+  - 배송비는 입력받지 않고 상품 금액 합계로 정한다 (30,000원 이상 0원, 미만 3,000원).
 - **출력 (Output)**:
   - `order: Order`: 생성된 주문 인스턴스
 - **예외 (Exceptions)**:
@@ -70,7 +70,8 @@ flowchart TD
     CreateOI --> HasMore{다음 품목 존재하는가?}
     
     HasMore -- 예 --> LoopItems
-    HasMore -- 아니오 --> CreateOrder[Order 레코드 생성<br>status = PENDING]
+    HasMore -- 아니오 --> CalcFee[배송비 결정<br>30,000원 이상 0원, 미만 3,000원]
+    CalcFee --> CreateOrder[Order 레코드 생성<br>status = PENDING]
     CreateOrder --> SaveOIs[모든 OrderItem 저장]
     SaveOIs --> DeleteCart[주문된 CartItem 일괄 삭제]
     DeleteCart --> CommitTx[트랜잭션 커밋]
@@ -80,7 +81,7 @@ flowchart TD
 #### 5. 상세 의사코드 (Pseudocode)
 ```text
 ALGORITHM Order_CreateOrder(user, order_id, recipient_name, recipient_phone, 
-                           shipping_address, cart_items, shipping_fee)
+                           shipping_address, cart_items)
 BEGIN
     IF cart_items IS EMPTY THEN
         RAISE EmptyCartException("주문할 장바구니 항목이 존재하지 않습니다.")
@@ -120,7 +121,12 @@ BEGIN
             APPEND order_item TO order_item_instances
         END FOR
 
-        // 4. 최종 결제 금액 산출
+        // 4. 배송비와 최종 결제 금액 산출 (상품 금액 30,000원 이상이면 무료배송)
+        IF total_product_amt >= 30000 THEN
+            shipping_fee <- 0
+        ELSE
+            shipping_fee <- 3000
+        END IF
         final_payment_amt <- total_product_amt + shipping_fee
 
         // 5. 주문 마스터 생성 (기본 상태 PENDING)
