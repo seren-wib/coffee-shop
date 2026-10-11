@@ -34,8 +34,8 @@
 | `SalesStatus` | `ON_SALE`, `SOLD_OUT`, `STOPPED` | 원두 판매 상태 (판매 중, 품절, 판매 중지) |
 | `RoastLevel` | `LIGHT`, `MEDIUM`, `DARK` | 로스팅 정도 (라이트, 미디엄, 다크) |
 | `GrindType` | `WHOLE_BEAN`, `HAND_DRIP`, `ESPRESSO` | 원두 분쇄도 (홀빈/원두 상태, 핸드드립용, 에스프레소용) |
-| `OrderStatus` | `PENDING`, `PAID`, `PREPARING`, `SHIPPED`, `DELIVERED`, `CANCEL_REQUESTED`, `CANCELLED` | 주문 생애주기 상태 (결제 대기, 결제 완료, 상품 준비 중, 배송 중, 배송 완료, 취소 요청, 주문 취소) |
-| `PaymentStatus` | `READY`, `SUCCESS`, `FAILED`, `CANCELLED` | 결제 트랜잭션 상태 (결제 대기, 결제 성공, 결제 실패, 결제 취소) |
+| `OrderStatus` | `PENDING`, `PAID`, `PREPARING`, `SHIPPED`, `DELIVERED`, `CANCEL_REQUESTED`, `CANCELLED` | 주문 생애주기 상태 (결제 대기, 결제 완료, 배송 준비, 배송 중, 배송 완료, 취소 요청, 주문 취소) |
+| `PaymentStatus` | `READY`, `SUCCESS`, `FAILED`, `CANCELLED` | 결제 트랜잭션 상태 (승인 대기, 결제 성공, 결제 실패, 결제 취소) |
 | `PaymentMethod` | `CARD`, `EASY_PAY`, `TRANSFER` | 결제 수단 (신용/체크카드, 간편결제, 계좌이체) |
 
 ---
@@ -338,12 +338,12 @@
 #### 메서드 (Operations)
 | 가시성 | 메서드 시그니처 | 반환형 | 설명 및 알고리즘 개요 |
 |---|---|---|---|
-| `+` | `create_order(user, order_id, recipient_name, recipient_phone, shipping_address, cart_items)` | `Order` | **주문 생성 (Class Method, Atomic)**: <br>1. 단일 데이터베이스 트랜잭션(`@transaction.atomic`) 시작.<br>2. 장바구니의 각 품목에 대해 원두가 판매 중(`ON_SALE`)인지 확인(아니면 `ProductNotAvailableException` 발생 후 롤백)하고, 단가 계산 및 `option.decrease_stock()` 원자적 호출 (재고 부족 시 `ValueError` 발생 후 롤백).<br>3. 품목별 불변 스냅샷 인스턴스(`OrderItem`) 준비.<br>4. 상품 금액 합계로 배송비를 정하고(30,000원 이상 0원, 미만 3,000원) 주문 마스터(`Order`) 인스턴스를 생성하여 상태를 `PENDING`으로 설정.<br>5. `OrderItem` 저장 및 결제 진행된 `CartItem` 삭제 후 생성된 `Order` 반환. |
+| `+` | `create_order(user, order_id, recipient_name, recipient_phone, shipping_address, cart_items)` | `Order` | **주문 생성 (Class Method, Atomic)**: <br>1. 단일 데이터베이스 트랜잭션(`@transaction.atomic`) 시작.<br>2. 장바구니의 각 품목에 대해 원두가 판매 중(`ON_SALE`)인지 확인(아니면 `ProductNotAvailableException` 발생 후 롤백)하고, 단가 계산 및 `option.decrease_stock()` 원자적 호출 (재고 부족 시 `InsufficientStockException` 발생 후 롤백).<br>3. 품목별 불변 스냅샷 인스턴스(`OrderItem`) 준비.<br>4. 상품 금액 합계로 배송비를 정하고(30,000원 이상 0원, 미만 3,000원) 주문 마스터(`Order`) 인스턴스를 생성하여 상태를 `PENDING`으로 설정.<br>5. `OrderItem` 저장 및 결제 진행된 `CartItem` 삭제 후 생성된 `Order` 반환. |
 | `+` | `request_cancellation(reason: String)` | `bool` | **회원 주문 취소 요청**: <br>- `order_status == PENDING`인 경우: 즉시 `CANCELLED` 처리 및 재고 롤백 수행.<br>- `order_status in [PAID, PREPARING]`인 경우: 관리자 확인이 필요하므로 현재 상태를 `status_before_cancel`에, 사유를 `cancel_reason`에 저장하고 상태를 `CANCEL_REQUESTED`로 전이.<br>- 배송 시작 이후(`SHIPPED`, `DELIVERED`)와 이미 취소 요청되었거나 취소된 주문(`CANCEL_REQUESTED`, `CANCELLED`)은 취소 불가 (`False` 반환). |
 | `+` | `process_cancellation(approved: bool)` | `bool` | **관리자 취소 요청 처리 (Atomic)**: <br>- 현재 상태가 `CANCEL_REQUESTED`인지 확인.<br>- `approved == True`인 경우: 주문 상태를 `CANCELLED`로 변경하고, 모든 `OrderItem`의 재고를 원상 복구(`increase_stock`)하며, 성공된 결제 건(`Payment`)의 `cancel_payment()`를 호출하여 환불 처리.<br>- `approved == False`인 경우: 취소 거절로 간주하여 주문 상태를 `status_before_cancel`(요청 전 상태)로 복귀. |
-| `+` | `register_tracking(courier: String, tracking_no: String)` | `void` | **송장 등록 및 출고 처리**: 주문 상태가 `PREPARING`일 때만 허용한다. 관리자가 택배사와 운송장 번호를 등록하면 `courier_name`, `tracking_number`, `shipped_at`을 설정하고 상태를 `SHIPPED`로 전이한다. |
-| `+` | `mark_as_delivered()` | `void` | **배송 완료 처리**: 주문 상태가 `SHIPPED`일 때만 허용한다. 배송이 완료되면 `delivered_at`을 기록하고 상태를 `DELIVERED`로 전이한다. |
-| `+` | `update_status(new_status: OrderStatus)` | `void` | **주문 상태 갱신**: 주문 상태 머신 규칙에 따라 상태를 갱신한다. |
+| `+` | `register_tracking(courier: String, tracking_no: String)` | `void` | **송장 등록 및 출고 처리**: 주문 상태가 `PREPARING`일 때만 허용한다. 관리자가 택배사와 운송장 번호를 등록하면 조건부 UPDATE(`WHERE order_status = PREPARING`)로 `courier_name`, `tracking_number`, `shipped_at`을 설정하고 상태를 `SHIPPED`로 전이한다. 그 사이 회원이 취소를 요청했으면 바뀐 행이 없으므로 출고하지 않는다. |
+| `+` | `mark_as_delivered()` | `void` | **배송 완료 처리**: 주문 상태가 `SHIPPED`일 때만 허용한다. 조건부 UPDATE(`WHERE order_status = SHIPPED`)로 `delivered_at`을 기록하고 상태를 `DELIVERED`로 전이한다. |
+| `+` | `update_status(new_status: OrderStatus)` | `void` | **주문 상태 갱신**: 주문 상태 머신 규칙에 따라 상태를 갱신한다. 관리자의 배송 준비 전환(`PAID` → `PREPARING`)은 조건부 UPDATE(`WHERE order_status = PAID`)로 처리하여, 같은 순간에 들어온 회원의 취소 요청을 덮어쓰지 않는다. |
 | `+` | `calculate_total()` | `int` | **총 금액 계산**: 상품 금액 합계와 배송비를 합산한 값을 반환한다. |
 
 ---

@@ -173,7 +173,7 @@ END
 ### ALG-02: 회원 주문 취소 요청 (`Order.request_cancellation`)
 
 #### 1. 개요 및 목적
-회원이 주문 내역에서 취소를 요청할 때, 주문의 현재 상태에 따라 적절한 분기 처리를 수행한다. 아직 결제되지 않은 주문(`PENDING`)은 즉시 취소하고 재고를 복원하며, 결제 완료(`PAID`) 또는 상품 준비 중(`PREPARING`)인 주문은 요청 전 상태와 취소 사유를 저장한 뒤 관리자 확인을 위해 상태를 `CANCEL_REQUESTED`로 전이시킨다. 이미 출고된 주문(`SHIPPED`, `DELIVERED`)은 취소를 불허한다.
+회원이 주문 내역에서 취소를 요청할 때, 주문의 현재 상태에 따라 적절한 분기 처리를 수행한다. 아직 결제되지 않은 주문(`PENDING`)은 즉시 취소하고 재고를 복원하며, 결제 완료(`PAID`) 또는 배송 준비(`PREPARING`)인 주문은 요청 전 상태와 취소 사유를 저장한 뒤 관리자 확인을 위해 상태를 `CANCEL_REQUESTED`로 전이시킨다. 이미 출고된 주문(`SHIPPED`, `DELIVERED`)과 이미 취소 요청되었거나 취소된 주문(`CANCEL_REQUESTED`, `CANCELLED`)은 취소를 불허한다.
 
 #### 2. 입출력 명세
 - **입력 (Input)**:
@@ -249,7 +249,7 @@ BEGIN
         RETURN affected == 1
 
     ELSE
-        // 출고 완료(SHIPPED), 배송 완료(DELIVERED), 또는 이미 취소된 주문은 취소 불가
+        // 출고 완료(SHIPPED), 배송 완료(DELIVERED), 이미 취소 요청되었거나 취소된 주문은 취소 불가
         RETURN FALSE
     END IF
 END
@@ -421,37 +421,33 @@ BEGIN
         RAISE InvalidArgumentException("택배사 명칭과 운송장 번호는 필수입니다.")
     END IF
 
-    // 주문이 배송 준비(PREPARING) 상태일 때만 출고 가능
-    IF order.order_status != OrderStatus.PREPARING THEN
-        RAISE InvalidStateTransitionException("출고할 수 없는 주문 상태입니다: " + order.order_status)
+    // 주문이 배송 준비(PREPARING) 상태일 때만 출고 가능.
+    // 상태 확인과 변경을 조건부 UPDATE 하나로 처리해, 그 사이 회원이 취소를 요청한
+    // 주문(CANCEL_REQUESTED)을 SHIPPED로 덮어쓰지 않는다.
+    affected <- UPDATE Order SET
+                    courier_name = courier_name,
+                    tracking_number = tracking_number,
+                    order_status = OrderStatus.SHIPPED,
+                    shipped_at = CURRENT_TIMESTAMP()
+                WHERE order_id = order.order_id AND order_status = OrderStatus.PREPARING
+    IF affected == 0 THEN
+        RAISE InvalidStateTransitionException("배송 준비 상태인 주문만 출고할 수 있습니다.")
     END IF
-
-    order.courier_name <- courier_name
-    order.tracking_number <- tracking_number
-    order.order_status <- OrderStatus.SHIPPED
-    order.shipped_at <- CURRENT_TIMESTAMP()
-
-    UPDATE order SET 
-        courier_name = order.courier_name,
-        tracking_number = order.tracking_number,
-        order_status = order.order_status,
-        shipped_at = order.shipped_at
 END
 
 ALGORITHM Order_MarkAsDelivered(order)
 BEGIN
-    IF order.order_status != OrderStatus.SHIPPED THEN
+    affected <- UPDATE Order SET
+                    order_status = OrderStatus.DELIVERED,
+                    delivered_at = CURRENT_TIMESTAMP()
+                WHERE order_id = order.order_id AND order_status = OrderStatus.SHIPPED
+    IF affected == 0 THEN
         RAISE InvalidStateTransitionException("배송 중인 주문만 배송 완료 처리할 수 있습니다.")
     END IF
-
-    order.order_status <- OrderStatus.DELIVERED
-    order.delivered_at <- CURRENT_TIMESTAMP()
-
-    UPDATE order SET 
-        order_status = order.order_status,
-        delivered_at = order.delivered_at
 END
 ```
+
+관리자의 배송 준비 전환(`PAID` → `PREPARING`, `Order.update_status`)도 같은 방식으로 `WHERE order_status = PAID` 조건부 UPDATE로 처리한다. 회원이 같은 순간에 취소를 요청해도 취소 요청 상태가 배송 준비로 덮어써지지 않는다.
 
 ---
 
@@ -505,7 +501,7 @@ END
 | `(None)` | 장바구니 결제 요청 | `PENDING` | `ALG-01: Order.create_order` |
 | `PENDING` | PG 결제 성공 승인 콜백 (결제 금액 일치) | `PAID` | `Payment.process_payment` |
 | `PENDING` | 결제 전 사용자 주문 취소 | `CANCELLED` | `ALG-02: Order.request_cancellation` |
-| `PAID` | 관리자 주문 확인 및 패킹 시작 | `PREPARING` | `Order.update_status` |
+| `PAID` | 관리자 주문 확인 및 패킹 시작 | `PREPARING` | `Order.update_status` (조건부 UPDATE) |
 | `PAID` / `PREPARING` | 사용자 취소 신청 접수 | `CANCEL_REQUESTED` | `ALG-02: Order.request_cancellation` |
 | `CANCEL_REQUESTED` | 관리자 취소 승인 및 PG 환불 | `CANCELLED` | `ALG-03: Order.process_cancellation(approved=True)` |
 | `CANCEL_REQUESTED` | 관리자 취소 거절/반려 | `PAID` / `PREPARING` (요청 전 상태) | `ALG-03: Order.process_cancellation(approved=False)` |
