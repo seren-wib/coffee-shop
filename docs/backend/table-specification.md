@@ -4,7 +4,7 @@
 
 This document specifies the relational database schema and table specifications for the back-end system of the **Coffee Bean Shopping Mall System** (`<Coffee Bean Shopping Mall System>`), addressing the **Database schema and table specification** deliverable in `docs/deliverables.md`.
 
-The physical database is designed for **SQLite 3** (`PRAGMA foreign_keys = ON;`) and strictly maps to the back-end domain models in `backend/orders/models.py`, `backend/products/models.py`, and `backend/users/models.py`.
+The physical database is designed for **SQLite 3** (`PRAGMA foreign_keys = ON;`) and maps to the back-end domain models in `backend/orders/models.py`, `backend/products/models.py`, and `backend/users/models.py`. Some items are specified here ahead of the code and are not in the models or `backend/schema.sql` yet: `orders.status_before_cancel`, `orders.cancel_reason`, the `roast_level` check constraint, and the `uq_payments_order_success` partial index. `backend/schema.sql` also lacks `ON DELETE CASCADE` on `payments.order_id`.
 
 ### 1.1 Key Architecture Decisions
 1. **Consolidated Order & Fulfillment**: Single-destination shipment attributes (`courier_name`, `tracking_number`, `shipped_at`, `delivered_at`) are integrated directly into the `orders` table. This eliminates redundant 1:1 join overhead, avoids out-of-sync state duplicates between order and delivery lifecycles, and resolves the issue of creating pending delivery records prior to courier dispatch.
@@ -81,9 +81,11 @@ erDiagram
     }
 
     orders {
-        TEXT order_id PK "e.g., ORD-2026-X"
+        TEXT order_id PK "ORD-YYYYMMDD-NNN"
         INTEGER user_id FK "NOT NULL"
         TEXT order_status "NOT NULL DEFAULT 'PENDING'"
+        TEXT status_before_cancel "NULL"
+        TEXT cancel_reason "NULL"
         INTEGER total_product_amt "NOT NULL >= 0"
         INTEGER shipping_fee "NOT NULL DEFAULT 0 >= 0"
         INTEGER final_payment_amt "NOT NULL >= 0"
@@ -165,7 +167,7 @@ erDiagram
 | `product_id` | `INTEGER` | `NO` | `PK` | `AUTOINCREMENT` | Primary Key | Product master identifier |
 | `name` | `TEXT` | `NO` | None | None | None | Name of the coffee bean (e.g., 'Ethiopia Yirgacheffe G1') |
 | `origin` | `TEXT` | `NO` | None | None | None | Country / region of cultivation |
-| `roast_level` | `TEXT` | `NO` | None | None | None | Roasting degree (Light, Medium, Dark) |
+| `roast_level` | `TEXT` | `NO` | None | None | `CHECK(roast_level IN ('LIGHT', 'MEDIUM', 'DARK'))` | Roasting degree (Light, Medium, Dark) |
 | `base_price` | `INTEGER` | `NO` | None | None | `CHECK(base_price >= 0)` | Base unit price in KRW |
 | `tasting_notes` | `TEXT` | `YES` | None | `NULL` | None | Sensory flavor notes (e.g., Floral, Citrus, Berry) |
 | `description` | `TEXT` | `YES` | None | `NULL` | None | Detailed promotional/origin narrative |
@@ -210,11 +212,13 @@ erDiagram
 
 | Column Name | Data Type | Nullable | Key | Default Value | Constraints | Description |
 |-------------|-----------|----------|-----|---------------|-------------|-------------|
-| `order_id` | `TEXT` | `NO` | `PK` | None | Primary Key (e.g. `'ORD-2026-X'`) | Unique business order identifier |
+| `order_id` | `TEXT` | `NO` | `PK` | None | Primary Key, format `ORD-YYYYMMDD-NNN` (e.g. `'ORD-20261011-001'`) | Unique business order identifier. `YYYYMMDD` is the order date and `NNN` is a daily sequence starting at 001 |
 | `user_id` | `INTEGER` | `NO` | `FK` | None | `REFERENCES users(user_id)` (RESTRICT / PROTECT) | Purchasing customer identifier |
 | `order_status` | `TEXT` | `NO` | None | `'PENDING'` | `CHECK(order_status IN ('PENDING', 'PAID', 'PREPARING', 'SHIPPED', 'DELIVERED', 'CANCEL_REQUESTED', 'CANCELLED'))` | Current lifecycle state of the order |
+| `status_before_cancel` | `TEXT` | `YES` | None | `NULL` | `CHECK(status_before_cancel IN ('PAID', 'PREPARING'))` | Status the order was in when the member requested cancellation; restored if the request is rejected |
+| `cancel_reason` | `TEXT` | `YES` | None | `NULL` | None | Reason the member entered when requesting cancellation |
 | `total_product_amt`| `INTEGER` | `NO` | None | None | `CHECK(total_product_amt >= 0)` | Sum of all ordered line item subtotals in KRW |
-| `shipping_fee` | `INTEGER` | `NO` | None | `0` | `CHECK(shipping_fee >= 0)` | Calculated shipping charge in KRW |
+| `shipping_fee` | `INTEGER` | `NO` | None | `0` | `CHECK(shipping_fee >= 0)` | Shipping charge in KRW: 3,000, or 0 when `total_product_amt` is 30,000 or more |
 | `final_payment_amt`| `INTEGER` | `NO` | None | None | `CHECK(final_payment_amt >= 0)` | Net payable charge (`total_product_amt + shipping_fee`) |
 | `recipient_name` | `TEXT` | `NO` | None | None | None | Snapshot recipient name for this shipment |
 | `recipient_phone`| `TEXT` | `NO` | None | None | None | Snapshot recipient telephone number |
@@ -249,20 +253,22 @@ erDiagram
 | Column Name | Data Type | Nullable | Key | Default Value | Constraints | Description |
 |-------------|-----------|----------|-----|---------------|-------------|-------------|
 | `payment_id` | `INTEGER` | `NO` | `PK` | `AUTOINCREMENT` | Primary Key | Payment transaction record identifier |
-| `order_id` | `TEXT` | `NO` | `FK` | None | `REFERENCES orders(order_id)` | Associated order identifier (allows 1:N for retries) |
+| `order_id` | `TEXT` | `NO` | `FK` | None | `REFERENCES orders(order_id) ON DELETE CASCADE` | Associated order identifier (allows 1:N for retries) |
 | `pg_provider` | `TEXT` | `NO` | None | None | e.g. `'TOSS'`, `'INICIS'`, `'NAVERPAY'` | Payment Gateway operator |
 | `pg_tid` | `TEXT` | `YES` | `UK` | `NULL` | Unique transaction ID from PG | Gateway transaction/authorization identifier |
 | `payment_method` | `TEXT` | `NO` | None | None | `'CARD'`, `'EASY_PAY'`, `'TRANSFER'` | Payment instrument method |
 | `payment_status` | `TEXT` | `NO` | None | `'READY'` | `CHECK(payment_status IN ('READY', 'SUCCESS', 'FAILED', 'CANCELLED'))` | Gateway transaction lifecycle state |
 | `paid_amount` | `INTEGER` | `NO` | None | None | `CHECK(paid_amount >= 0)` | Actual charged transaction amount in KRW |
-| `failure_reason`| `TEXT` | `YES` | None | `NULL` | None | Diagnostic error message if payment was rejected |
+| `failure_reason`| `TEXT` | `YES` | None | `NULL` | None | Error message if payment was rejected, or the reason a payment was cancelled and refunded |
 | `approved_at` | `TEXT` | `YES` | None | `NULL` | ISO-8601 string | Gateway authorization approval timestamp |
+
+- **Partial Unique Constraint**: `UNIQUE (order_id) WHERE payment_status = 'SUCCESS'` allows any number of failed attempts per order but only one successful payment, even if two PG callbacks arrive at the same time.
 
 ---
 
 ## 4. Performance Indexes
 
-The following physical indexes are created in `backend/schema.sql` to optimize query execution and search filtering:
+The following physical indexes optimize query execution and search filtering. All except `uq_payments_order_success` are already created in `backend/schema.sql`:
 
 | Index Name | Target Table | Indexed Columns | Justification / Target Queries |
 |------------|--------------|-----------------|--------------------------------|
@@ -275,6 +281,7 @@ The following physical indexes are created in `backend/schema.sql` to optimize q
 | `idx_orders_tracking` | `orders` | `(tracking_number)` | Enables immediate lookup by carrier shipment tracking number |
 | `idx_order_items_order_id` | `order_items` | `(order_id)` | Speeds up loading line items for order detail pages |
 | `idx_payments_order_id` | `payments` | `(order_id)` | Speeds up lookup of payment attempts and transaction history for an order |
+| `uq_payments_order_success` | `payments` | `(order_id) WHERE payment_status = 'SUCCESS'` | Unique partial index; guarantees at most one successful payment per order |
 
 ---
 
@@ -286,7 +293,7 @@ The following physical indexes are created in `backend/schema.sql` to optimize q
    │ (Payment done)                                ▲
    ▼                                               │ (Admin approves)
  [PAID] ──(Member requests)──> [CANCEL_REQUESTED] ─┘
-   │  ▲                          │   ▲   │
+   │  ▲                           │   ▲   │
    │  └──(Admin rejects, was PAID)┘   │   │
    ▼                                  │   │
 [PREPARING] ──(Member requests)───────┘   │
@@ -300,15 +307,15 @@ The following physical indexes are created in `backend/schema.sql` to optimize q
 ```
 
 - **`PENDING`**: Order created from cart items, awaiting payment transaction.
-- **`PAID`**: Payment completed successfully via PG; stock successfully decremented.
+- **`PAID`**: Payment completed successfully via PG. Stock was already decremented when the order was created (`PENDING`).
 - **`PREPARING`**: Merchant preparing coffee beans and packaging.
 - **`SHIPPED`**: Courier and tracking number registered (`courier_name`, `tracking_number`, `shipped_at` populated).
 - **`DELIVERED`**: Parcel delivered to recipient (`delivered_at` populated).
-- **`CANCEL_REQUESTED`**: Member requested cancellation while order was in `PAID` or `PREPARING` status.
-- **`CANCELLED`**: Order cancelled and voided. If previously paid, PG refund is processed and inventory is replenished.
+- **`CANCEL_REQUESTED`**: Member requested cancellation while order was in `PAID` or `PREPARING` status. The previous status is stored in `status_before_cancel` and the member's reason in `cancel_reason`. If the admin rejects the request, the order returns to `status_before_cancel`.
+- **`CANCELLED`**: Order cancelled and voided. Inventory is replenished. If the order was paid, the successful payment is refunded through the PG.
 
 ### 5.2 Payment Lifecycle (`payment_status`)
 - **`READY`**: Payment initialized and awaiting PG approval callback.
 - **`SUCCESS`**: Authorized and confirmed by PG; advances parent order to `PAID`.
 - **`FAILED`**: PG authorization declined (records `failure_reason`); customer may initiate a new payment attempt (`Retry Payment`).
-- **`CANCELLED`**: Transaction refunded/voided upon order cancellation.
+- **`CANCELLED`**: Transaction refunded/voided, either because an admin approved the order's cancellation or because the PG reported success for an order that was no longer `PENDING` or with an amount different from `final_payment_amt`. The reason is stored in `failure_reason`.

@@ -65,7 +65,7 @@ The Django project is `backend/config`. Domain code is split into three apps:
 - One SQLite file, `backend/db.sqlite3`, created locally and never committed.
 - Tables, columns, constraints, and indexes are specified in
   [table-specification.md](backend/table-specification.md). `backend/schema.sql` holds the
-  matching DDL.
+  DDL. A few newly specified items are not in it yet; the table specification lists them.
 - Order items store a snapshot of product name, option, and price, so later catalog changes
   do not alter past orders.
 

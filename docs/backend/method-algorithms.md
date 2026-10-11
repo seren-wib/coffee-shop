@@ -1,8 +1,10 @@
-# 3. 메소드 알고리즘 설계 (Method Algorithm Design)
+# 2.4 메소드 알고리즘 설계 (Method Algorithm Design)
 
-커피 원두 쇼핑몰 시스템의 백엔드 핵심 비즈니스 로직에 대한 **메소드 알고리즘 설계서**이다. SDD(소프트웨어 설계 명세서) 제3절 및 `docs/deliverables.md`의 **"Method algorithm design and implementation"** 산출물에 해당한다.
+커피 원두 쇼핑몰 시스템의 백엔드 핵심 비즈니스 로직에 대한 **메소드 알고리즘 설계서**이다. HW1 요구사항 명세서 2.4절 및 `docs/deliverables.md`의 **"Method algorithm design and implementation"** 산출물에 해당한다.
 
 클래스 명세(`class-specification.md`)와 데이터베이스 스키마(`table-specification.md`)에서 정의된 인터페이스를 바탕으로, 트랜잭션 일관성, 재고 동시성 제어, 불변 스냅샷 생성, 결제 및 배송 상태 머신 전이를 담당하는 **핵심 6대 알고리즘**을 상세히 기술한다.
+
+메서드 이름은 구현 코드(Python)를 따라 snake_case로 적는다. Class Diagram과 시퀀스 다이어그램의 camelCase 이름과 같은 메서드다(예: `create_order` = `createOrder`).
 
 ---
 
@@ -31,17 +33,18 @@
 #### 2. 입출력 명세
 - **입력 (Input)**:
   - `user: User`: 주문을 생성하는 회원 객체
-  - `order_id: String`: 고유 주문 비즈니스 번호 (예: `ORD-20261008-001`)
+  - `order_id: String`: 고유 주문 비즈니스 번호. 형식 `ORD-YYYYMMDD-NNN` (예: `ORD-20261008-001`)
   - `recipient_name: String`: 수령인 성명
   - `recipient_phone: String`: 수령인 연락처
   - `shipping_address: String`: 배송지 주소
   - `cart_items: List[CartItem]`: 주문 대상 장바구니 품목 목록
-  - `shipping_fee: int`: 배송비 (기본값: 3,000 KRW)
+  - 배송비는 입력받지 않고 상품 금액 합계로 정한다 (30,000원 이상 0원, 미만 3,000원).
 - **출력 (Output)**:
   - `order: Order`: 생성된 주문 인스턴스
 - **예외 (Exceptions)**:
   - `EmptyCartException`: `cart_items`가 비어있는 경우
   - `InsufficientStockException`: 품목 중 재고 수량이 부족한 경우 (`ValueError`)
+  - `ProductNotAvailableException`: 품목의 원두가 판매 중(`ON_SALE`)이 아닌 경우
 
 #### 3. 사전 및 사후 조건 (Pre/Post-conditions)
 - **사전 조건**: `user`는 인증된 회원이어야 하며, `cart_items`의 각 품목은 유효한 `ProductOption`을 참조해야 한다.
@@ -59,7 +62,9 @@ flowchart TD
     CheckEmpty -- 아니오 --> BeginTx[데이터베이스 트랜잭션 시작]
     
     BeginTx --> LoopItems[각 CartItem 반복]
-    LoopItems --> CalcPrice[단가 및 소계 계산]
+    LoopItems --> CheckSale{원두가 판매 중인가?}
+    CheckSale -- 아니오 --> RollbackSale[트랜잭션 롤백<br>ProductNotAvailableException] --> EndFail
+    CheckSale -- 예 --> CalcPrice[단가 및 소계 계산]
     CalcPrice --> TryDecrease{재고 차감 시도<br>option.decrease_stock}
     
     TryDecrease -- 실패 --> Rollback[트랜잭션 롤백<br>InsufficientStockException] --> EndFail
@@ -67,7 +72,8 @@ flowchart TD
     CreateOI --> HasMore{다음 품목 존재하는가?}
     
     HasMore -- 예 --> LoopItems
-    HasMore -- 아니오 --> CreateOrder[Order 레코드 생성<br>status = PENDING]
+    HasMore -- 아니오 --> CalcFee[배송비 결정<br>30,000원 이상 0원, 미만 3,000원]
+    CalcFee --> CreateOrder[Order 레코드 생성<br>status = PENDING]
     CreateOrder --> SaveOIs[모든 OrderItem 저장]
     SaveOIs --> DeleteCart[주문된 CartItem 일괄 삭제]
     DeleteCart --> CommitTx[트랜잭션 커밋]
@@ -77,7 +83,7 @@ flowchart TD
 #### 5. 상세 의사코드 (Pseudocode)
 ```text
 ALGORITHM Order_CreateOrder(user, order_id, recipient_name, recipient_phone, 
-                           shipping_address, cart_items, shipping_fee)
+                           shipping_address, cart_items)
 BEGIN
     IF cart_items IS EMPTY THEN
         RAISE EmptyCartException("주문할 장바구니 항목이 존재하지 않습니다.")
@@ -89,6 +95,11 @@ BEGIN
         order_item_instances <- EMPTY_LIST
 
         FOR EACH item IN cart_items DO
+            // 0. 품절이거나 판매 중지된 원두는 주문할 수 없음
+            IF item.option.product.sales_status != SalesStatus.ON_SALE THEN
+                RAISE ProductNotAvailableException("주문할 수 없는 원두입니다: " + item.option.product.name)
+            END IF
+
             // 1. 주문 시점 옵션 결합 단가 산출
             unit_price <- item.option.product.base_price + item.option.extra_price
             subtotal <- unit_price * item.quantity
@@ -112,7 +123,12 @@ BEGIN
             APPEND order_item TO order_item_instances
         END FOR
 
-        // 4. 최종 결제 금액 산출
+        // 4. 배송비와 최종 결제 금액 산출 (상품 금액 30,000원 이상이면 무료배송)
+        IF total_product_amt >= 30000 THEN
+            shipping_fee <- 0
+        ELSE
+            shipping_fee <- 3000
+        END IF
         final_payment_amt <- total_product_amt + shipping_fee
 
         // 5. 주문 마스터 생성 (기본 상태 PENDING)
@@ -150,18 +166,19 @@ END
 #### 6. 복잡도 및 동시성 분석
 - **시간 복잡도**: $O(N)$ ($N$ = 장바구니 품목 수)
 - **공간 복잡도**: $O(N)$ (생성된 스냅샷 객체 수)
-- **동시성 제어**: `decrease_stock`은 단일 DB 트랜잭션 내에서 실행되며, SQLite/RDBMS의 Row-Level Lock 또는 격리 수준에 의해 동시에 동일 상품의 마지막 재고를 주문하더라도 한 쪽만 성공하고 다른 트랜잭션은 롤백된다.
+- **동시성 제어**: SQLite에는 행 단위 잠금이 없으므로, 재고를 읽어 비교한 뒤 저장하면 두 주문이 같은 재고를 동시에 통과할 수 있다. `decrease_stock`은 비교와 차감을 하나의 조건부 UPDATE(`WHERE stock_quantity >= quantity`)로 처리하고, 바뀐 행이 없으면 재고 부족으로 본다(ALG-04). 따라서 동시에 동일 옵션의 마지막 재고를 주문해도 한 쪽만 성공하고, 실패한 쪽은 트랜잭션 전체가 롤백된다.
 
 ---
 
 ### ALG-02: 회원 주문 취소 요청 (`Order.request_cancellation`)
 
 #### 1. 개요 및 목적
-회원이 주문 내역에서 취소를 요청할 때, 주문의 현재 상태에 따라 적절한 분기 처리를 수행한다. 아직 결제되지 않은 주문(`PENDING`)은 즉시 취소하고 재고를 복원하며, 결제 완료(`PAID`) 또는 상품 준비 중(`PREPARING`)인 주문은 관리자 확인을 위해 상태를 `CANCEL_REQUESTED`로 전이시킨다. 이미 출고된 주문(`SHIPPED`, `DELIVERED`)은 취소를 불허한다.
+회원이 주문 내역에서 취소를 요청할 때, 주문의 현재 상태에 따라 적절한 분기 처리를 수행한다. 아직 결제되지 않은 주문(`PENDING`)은 즉시 취소하고 재고를 복원하며, 결제 완료(`PAID`) 또는 배송 준비(`PREPARING`)인 주문은 요청 전 상태와 취소 사유를 저장한 뒤 관리자 확인을 위해 상태를 `CANCEL_REQUESTED`로 전이시킨다. 이미 출고된 주문(`SHIPPED`, `DELIVERED`)과 이미 취소 요청되었거나 취소된 주문(`CANCEL_REQUESTED`, `CANCELLED`)은 취소를 불허한다.
 
 #### 2. 입출력 명세
 - **입력 (Input)**:
   - `self: Order`: 취소 대상 주문 객체
+  - `reason: String`: 회원이 적은 취소 사유 (`PENDING` 주문 즉시 취소 시에는 사용하지 않음)
 - **출력 (Output)**:
   - `success: bool`: 취소 요청 접수 또는 즉시 취소 성공 여부
 
@@ -169,7 +186,7 @@ END
 - **사전 조건**: 대상 주문이 데이터베이스에 존재해야 한다.
 - **사후 조건**:
   - `PENDING` 주문: `order_status`가 `CANCELLED`로 변경되고 재고가 환원된다.
-  - `PAID` / `PREPARING` 주문: `order_status`가 `CANCEL_REQUESTED`로 변경된다.
+  - `PAID` / `PREPARING` 주문: 요청 전 상태가 `status_before_cancel`에, 사유가 `cancel_reason`에 저장되고 `order_status`가 `CANCEL_REQUESTED`로 변경된다.
   - 기타 상태: 상태 변경 없이 `False`를 반환한다.
 
 #### 4. 제어 흐름 다이어그램
@@ -178,26 +195,36 @@ flowchart TD
     Start([시작]) --> CheckStatus{주문 상태 판별}
     
     CheckStatus -- PENDING --> StartTx[트랜잭션 시작]
-    StartTx --> SetCancelled[order_status <- CANCELLED]
-    SetCancelled --> RestoreStock[각 OrderItem 재고 원상 복구]
+    StartTx --> SetCancelled{조건부 UPDATE<br>PENDING인 경우만 CANCELLED}
+    SetCancelled -- 바뀐 행 없음 --> RollbackDup[트랜잭션 롤백] --> ReturnFalse
+    SetCancelled -- 1행 변경 --> RestoreStock[각 OrderItem 재고 원상 복구]
     RestoreStock --> CommitTx[트랜잭션 커밋] --> ReturnTrue([True 반환])
     
-    CheckStatus -- PAID 또는 PREPARING --> SetReq[order_status <- CANCEL_REQUESTED]
-    SetReq --> SaveOrder[주문 상태 저장] --> ReturnTrue
+    CheckStatus -- PAID 또는 PREPARING --> SaveBefore[조건부 UPDATE<br>status_before_cancel <- 현재 상태<br>cancel_reason <- reason<br>order_status <- CANCEL_REQUESTED]
+    SaveBefore --> Changed{바뀐 행이 있는가?}
+    Changed -- 예 --> ReturnTrue
+    Changed -- 아니오 --> ReturnFalse
     
-    CheckStatus -- SHIPPED / DELIVERED / CANCELLED --> Reject[취소 불가 처리]
+    CheckStatus -- SHIPPED / DELIVERED / CANCEL_REQUESTED / CANCELLED --> Reject[취소 불가 처리]
     Reject --> ReturnFalse([False 반환])
 ```
 
 #### 5. 상세 의사코드 (Pseudocode)
 ```text
-ALGORITHM Order_RequestCancellation(order)
+ALGORITHM Order_RequestCancellation(order, reason)
 BEGIN
+    // 상태 확인과 변경은 조건부 UPDATE 하나로 처리한다.
+    // 같은 요청이 두 번 들어와도 두 번째 UPDATE는 바뀐 행이 0이므로 재고를 다시 되돌리지 않는다.
     IF order.order_status == OrderStatus.PENDING THEN
         START TRANSACTION
         TRY
-            order.order_status <- OrderStatus.CANCELLED
-            UPDATE order SET order_status = OrderStatus.CANCELLED
+            affected <- UPDATE Order SET order_status = OrderStatus.CANCELLED
+                        WHERE order_id = order.order_id AND order_status = OrderStatus.PENDING
+            IF affected == 0 THEN
+                // 다른 요청이 먼저 상태를 바꿈
+                ROLLBACK TRANSACTION
+                RETURN FALSE
+            END IF
 
             // 결제 전 취소이므로 점유했던 재고 즉시 환원
             FOR EACH item IN order.items DO
@@ -213,12 +240,16 @@ BEGIN
 
     ELSE IF order.order_status IN [OrderStatus.PAID, OrderStatus.PREPARING] THEN
         // 이미 결제가 완료되었거나 상품을 준비 중이므로 관리자 승인 단계로 전이
-        order.order_status <- OrderStatus.CANCEL_REQUESTED
-        UPDATE order SET order_status = OrderStatus.CANCEL_REQUESTED
-        RETURN TRUE
+        // 반려 시 되돌아갈 상태와 회원이 적은 사유를 함께 저장
+        current_status <- order.order_status
+        affected <- UPDATE Order SET status_before_cancel = current_status,
+                                     cancel_reason = reason,
+                                     order_status = OrderStatus.CANCEL_REQUESTED
+                    WHERE order_id = order.order_id AND order_status = current_status
+        RETURN affected == 1
 
     ELSE
-        // 출고 완료(SHIPPED), 배송 완료(DELIVERED), 또는 이미 취소된 주문은 취소 불가
+        // 출고 완료(SHIPPED), 배송 완료(DELIVERED), 이미 취소 요청되었거나 취소된 주문은 취소 불가
         RETURN FALSE
     END IF
 END
@@ -229,7 +260,7 @@ END
 ### ALG-03: 관리자 주문 취소 심사 및 환불 (`Order.process_cancellation`)
 
 #### 1. 개요 및 목적
-관리자가 회원의 주문 취소 요청(`CANCEL_REQUESTED`)을 심사하여 승인(`approved=True`) 또는 반려(`approved=False`)한다. 승인 시 원자적으로 주문 상태를 `CANCELLED`로 변경하고, 감소되었던 상품 재고를 복구하며, 연관된 결제 성공 건에 대해 결제 취소(PG 환불)를 실행한다. 반려 시에는 다시 상품 준비 중(`PREPARING`) 상태로 복귀시킨다.
+관리자가 회원의 주문 취소 요청(`CANCEL_REQUESTED`)을 심사하여 승인(`approved=True`) 또는 반려(`approved=False`)한다. 승인 시 원자적으로 주문 상태를 `CANCELLED`로 변경하고, 감소되었던 상품 재고를 복구하며, 연관된 결제 성공 건에 대해 결제 취소(PG 환불)를 실행한다. 반려 시에는 취소 요청 전 상태(`status_before_cancel`, `PAID` 또는 `PREPARING`)로 복귀시킨다.
 
 #### 2. 입출력 명세
 - **입력 (Input)**:
@@ -246,7 +277,7 @@ END
     - 주문 품목들의 옵션 재고가 환원된다 (`increase_stock`).
     - 상태가 `SUCCESS`인 모든 `Payment`의 상태가 `CANCELLED`로 변경되고 환불 사유가 기록된다.
   - `approved == False`:
-    - `order_status`가 `PREPARING`으로 복구된다.
+    - `order_status`가 `status_before_cancel`(요청 전 상태)로 복구된다.
 
 #### 4. 상세 의사코드 (Pseudocode)
 ```text
@@ -260,9 +291,15 @@ BEGIN
     START TRANSACTION
     TRY
         IF approved IS TRUE THEN
-            // 1. 주문 상태 취소 전이
-            order.order_status <- OrderStatus.CANCELLED
-            UPDATE order SET order_status = OrderStatus.CANCELLED
+            // 1. 주문 상태 취소 전이 (조건부 UPDATE)
+            //    승인이 두 번 들어와도 두 번째는 바뀐 행이 0이므로 재고를 다시 되돌리지 않는다.
+            affected <- UPDATE Order SET order_status = OrderStatus.CANCELLED
+                        WHERE order_id = order.order_id
+                          AND order_status = OrderStatus.CANCEL_REQUESTED
+            IF affected == 0 THEN
+                ROLLBACK TRANSACTION
+                RETURN FALSE
+            END IF
 
             // 2. 주문 상세 품목별 재고 복원
             FOR EACH item IN order.items DO
@@ -278,9 +315,14 @@ BEGIN
             END FOR
 
         ELSE
-            // 관리자가 취소를 거절한 경우 상품 준비 상태로 복구
-            order.order_status <- OrderStatus.PREPARING
-            UPDATE order SET order_status = OrderStatus.PREPARING
+            // 관리자가 취소를 거절한 경우 취소 요청 전 상태(PAID 또는 PREPARING)로 복구
+            affected <- UPDATE Order SET order_status = status_before_cancel
+                        WHERE order_id = order.order_id
+                          AND order_status = OrderStatus.CANCEL_REQUESTED
+            IF affected == 0 THEN
+                ROLLBACK TRANSACTION
+                RETURN FALSE
+            END IF
         END IF
 
         COMMIT TRANSACTION
@@ -298,7 +340,7 @@ END
 ### ALG-04: 재고 증감 및 자동 품절 판별 (`ProductOption.decrease_stock` & `increase_stock`)
 
 #### 1. 개요 및 목적
-원두 옵션의 실물 재고를 안전하게 차감하거나 증가시킨다. 재고 차감 시 0 미만으로 내려가는 것을 방지하고, 차감 결과 해당 원두 상품(`Product`)의 모든 옵션 재고가 0이 되면 마스터 상품의 상태를 `SOLD_OUT`으로 자동 전이한다. 반대로 재고가 보충되면 품절 상태에서 `ON_SALE`로 자동 복구한다.
+원두 옵션의 실물 재고를 안전하게 차감하거나 증가시킨다. 재고 차감 시 0 미만으로 내려가는 것을 방지하고, 차감 결과 판매 중(`ON_SALE`)인 원두 상품(`Product`)의 모든 옵션 재고가 0이 되면 마스터 상품의 상태를 `SOLD_OUT`으로 자동 전이한다. 반대로 재고가 보충되면 품절 상태에서 `ON_SALE`로 자동 복구한다. 품절은 이 알고리즘으로만 바뀌며, 관리자가 판매 중지(`STOPPED`)한 원두는 재고가 변해도 상태를 유지한다.
 
 #### 2. 입출력 명세
 - **차감 메서드 (`decrease_stock`)**:
@@ -316,28 +358,33 @@ BEGIN
         RETURN FALSE
     END IF
 
-    // 현재 재고가 요청 수량 이상인지 검증
-    IF option.stock_quantity >= quantity THEN
-        option.stock_quantity <- option.stock_quantity - quantity
-        UPDATE option SET stock_quantity = option.stock_quantity
-
-        // 만약 이번 차감으로 현재 옵션 재고가 0이 되었다면,
-        // 부모 원두 상품의 다른 옵션들도 전부 재고가 0인지 검사
-        IF option.stock_quantity == 0 THEN
-            has_remaining_stock <- EXISTS(
-                SELECT 1 FROM ProductOption 
-                WHERE product = option.product AND stock_quantity > 0
-            )
-            IF has_remaining_stock IS FALSE THEN
-                option.product.change_sales_status(SalesStatus.SOLD_OUT)
-            END IF
-        END IF
-
-        RETURN TRUE
-    ELSE
+    // 재고 비교와 차감을 하나의 조건부 UPDATE로 처리한다.
+    // 메모리 값을 읽어 비교한 뒤 저장하면, 동시에 들어온 두 주문이 같은 재고로 둘 다 통과할 수 있다.
+    affected <- UPDATE ProductOption SET stock_quantity = stock_quantity - quantity
+                WHERE option_id = option.option_id AND stock_quantity >= quantity
+    IF affected == 0 THEN
         // 재고 부족
         RETURN FALSE
     END IF
+
+    REFRESH option FROM DATABASE
+
+    // 만약 이번 차감으로 현재 옵션 재고가 0이 되었다면,
+    // 부모 원두 상품의 다른 옵션들도 전부 재고가 0인지 검사
+    IF option.stock_quantity == 0 THEN
+        has_remaining_stock <- EXISTS(
+            SELECT 1 FROM ProductOption
+            WHERE product = option.product AND stock_quantity > 0
+        )
+        // 판매 중인 원두만 품절로 바꾼다. 관리자가 판매 중지(STOPPED)한 상태는 유지한다.
+        // 조건부 UPDATE로 처리해, 그 사이 관리자가 판매 중지한 상태를 덮어쓰지 않는다.
+        IF has_remaining_stock IS FALSE THEN
+            UPDATE Product SET sales_status = SalesStatus.SOLD_OUT
+            WHERE product_id = option.product.product_id AND sales_status = SalesStatus.ON_SALE
+        END IF
+    END IF
+
+    RETURN TRUE
 END
 
 ALGORITHM ProductOption_IncreaseStock(option, quantity)
@@ -346,12 +393,15 @@ BEGIN
         RETURN
     END IF
 
-    option.stock_quantity <- option.stock_quantity + quantity
-    UPDATE option SET stock_quantity = option.stock_quantity
+    // 현재 DB 값에 더한다. 메모리 값으로 덮어쓰면 동시에 일어난 차감이 사라진다.
+    UPDATE ProductOption SET stock_quantity = stock_quantity + quantity
+    WHERE option_id = option.option_id
+    REFRESH option FROM DATABASE
 
-    // 품절 상태였던 상품에 재고가 입고된 경우 판매 중 상태로 자동 복원
-    IF option.product.sales_status == SalesStatus.SOLD_OUT AND option.stock_quantity > 0 THEN
-        option.product.change_sales_status(SalesStatus.ON_SALE)
+    // 품절 상태였던 상품에 재고가 입고된 경우 판매 중 상태로 자동 복원 (판매 중지 상태는 유지)
+    IF option.stock_quantity > 0 THEN
+        UPDATE Product SET sales_status = SalesStatus.ON_SALE
+        WHERE product_id = option.product.product_id AND sales_status = SalesStatus.SOLD_OUT
     END IF
 END
 ```
@@ -371,37 +421,33 @@ BEGIN
         RAISE InvalidArgumentException("택배사 명칭과 운송장 번호는 필수입니다.")
     END IF
 
-    // 주문이 결제 완료(PAID) 또는 준비 중(PREPARING) 상태일 때만 출고 가능
-    IF order.order_status NOT IN [OrderStatus.PAID, OrderStatus.PREPARING] THEN
-        RAISE InvalidStateTransitionException("출고할 수 없는 주문 상태입니다: " + order.order_status)
+    // 주문이 배송 준비(PREPARING) 상태일 때만 출고 가능.
+    // 상태 확인과 변경을 조건부 UPDATE 하나로 처리해, 그 사이 회원이 취소를 요청한
+    // 주문(CANCEL_REQUESTED)을 SHIPPED로 덮어쓰지 않는다.
+    affected <- UPDATE Order SET
+                    courier_name = courier_name,
+                    tracking_number = tracking_number,
+                    order_status = OrderStatus.SHIPPED,
+                    shipped_at = CURRENT_TIMESTAMP()
+                WHERE order_id = order.order_id AND order_status = OrderStatus.PREPARING
+    IF affected == 0 THEN
+        RAISE InvalidStateTransitionException("배송 준비 상태인 주문만 출고할 수 있습니다.")
     END IF
-
-    order.courier_name <- courier_name
-    order.tracking_number <- tracking_number
-    order.order_status <- OrderStatus.SHIPPED
-    order.shipped_at <- CURRENT_TIMESTAMP()
-
-    UPDATE order SET 
-        courier_name = order.courier_name,
-        tracking_number = order.tracking_number,
-        order_status = order.order_status,
-        shipped_at = order.shipped_at
 END
 
 ALGORITHM Order_MarkAsDelivered(order)
 BEGIN
-    IF order.order_status != OrderStatus.SHIPPED THEN
+    affected <- UPDATE Order SET
+                    order_status = OrderStatus.DELIVERED,
+                    delivered_at = CURRENT_TIMESTAMP()
+                WHERE order_id = order.order_id AND order_status = OrderStatus.SHIPPED
+    IF affected == 0 THEN
         RAISE InvalidStateTransitionException("배송 중인 주문만 배송 완료 처리할 수 있습니다.")
     END IF
-
-    order.order_status <- OrderStatus.DELIVERED
-    order.delivered_at <- CURRENT_TIMESTAMP()
-
-    UPDATE order SET 
-        order_status = order.order_status,
-        delivered_at = order.delivered_at
 END
 ```
+
+관리자의 배송 준비 전환(`PAID` → `PREPARING`, `Order.update_status`)도 같은 방식으로 `WHERE order_status = PAID` 조건부 UPDATE로 처리한다. 회원이 같은 순간에 취소를 요청해도 취소 요청 상태가 배송 준비로 덮어써지지 않는다.
 
 ---
 
@@ -453,11 +499,21 @@ END
 | 현재 상태 (Current State) | 전이 이벤트 (Trigger Event) | 다음 상태 (Next State) | 실행 알고리즘 |
 |---|---|---|---|
 | `(None)` | 장바구니 결제 요청 | `PENDING` | `ALG-01: Order.create_order` |
-| `PENDING` | PG 결제 성공 승인 콜백 | `PAID` | `Payment.process_payment` |
+| `PENDING` | PG 결제 성공 승인 콜백 (결제 금액 일치) | `PAID` | `Payment.process_payment` |
 | `PENDING` | 결제 전 사용자 주문 취소 | `CANCELLED` | `ALG-02: Order.request_cancellation` |
-| `PAID` | 관리자 주문 확인 및 패킹 시작 | `PREPARING` | `Order.update_status` |
+| `PAID` | 관리자 주문 확인 및 패킹 시작 | `PREPARING` | `Order.update_status` (조건부 UPDATE) |
 | `PAID` / `PREPARING` | 사용자 취소 신청 접수 | `CANCEL_REQUESTED` | `ALG-02: Order.request_cancellation` |
 | `CANCEL_REQUESTED` | 관리자 취소 승인 및 PG 환불 | `CANCELLED` | `ALG-03: Order.process_cancellation(approved=True)` |
-| `CANCEL_REQUESTED` | 관리자 취소 거절/반려 | `PREPARING` | `ALG-03: Order.process_cancellation(approved=False)` |
-| `PAID` / `PREPARING` | 택배사 및 운송장 번호 등록 | `SHIPPED` | `ALG-05: Order.register_tracking` |
-| `SHIPPED` | 배송 완료 콜백 / 관리자 완료 처리 | `DELIVERED` | `ALG-05: Order.mark_as_delivered` |
+| `CANCEL_REQUESTED` | 관리자 취소 거절/반려 | `PAID` / `PREPARING` (요청 전 상태) | `ALG-03: Order.process_cancellation(approved=False)` |
+| `PREPARING` | 택배사 및 운송장 번호 등록 | `SHIPPED` | `ALG-05: Order.register_tracking` |
+| `SHIPPED` | 관리자 배송 완료 처리 | `DELIVERED` | `ALG-05: Order.mark_as_delivered` |
+
+결제(`payment_status`) 상태 전이는 다음과 같다.
+
+| 현재 상태 (Current State) | 전이 이벤트 (Trigger Event) | 다음 상태 (Next State) | 실행 메서드 |
+|---|---|---|---|
+| `(None)` | 결제 요청 (최초 또는 재시도) | `READY` | 결제 시도 기록 생성 |
+| `READY` | PG 결제 성공, 주문이 `PENDING`이고 결제 금액 일치 | `SUCCESS` | `Payment.process_payment` |
+| `READY` | PG 결제 성공, 주문이 `PENDING`이 아니거나 결제 금액 불일치 (PG 환불) | `CANCELLED` | `Payment.process_payment` |
+| `READY` | PG 결제 실패 | `FAILED` | `Payment.process_payment` |
+| `SUCCESS` | 관리자 취소 승인 (PG 환불) | `CANCELLED` | `ALG-03: Payment.cancel_payment` |

@@ -32,9 +32,10 @@
 |---|---|---|
 | `Role` | `MEMBER`, `ADMIN` | 사용자 권한 등급 (일반 회원, 시스템 관리자) |
 | `SalesStatus` | `ON_SALE`, `SOLD_OUT`, `STOPPED` | 원두 판매 상태 (판매 중, 품절, 판매 중지) |
+| `RoastLevel` | `LIGHT`, `MEDIUM`, `DARK` | 로스팅 정도 (라이트, 미디엄, 다크) |
 | `GrindType` | `WHOLE_BEAN`, `HAND_DRIP`, `ESPRESSO` | 원두 분쇄도 (홀빈/원두 상태, 핸드드립용, 에스프레소용) |
-| `OrderStatus` | `PENDING`, `PAID`, `PREPARING`, `SHIPPED`, `DELIVERED`, `CANCEL_REQUESTED`, `CANCELLED` | 주문 생애주기 상태 (결제 대기, 결제 완료, 상품 준비 중, 배송 중, 배송 완료, 취소 요청, 주문 취소) |
-| `PaymentStatus` | `READY`, `SUCCESS`, `FAILED`, `CANCELLED` | 결제 트랜잭션 상태 (결제 대기, 결제 성공, 결제 실패, 결제 취소) |
+| `OrderStatus` | `PENDING`, `PAID`, `PREPARING`, `SHIPPED`, `DELIVERED`, `CANCEL_REQUESTED`, `CANCELLED` | 주문 생애주기 상태 (결제 대기, 결제 완료, 배송 준비, 배송 중, 배송 완료, 취소 요청, 주문 취소) |
+| `PaymentStatus` | `READY`, `SUCCESS`, `FAILED`, `CANCELLED` | 결제 트랜잭션 상태 (승인 대기, 결제 성공, 결제 실패, 결제 취소) |
 | `PaymentMethod` | `CARD`, `EASY_PAY`, `TRANSFER` | 결제 수단 (신용/체크카드, 간편결제, 계좌이체) |
 
 ---
@@ -67,7 +68,7 @@
 +------------------------------------------+-------------------------------+
 | 1. 회원의 배송지 정보(수령인, 주소) 유지 | User                          |
 | 2. 기본 배송지 단일 지정 및 기존 해제    | Order (주문 시 참조)          |
-| 3. 배송지 정보 수정                      |                               |
+| 3. 배송지 정보 수정 및 삭제              |                               |
 +------------------------------------------+-------------------------------+
 ```
 
@@ -140,7 +141,7 @@
 | Responsibilities (책임)                  | Collaborators (협력자)        |
 +------------------------------------------+-------------------------------+
 | 1. 주문 시점의 상품명, 옵션, 단가 스냅샷  | Order                         |
-| 2. 구매 품목별 부분합(orderPrice*수량) 계산| ProductOption                |
+| 2. 구매 품목별 부분합(order_price*수량) 계산| ProductOption               |
 +------------------------------------------+-------------------------------+
 ```
 
@@ -184,10 +185,10 @@
 #### 메서드 (Operations)
 | 가시성 | 메서드 시그니처 | 반환형 | 설명 및 알고리즘 개요 |
 |---|---|---|---|
-| `+` | `register(email, password, user_name, phone_number, role=MEMBER)` | `User` | **회원가입 팩토리 메서드**: 비밀번호를 안전한 해시 함수(`make_password`)로 변환한 후 신규 사용자 인스턴스를 생성하여 데이터베이스에 저장한다. |
+| `+` | `register(email, password, user_name, phone_number, role=MEMBER)` | `User` | **회원가입 팩토리 메서드**: 비밀번호가 8자 미만이면 가입을 거부한다. 비밀번호를 안전한 해시 함수(`make_password`)로 변환한 후 신규 사용자 인스턴스를 생성하여 데이터베이스에 저장한다. |
 | `+` | `login(password: String)` | `bool` | **로그인 자격증명 검증**: 입력된 평문 비밀번호를 기존의 `password_hash`와 대조(`check_password`)하여 일치 여부를 반환한다. |
 | `+` | `update_profile(name: String, phone: String)` | `void` | **프로필 수정**: 이름과 연락처를 갱신하고 변경된 필드를 영속화한다. |
-| `+` | `change_password(old_pw: String, new_pw: String)` | `bool` | **비밀번호 변경**: 기존 비밀번호(`old_pw`) 일치 여부를 먼저 검증한 뒤, 검증 통과 시 새 비밀번호(`new_pw`)를 해싱하여 저장한다. |
+| `+` | `change_password(old_pw: String, new_pw: String)` | `bool` | **비밀번호 변경**: 기존 비밀번호(`old_pw`) 일치 여부를 먼저 검증한 뒤, 새 비밀번호(`new_pw`)가 8자 이상이면 해싱하여 저장한다. |
 
 #### 비즈니스 규칙 및 제약사항
 - 이메일은 시스템 전체에서 중복될 수 없다 (`UNIQUE`).
@@ -218,10 +219,13 @@
 | 가시성 | 메서드 시그니처 | 반환형 | 설명 및 알고리즘 개요 |
 |---|---|---|---|
 | `+` | `set_default()` | `void` | **기본 배송지 지정**: 동일 회원의 다른 모든 배송지의 `is_default`를 `False`로 일괄 해제한 뒤, 현재 배송지를 `True`로 지정하여 저장한다. |
-| `+` | `update_address(...)` | `void` | **배송지 수정**: 전달된 파라미터(수령인, 연락처, 주소, 기본 여부 등)를 반영하여 갱신한다. |
+| `+` | `update_address(...)` | `void` | **배송지 수정**: 전달된 파라미터(수령인, 연락처, 주소, 기본 여부 등)를 반영하여 갱신한다. 기본 여부를 `True`로 바꾸면 `set_default()`와 같이 처리한다. 기본 배송지를 직접 `False`로 해제할 수는 없다. |
+| `+` | `delete_address()` | `bool` | **배송지 삭제**: 기본 배송지이고 같은 회원의 다른 배송지가 있으면 삭제하지 않고 `False`를 반환한다. 그 밖의 경우 삭제하고 `True`를 반환한다. |
 
 #### 비즈니스 규칙 및 제약사항
-- 한 회원당 `is_default == True`인 배송지는 최대 1개만 유지된다.
+- 배송지가 있는 회원은 `is_default == True`인 배송지를 정확히 1개 가진다. 처음 등록한 배송지는 자동으로 기본 배송지가 된다.
+- 배송지가 둘 이상이면 기본 배송지는 다른 배송지를 기본으로 지정한 뒤에만 삭제할 수 있다.
+- 주문에는 배송지가 복사되어 저장되므로, 배송지를 삭제해도 기존 주문의 배송지는 바뀌지 않는다.
 - 회원이 삭제될 경우 등록된 배송지 목록은 함께 삭제된다 (`ON DELETE CASCADE`).
 
 ---
@@ -237,7 +241,7 @@
 | `-` | `product_id` | `int` | Auto | PK, Auto Increment | 상품 마스터 고유 식별자 |
 | `-` | `name` | `String` | None | Max 200 | 원두 상품명 (예: 에티오피아 예가체프 G1) |
 | `-` | `origin` | `String` | None | Max 100 | 원산지 국가/지역 |
-| `-` | `roast_level` | `String` | None | Max 50 | 로스팅 정도 (Light, Medium, Dark 등) |
+| `-` | `roast_level` | `RoastLevel` | None | Choices (`LIGHT`, `MEDIUM`, `DARK`) | 로스팅 정도 |
 | `-` | `base_price` | `int` | None | Non-negative (>= 0) | 기본 상품 단가 (KRW) |
 | `-` | `tasting_notes` | `String` | None | Nullable, Text | 컵 노트 / 향미 특징 |
 | `-` | `description` | `String` | None | Nullable, Text | 상세 상품 설명 |
@@ -248,7 +252,7 @@
 | 가시성 | 메서드 시그니처 | 반환형 | 설명 및 알고리즘 개요 |
 |---|---|---|---|
 | `+` | `update_info(...)` | `void` | **상품 정보 수정**: 원두명, 원산지, 로스팅, 기본가, 설명 등의 정보를 갱신한다. |
-| `+` | `change_sales_status(status: SalesStatus)` | `void` | **판매 상태 변경**: 관리자 또는 재고 연동 로직에 의해 상품 판매 상태를 변경한다. |
+| `+` | `change_sales_status(status: SalesStatus)` | `void` | **판매 상태 변경**: 관리자는 판매 중지(`STOPPED`)와 판매 재개만 한다. 판매를 재개할 때 모든 옵션의 재고가 0이면 `ON_SALE` 대신 `SOLD_OUT`으로 설정한다. 그 밖의 품절(`SOLD_OUT`) 전환과 해제는 재고 연동 로직(`decrease_stock`, `increase_stock`)만 한다. |
 | `+` | `calculate_price(option: ProductOption)` | `int` | **옵션 결합 단가 계산**: `base_price + option.extra_price`를 합산하여 최종 판매 단가를 계산한다. |
 
 ---
@@ -271,7 +275,7 @@
 #### 메서드 (Operations)
 | 가시성 | 메서드 시그니처 | 반환형 | 설명 및 알고리즘 개요 |
 |---|---|---|---|
-| `+` | `decrease_stock(quantity: int)` | `bool` | **원자적 재고 차감**: 현재 `stock_quantity >= quantity`를 검증하고, 재고가 충분하면 `stock_quantity`를 차감한 뒤 저장한다. 차감 후 해당 상품의 모든 옵션 재고가 0이 되면 부모 상품 상태를 `SOLD_OUT`으로 전환한다. 성공 시 `True`, 재고 부족 시 `False` 반환. |
+| `+` | `decrease_stock(quantity: int)` | `bool` | **원자적 재고 차감**: 조건부 UPDATE(`SET stock_quantity = stock_quantity - quantity WHERE stock_quantity >= quantity`) 하나로 비교와 차감을 처리하여, 동시에 주문이 들어와도 재고가 0 밑으로 내려가지 않는다. 차감 후 해당 상품의 모든 옵션 재고가 0이 되고 부모 상품이 `ON_SALE`이면 상태를 `SOLD_OUT`으로 전환한다. 판매 중지(`STOPPED`) 상태는 바꾸지 않는다. 성공 시 `True`, 재고 부족 시 `False` 반환. |
 | `+` | `increase_stock(quantity: int)` | `void` | **재고 보충/복원**: 취소/반품 또는 관리자 입고 시 재고를 가산한다. 부모 상품이 `SOLD_OUT` 상태였고 재고가 1 이상이 되면 부모 상태를 `ON_SALE`로 자동 복구한다. |
 | `+` | `is_available(quantity: int)` | `bool` | **구매 가능 검증**: 요청 수량만큼의 재고가 남아있는지 확인한다 (`stock_quantity >= quantity`). |
 
@@ -314,11 +318,13 @@
 #### 속성 (Attributes)
 | 가시성 | 속성명 | 타입 | 기본값 | 제약사항 | 설명 |
 |---|---|---|---|---|---|
-| `-` | `order_id` | `String` | None | PK, Max 50 | 고유 비즈니스 주문 번호 (예: ORD-2026-X) |
+| `-` | `order_id` | `String` | None | PK, Max 50 | 고유 비즈니스 주문 번호. 형식 `ORD-YYYYMMDD-NNN` (예: ORD-20261011-001) |
 | `-` | `user` | `User` | None | FK (PROTECT) | 주문을 접수한 회원 |
 | `-` | `order_status` | `OrderStatus` | `PENDING` | Choices | 주문 및 배송 종합 상태 |
+| `-` | `status_before_cancel` | `OrderStatus` | None | Nullable, Choices (`PAID`, `PREPARING`) | 취소 요청 직전 상태. 관리자가 취소를 반려하면 이 상태로 되돌린다 |
+| `-` | `cancel_reason` | `String` | None | Nullable, Text | 회원이 취소를 요청할 때 적은 사유 |
 | `-` | `total_product_amt` | `int` | None | Non-negative (>= 0) | 주문 상품 총액 합계 (KRW) |
-| `-` | `shipping_fee` | `int` | `0` | Non-negative (>= 0) | 적용된 배송비 (기본 3,000원 등) |
+| `-` | `shipping_fee` | `int` | `0` | Non-negative (>= 0) | 적용된 배송비. 3,000원이며 상품 금액이 30,000원 이상이면 0원 |
 | `-` | `final_payment_amt` | `int` | None | Non-negative (>= 0) | 최종 결제 대상 금액 (`total + fee`) |
 | `-` | `recipient_name` | `String` | None | Max 100 | 주문 시점의 수령인 성명 스냅샷 |
 | `-` | `recipient_phone` | `String` | None | Max 20 | 주문 시점의 수령인 연락처 스냅샷 |
@@ -332,12 +338,12 @@
 #### 메서드 (Operations)
 | 가시성 | 메서드 시그니처 | 반환형 | 설명 및 알고리즘 개요 |
 |---|---|---|---|
-| `+` | `create_order(user, order_id, recipient_name, recipient_phone, shipping_address, cart_items, shipping_fee=3000)` | `Order` | **주문 생성 (Class Method, Atomic)**: <br>1. 단일 데이터베이스 트랜잭션(`@transaction.atomic`) 시작.<br>2. 장바구니의 각 품목에 대해 단가 계산 및 `option.decrease_stock()` 원자적 호출 (재고 부족 시 `ValueError` 발생 후 롤백).<br>3. 품목별 불변 스냅샷 인스턴스(`OrderItem`) 준비.<br>4. 주문 마스터(`Order`) 인스턴스를 생성하고 상태를 `PENDING`으로 설정.<br>5. `OrderItem` 저장 및 결제 진행된 `CartItem` 삭제 후 생성된 `Order` 반환. |
-| `+` | `request_cancellation()` | `bool` | **회원 주문 취소 요청**: <br>- `order_status == PENDING`인 경우: 즉시 `CANCELLED` 처리 및 재고 롤백 수행.<br>- `order_status in [PAID, PREPARING]`인 경우: 관리자 확인이 필요하므로 상태를 `CANCEL_REQUESTED`로 전이.<br>- 배송 시작 이후(`SHIPPED`, `DELIVERED`)는 취소 불가 (`False` 반환). |
-| `+` | `process_cancellation(approved: bool)` | `bool` | **관리자 취소 요청 처리 (Atomic)**: <br>- 현재 상태가 `CANCEL_REQUESTED`인지 확인.<br>- `approved == True`인 경우: 주문 상태를 `CANCELLED`로 변경하고, 모든 `OrderItem`의 재고를 원상 복구(`increase_stock`)하며, 성공된 결제 건(`Payment`)의 `cancel_payment()`를 호출하여 환불 처리.<br>- `approved == False`인 경우: 취소 거절로 간주하여 주문 상태를 `PREPARING`으로 복귀. |
-| `+` | `register_tracking(courier: String, tracking_no: String)` | `void` | **송장 등록 및 출고 처리**: 관리자가 택배사와 운송장 번호를 등록하면 `courier_name`, `tracking_number`, `shipped_at`을 설정하고 상태를 `SHIPPED`로 전이한다. |
-| `+` | `mark_as_delivered()` | `void` | **배송 완료 처리**: 배송이 완료되면 `delivered_at`을 기록하고 상태를 `DELIVERED`로 전이한다. |
-| `+` | `update_status(new_status: OrderStatus)` | `void` | **주문 상태 갱신**: 주문 상태 머신 규칙에 따라 상태를 갱신한다. |
+| `+` | `create_order(user, order_id, recipient_name, recipient_phone, shipping_address, cart_items)` | `Order` | **주문 생성 (Class Method, Atomic)**: <br>1. 단일 데이터베이스 트랜잭션(`@transaction.atomic`) 시작.<br>2. 장바구니의 각 품목에 대해 원두가 판매 중(`ON_SALE`)인지 확인(아니면 `ProductNotAvailableException` 발생 후 롤백)하고, 단가 계산 및 `option.decrease_stock()` 원자적 호출 (재고 부족 시 `InsufficientStockException` 발생 후 롤백).<br>3. 품목별 불변 스냅샷 인스턴스(`OrderItem`) 준비.<br>4. 상품 금액 합계로 배송비를 정하고(30,000원 이상 0원, 미만 3,000원) 주문 마스터(`Order`) 인스턴스를 생성하여 상태를 `PENDING`으로 설정.<br>5. `OrderItem` 저장 및 결제 진행된 `CartItem` 삭제 후 생성된 `Order` 반환. |
+| `+` | `request_cancellation(reason: String)` | `bool` | **회원 주문 취소 요청**: <br>- `order_status == PENDING`인 경우: 즉시 `CANCELLED` 처리 및 재고 롤백 수행.<br>- `order_status in [PAID, PREPARING]`인 경우: 관리자 확인이 필요하므로 현재 상태를 `status_before_cancel`에, 사유를 `cancel_reason`에 저장하고 상태를 `CANCEL_REQUESTED`로 전이.<br>- 배송 시작 이후(`SHIPPED`, `DELIVERED`)와 이미 취소 요청되었거나 취소된 주문(`CANCEL_REQUESTED`, `CANCELLED`)은 취소 불가 (`False` 반환). |
+| `+` | `process_cancellation(approved: bool)` | `bool` | **관리자 취소 요청 처리 (Atomic)**: <br>- 현재 상태가 `CANCEL_REQUESTED`인지 확인.<br>- `approved == True`인 경우: 주문 상태를 `CANCELLED`로 변경하고, 모든 `OrderItem`의 재고를 원상 복구(`increase_stock`)하며, 성공된 결제 건(`Payment`)의 `cancel_payment()`를 호출하여 환불 처리.<br>- `approved == False`인 경우: 취소 거절로 간주하여 주문 상태를 `status_before_cancel`(요청 전 상태)로 복귀. |
+| `+` | `register_tracking(courier: String, tracking_no: String)` | `void` | **송장 등록 및 출고 처리**: 주문 상태가 `PREPARING`일 때만 허용한다. 관리자가 택배사와 운송장 번호를 등록하면 조건부 UPDATE(`WHERE order_status = PREPARING`)로 `courier_name`, `tracking_number`, `shipped_at`을 설정하고 상태를 `SHIPPED`로 전이한다. 그 사이 회원이 취소를 요청했으면 바뀐 행이 없으므로 출고하지 않는다. |
+| `+` | `mark_as_delivered()` | `void` | **배송 완료 처리**: 주문 상태가 `SHIPPED`일 때만 허용한다. 조건부 UPDATE(`WHERE order_status = SHIPPED`)로 `delivered_at`을 기록하고 상태를 `DELIVERED`로 전이한다. |
+| `+` | `update_status(new_status: OrderStatus)` | `void` | **주문 상태 갱신**: 주문 상태 머신 규칙에 따라 상태를 갱신한다. 관리자의 배송 준비 전환(`PAID` → `PREPARING`)은 조건부 UPDATE(`WHERE order_status = PAID`)로 처리하여, 같은 순간에 들어온 회원의 취소 요청을 덮어쓰지 않는다. |
 | `+` | `calculate_total()` | `int` | **총 금액 계산**: 상품 금액 합계와 배송비를 합산한 값을 반환한다. |
 
 ---
@@ -387,31 +393,37 @@
 #### 메서드 (Operations)
 | 가시성 | 메서드 시그니처 | 반환형 | 설명 및 알고리즘 개요 |
 |---|---|---|---|
-| `+` | `process_payment(pg_tid: String)` | `bool` | **결제 승인 완료**: 외부 PG사 승인 성공 콜백 접수 시, `pg_tid`를 저장하고 상태를 `SUCCESS`로 변경하며 승인 일시를 기록한다. 연관된 부모 주문(`order`)의 상태를 `PAID`로 전이시킨다. |
-| `+` | `cancel_payment(reason: String)` | `bool` | **결제 취소 및 환불**: 관리자 취소 승인에 따른 환불 처리 시 상태를 `CANCELLED`로 변경하고 취소 사유(`failure_reason`)를 기록한다. |
+| `+` | `process_payment(pg_tid: String, result: PaymentStatus, amount: int)` | `bool` | **결제 결과 처리**: 외부 PG사 콜백을 받아 `pg_tid`와 PG가 알려준 실제 결제 금액(`amount`)을 `paid_amount`에 저장한다. `result`는 `SUCCESS` 또는 `FAILED`다. <br>- 성공: `amount`가 주문의 `final_payment_amt`와 같으면 조건부 UPDATE(`SET order_status = PAID WHERE order_status = PENDING`)로 주문을 전이시킨다. 바뀐 행이 있으면 결제 상태를 `SUCCESS`로 바꾸고 승인 일시를 기록한다. 상태 확인과 변경을 한 번에 하므로, 회원이 같은 순간에 주문을 취소해도 취소된 주문이 `PAID`로 바뀌지 않는다.<br>- 성공했지만 주문이 이미 `PENDING`이 아니거나 금액이 다른 경우: 주문 상태는 바꾸지 않는다. PG에 결제 취소(환불)를 요청하고 결제 상태를 `CANCELLED`로, 사유를 `failure_reason`에 기록한다.<br>- 실패: 상태를 `FAILED`로 바꾸고 `failure_reason`을 기록한다. 주문은 `PENDING`으로 남아 다시 결제할 수 있다. |
+| `+` | `cancel_payment(reason: String)` | `bool` | **결제 취소 및 환불**: 관리자 취소 승인에 따른 환불 처리 시 PG에 결제 취소를 요청하고, 상태를 `CANCELLED`로 변경하고 취소 사유(`failure_reason`)를 기록한다. |
+
+#### 비즈니스 규칙 및 제약사항
+- 한 주문에 결제 기록은 여러 건 있을 수 있지만, `SUCCESS` 상태인 결제는 하나뿐이다 (부분 유니크 인덱스 `UNIQUE (order) WHERE payment_status = 'SUCCESS'`).
 
 ---
 
-## 4. 핵심 비즈니스 로직 알고리즘 연계 (#17 연계 요약)
+## 4. 핵심 비즈니스 로직 알고리즘 연계
 
-클래스 명세에서 정의된 주요 연산 중 다중 객체 상태 변경 및 트랜잭션 정합성이 요구되는 알고리즘의 동작 순서 요약이다. 상세 의사코드 및 제어 흐름은 **#17 메소드 알고리즘 설계**에서 구체화된다.
+클래스 명세에서 정의된 주요 연산 중 다중 객체 상태 변경 및 트랜잭션 정합성이 요구되는 알고리즘의 동작 순서 요약이다. 상세 의사코드 및 제어 흐름은 메소드 알고리즘 설계(`method-algorithms.md`)에서 구체화된다.
 
 ### 4.1 주문 생성 알고리즘 (`Order.create_order`)
 ```
-Input: user, order_id, recipient info, shipping_address, cart_items, shipping_fee
+Input: user, order_id, recipient info, shipping_address, cart_items
 Output: Order instance
 
 1. [트랜잭션 시작]
 2. total_product_amt <- 0
 3. order_item_instances <- []
 4. FOR EACH item IN cart_items:
-     a. unit_price <- item.option.product.base_price + item.option.extra_price
-     b. total_product_amt <- total_product_amt + (unit_price * item.quantity)
-     c. is_decreased <- item.option.decrease_stock(item.quantity)
-     d. IF NOT is_decreased THEN:
+     a. IF item.option.product.sales_status != ON_SALE THEN:
+          ROLLBACK AND RAISE ProductNotAvailableException
+     b. unit_price <- item.option.product.base_price + item.option.extra_price
+     c. total_product_amt <- total_product_amt + (unit_price * item.quantity)
+     d. is_decreased <- item.option.decrease_stock(item.quantity)
+     e. IF NOT is_decreased THEN:
           ROLLBACK AND RAISE InsufficientStockException
-     e. APPEND OrderItem(option, snapshot_name, snapshot_options, unit_price, quantity) TO order_item_instances
-5. final_payment_amt <- total_product_amt + shipping_fee
+     f. APPEND OrderItem(option, snapshot_name, snapshot_options, unit_price, quantity) TO order_item_instances
+5. shipping_fee <- 0 IF total_product_amt >= 30000 ELSE 3000
+   final_payment_amt <- total_product_amt + shipping_fee
 6. order <- CREATE Order(user, order_id, totals, recipient info, status=PENDING)
 7. FOR EACH oi IN order_item_instances:
      oi.order <- order
@@ -429,15 +441,17 @@ Output: Boolean (성공 여부)
 1. IF order.order_status != CANCEL_REQUESTED THEN RETURN False
 2. [트랜잭션 시작]
 3. IF approved == True THEN:
-     a. order.order_status <- CANCELLED
-     b. SAVE order
+     a. affected <- UPDATE order SET order_status = CANCELLED
+                    WHERE order_status = CANCEL_REQUESTED
+     b. IF affected == 0 THEN ROLLBACK AND RETURN False   (승인이 두 번 들어온 경우)
      c. FOR EACH item IN order.items:
           item.option.increase_stock(item.quantity)
      d. FOR EACH payment IN order.payments WHERE payment.payment_status == SUCCESS:
           payment.cancel_payment("Admin approved cancellation request")
 4. ELSE (approved == False):
-     a. order.order_status <- PREPARING
-     b. SAVE order
+     a. affected <- UPDATE order SET order_status = status_before_cancel
+                    WHERE order_status = CANCEL_REQUESTED
+     b. IF affected == 0 THEN ROLLBACK AND RETURN False
 5. [트랜잭션 커밋]
 6. RETURN True
 ```

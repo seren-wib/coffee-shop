@@ -14,7 +14,7 @@
 | Formatters       | black (Python) / prettier + prettier-plugin-tailwindcss (JS) | Commit config files only                                     |
 | Linter           | Oxlint (`oxlint`)                                   | Ships with the Vite React template. Run `npm run lint` in `frontend/` |
 | Package manager  | npm                                                 | Commit `package-lock.json`. Do not use yarn or pnpm                   |
-| Versions         | Python 3.12 / Node 20 LTS                           |                                                                       |
+| Versions         | Python 3.12 / Node 24 LTS                           |                                                                       |
 | Env vars         | `.env` + `.env.example`                             | Never commit `.env`                                                   |
 | Line endings     | `.gitattributes`: `* text=auto eol=lf`              |                                                                       |
 | Docs             | Markdown in `docs/` + Google Docs                   | No Word or HWP files in the repo                                      |
