@@ -4,7 +4,7 @@
 
 This document specifies the relational database schema and table specifications for the back-end system of the **Coffee Bean Shopping Mall System** (`<Coffee Bean Shopping Mall System>`), addressing the **Database schema and table specification** deliverable in `docs/deliverables.md`.
 
-The physical database is designed for **SQLite 3** (`PRAGMA foreign_keys = ON;`) and strictly maps to the back-end domain models in `backend/orders/models.py`, `backend/products/models.py`, and `backend/users/models.py`.
+The physical database is designed for **SQLite 3** (`PRAGMA foreign_keys = ON;`) and maps to the back-end domain models in `backend/orders/models.py`, `backend/products/models.py`, and `backend/users/models.py`. Some items are specified here ahead of the code and are not in the models yet: `orders.status_before_cancel`, `orders.cancel_reason`, the `roast_level` check constraint, and the `uq_payments_order_success` partial index.
 
 ### 1.1 Key Architecture Decisions
 1. **Consolidated Order & Fulfillment**: Single-destination shipment attributes (`courier_name`, `tracking_number`, `shipped_at`, `delivered_at`) are integrated directly into the `orders` table. This eliminates redundant 1:1 join overhead, avoids out-of-sync state duplicates between order and delivery lifecycles, and resolves the issue of creating pending delivery records prior to courier dispatch.

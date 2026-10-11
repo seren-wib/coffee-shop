@@ -393,7 +393,7 @@
 #### 메서드 (Operations)
 | 가시성 | 메서드 시그니처 | 반환형 | 설명 및 알고리즘 개요 |
 |---|---|---|---|
-| `+` | `process_payment(pg_tid: String, result: PaymentStatus)` | `bool` | **결제 결과 처리**: 외부 PG사 콜백을 받아 `pg_tid`를 저장한다. `result`는 `SUCCESS` 또는 `FAILED`다. <br>- 성공: 부모 주문(`order`)이 `PENDING`이고 `paid_amount`가 주문의 `final_payment_amt`와 같을 때만 상태를 `SUCCESS`로 바꾸고 승인 일시를 기록하며 주문을 `PAID`로 전이시킨다. 주문이 이미 취소되었으면 주문 상태를 바꾸지 않는다.<br>- 실패: 상태를 `FAILED`로 바꾸고 `failure_reason`을 기록한다. 주문은 `PENDING`으로 남아 다시 결제할 수 있다. |
+| `+` | `process_payment(pg_tid: String, result: PaymentStatus)` | `bool` | **결제 결과 처리**: 외부 PG사 콜백을 받아 `pg_tid`를 저장한다. `result`는 `SUCCESS` 또는 `FAILED`다. <br>- 성공: `paid_amount`가 주문의 `final_payment_amt`와 같으면 조건부 UPDATE(`SET order_status = PAID WHERE order_status = PENDING`)로 주문을 전이시킨다. 바뀐 행이 있으면 결제 상태를 `SUCCESS`로 바꾸고 승인 일시를 기록한다. 상태 확인과 변경을 한 번에 하므로, 회원이 같은 순간에 주문을 취소해도 취소된 주문이 `PAID`로 바뀌지 않는다.<br>- 성공했지만 주문이 이미 `PENDING`이 아니거나 금액이 다른 경우: 주문 상태는 바꾸지 않는다. PG에 결제 취소(환불)를 요청하고 결제 상태를 `CANCELLED`로, 사유를 `failure_reason`에 기록한다.<br>- 실패: 상태를 `FAILED`로 바꾸고 `failure_reason`을 기록한다. 주문은 `PENDING`으로 남아 다시 결제할 수 있다. |
 | `+` | `cancel_payment(reason: String)` | `bool` | **결제 취소 및 환불**: 관리자 취소 승인에 따른 환불 처리 시 상태를 `CANCELLED`로 변경하고 취소 사유(`failure_reason`)를 기록한다. |
 
 #### 비즈니스 규칙 및 제약사항

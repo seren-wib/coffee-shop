@@ -372,7 +372,7 @@ BEGIN
     // 부모 원두 상품의 다른 옵션들도 전부 재고가 0인지 검사
     IF option.stock_quantity == 0 THEN
         has_remaining_stock <- EXISTS(
-            SELECT 1 FROM ProductOption 
+            SELECT 1 FROM ProductOption
             WHERE product = option.product AND stock_quantity > 0
         )
         // 판매 중인 원두만 품절로 바꾼다. 관리자가 판매 중지(STOPPED)한 상태는 유지한다.
