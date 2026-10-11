@@ -167,7 +167,7 @@ erDiagram
 | `product_id` | `INTEGER` | `NO` | `PK` | `AUTOINCREMENT` | Primary Key | Product master identifier |
 | `name` | `TEXT` | `NO` | None | None | None | Name of the coffee bean (e.g., 'Ethiopia Yirgacheffe G1') |
 | `origin` | `TEXT` | `NO` | None | None | None | Country / region of cultivation |
-| `roast_level` | `TEXT` | `NO` | None | None | None | Roasting degree (Light, Medium, Dark) |
+| `roast_level` | `TEXT` | `NO` | None | None | `CHECK(roast_level IN ('LIGHT', 'MEDIUM', 'DARK'))` | Roasting degree (Light, Medium, Dark) |
 | `base_price` | `INTEGER` | `NO` | None | None | `CHECK(base_price >= 0)` | Base unit price in KRW |
 | `tasting_notes` | `TEXT` | `YES` | None | `NULL` | None | Sensory flavor notes (e.g., Floral, Citrus, Berry) |
 | `description` | `TEXT` | `YES` | None | `NULL` | None | Detailed promotional/origin narrative |
@@ -304,7 +304,7 @@ The following physical indexes are created in `backend/schema.sql` to optimize q
 ```
 
 - **`PENDING`**: Order created from cart items, awaiting payment transaction.
-- **`PAID`**: Payment completed successfully via PG; stock successfully decremented.
+- **`PAID`**: Payment completed successfully via PG. Stock was already decremented when the order was created (`PENDING`).
 - **`PREPARING`**: Merchant preparing coffee beans and packaging.
 - **`SHIPPED`**: Courier and tracking number registered (`courier_name`, `tracking_number`, `shipped_at` populated).
 - **`DELIVERED`**: Parcel delivered to recipient (`delivered_at` populated).

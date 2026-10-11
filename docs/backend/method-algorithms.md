@@ -42,6 +42,7 @@
 - **예외 (Exceptions)**:
   - `EmptyCartException`: `cart_items`가 비어있는 경우
   - `InsufficientStockException`: 품목 중 재고 수량이 부족한 경우 (`ValueError`)
+  - `ProductNotAvailableException`: 품목의 원두가 판매 중(`ON_SALE`)이 아닌 경우
 
 #### 3. 사전 및 사후 조건 (Pre/Post-conditions)
 - **사전 조건**: `user`는 인증된 회원이어야 하며, `cart_items`의 각 품목은 유효한 `ProductOption`을 참조해야 한다.
@@ -59,7 +60,9 @@ flowchart TD
     CheckEmpty -- 아니오 --> BeginTx[데이터베이스 트랜잭션 시작]
     
     BeginTx --> LoopItems[각 CartItem 반복]
-    LoopItems --> CalcPrice[단가 및 소계 계산]
+    LoopItems --> CheckSale{원두가 판매 중인가?}
+    CheckSale -- 아니오 --> RollbackSale[트랜잭션 롤백<br>ProductNotAvailableException] --> EndFail
+    CheckSale -- 예 --> CalcPrice[단가 및 소계 계산]
     CalcPrice --> TryDecrease{재고 차감 시도<br>option.decrease_stock}
     
     TryDecrease -- 실패 --> Rollback[트랜잭션 롤백<br>InsufficientStockException] --> EndFail
@@ -89,6 +92,11 @@ BEGIN
         order_item_instances <- EMPTY_LIST
 
         FOR EACH item IN cart_items DO
+            // 0. 품절이거나 판매 중지된 원두는 주문할 수 없음
+            IF item.option.product.sales_status != SalesStatus.ON_SALE THEN
+                RAISE ProductNotAvailableException("주문할 수 없는 원두입니다: " + item.option.product.name)
+            END IF
+
             // 1. 주문 시점 옵션 결합 단가 산출
             unit_price <- item.option.product.base_price + item.option.extra_price
             subtotal <- unit_price * item.quantity
@@ -305,7 +313,7 @@ END
 ### ALG-04: 재고 증감 및 자동 품절 판별 (`ProductOption.decrease_stock` & `increase_stock`)
 
 #### 1. 개요 및 목적
-원두 옵션의 실물 재고를 안전하게 차감하거나 증가시킨다. 재고 차감 시 0 미만으로 내려가는 것을 방지하고, 차감 결과 해당 원두 상품(`Product`)의 모든 옵션 재고가 0이 되면 마스터 상품의 상태를 `SOLD_OUT`으로 자동 전이한다. 반대로 재고가 보충되면 품절 상태에서 `ON_SALE`로 자동 복구한다.
+원두 옵션의 실물 재고를 안전하게 차감하거나 증가시킨다. 재고 차감 시 0 미만으로 내려가는 것을 방지하고, 차감 결과 판매 중(`ON_SALE`)인 원두 상품(`Product`)의 모든 옵션 재고가 0이 되면 마스터 상품의 상태를 `SOLD_OUT`으로 자동 전이한다. 반대로 재고가 보충되면 품절 상태에서 `ON_SALE`로 자동 복구한다. 품절은 이 알고리즘으로만 바뀌며, 관리자가 판매 중지(`STOPPED`)한 원두는 재고가 변해도 상태를 유지한다.
 
 #### 2. 입출력 명세
 - **차감 메서드 (`decrease_stock`)**:
@@ -335,7 +343,8 @@ BEGIN
                 SELECT 1 FROM ProductOption 
                 WHERE product = option.product AND stock_quantity > 0
             )
-            IF has_remaining_stock IS FALSE THEN
+            // 판매 중인 원두만 품절로 바꾼다. 관리자가 판매 중지(STOPPED)한 상태는 유지한다.
+            IF has_remaining_stock IS FALSE AND option.product.sales_status == SalesStatus.ON_SALE THEN
                 option.product.change_sales_status(SalesStatus.SOLD_OUT)
             END IF
         END IF

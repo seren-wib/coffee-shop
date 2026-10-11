@@ -32,6 +32,7 @@
 |---|---|---|
 | `Role` | `MEMBER`, `ADMIN` | 사용자 권한 등급 (일반 회원, 시스템 관리자) |
 | `SalesStatus` | `ON_SALE`, `SOLD_OUT`, `STOPPED` | 원두 판매 상태 (판매 중, 품절, 판매 중지) |
+| `RoastLevel` | `LIGHT`, `MEDIUM`, `DARK` | 로스팅 정도 (라이트, 미디엄, 다크) |
 | `GrindType` | `WHOLE_BEAN`, `HAND_DRIP`, `ESPRESSO` | 원두 분쇄도 (홀빈/원두 상태, 핸드드립용, 에스프레소용) |
 | `OrderStatus` | `PENDING`, `PAID`, `PREPARING`, `SHIPPED`, `DELIVERED`, `CANCEL_REQUESTED`, `CANCELLED` | 주문 생애주기 상태 (결제 대기, 결제 완료, 상품 준비 중, 배송 중, 배송 완료, 취소 요청, 주문 취소) |
 | `PaymentStatus` | `READY`, `SUCCESS`, `FAILED`, `CANCELLED` | 결제 트랜잭션 상태 (결제 대기, 결제 성공, 결제 실패, 결제 취소) |
@@ -237,7 +238,7 @@
 | `-` | `product_id` | `int` | Auto | PK, Auto Increment | 상품 마스터 고유 식별자 |
 | `-` | `name` | `String` | None | Max 200 | 원두 상품명 (예: 에티오피아 예가체프 G1) |
 | `-` | `origin` | `String` | None | Max 100 | 원산지 국가/지역 |
-| `-` | `roast_level` | `String` | None | Max 50 | 로스팅 정도 (Light, Medium, Dark 등) |
+| `-` | `roast_level` | `RoastLevel` | None | Choices (`LIGHT`, `MEDIUM`, `DARK`) | 로스팅 정도 |
 | `-` | `base_price` | `int` | None | Non-negative (>= 0) | 기본 상품 단가 (KRW) |
 | `-` | `tasting_notes` | `String` | None | Nullable, Text | 컵 노트 / 향미 특징 |
 | `-` | `description` | `String` | None | Nullable, Text | 상세 상품 설명 |
@@ -248,7 +249,7 @@
 | 가시성 | 메서드 시그니처 | 반환형 | 설명 및 알고리즘 개요 |
 |---|---|---|---|
 | `+` | `update_info(...)` | `void` | **상품 정보 수정**: 원두명, 원산지, 로스팅, 기본가, 설명 등의 정보를 갱신한다. |
-| `+` | `change_sales_status(status: SalesStatus)` | `void` | **판매 상태 변경**: 관리자 또는 재고 연동 로직에 의해 상품 판매 상태를 변경한다. |
+| `+` | `change_sales_status(status: SalesStatus)` | `void` | **판매 상태 변경**: 관리자는 판매 중지(`STOPPED`)와 판매 재개만 한다. 품절(`SOLD_OUT`) 전환과 해제는 재고 연동 로직(`decrease_stock`, `increase_stock`)만 한다. |
 | `+` | `calculate_price(option: ProductOption)` | `int` | **옵션 결합 단가 계산**: `base_price + option.extra_price`를 합산하여 최종 판매 단가를 계산한다. |
 
 ---
@@ -271,7 +272,7 @@
 #### 메서드 (Operations)
 | 가시성 | 메서드 시그니처 | 반환형 | 설명 및 알고리즘 개요 |
 |---|---|---|---|
-| `+` | `decrease_stock(quantity: int)` | `bool` | **원자적 재고 차감**: 현재 `stock_quantity >= quantity`를 검증하고, 재고가 충분하면 `stock_quantity`를 차감한 뒤 저장한다. 차감 후 해당 상품의 모든 옵션 재고가 0이 되면 부모 상품 상태를 `SOLD_OUT`으로 전환한다. 성공 시 `True`, 재고 부족 시 `False` 반환. |
+| `+` | `decrease_stock(quantity: int)` | `bool` | **원자적 재고 차감**: 현재 `stock_quantity >= quantity`를 검증하고, 재고가 충분하면 `stock_quantity`를 차감한 뒤 저장한다. 차감 후 해당 상품의 모든 옵션 재고가 0이 되고 부모 상품이 `ON_SALE`이면 상태를 `SOLD_OUT`으로 전환한다. 판매 중지(`STOPPED`) 상태는 바꾸지 않는다. 성공 시 `True`, 재고 부족 시 `False` 반환. |
 | `+` | `increase_stock(quantity: int)` | `void` | **재고 보충/복원**: 취소/반품 또는 관리자 입고 시 재고를 가산한다. 부모 상품이 `SOLD_OUT` 상태였고 재고가 1 이상이 되면 부모 상태를 `ON_SALE`로 자동 복구한다. |
 | `+` | `is_available(quantity: int)` | `bool` | **구매 가능 검증**: 요청 수량만큼의 재고가 남아있는지 확인한다 (`stock_quantity >= quantity`). |
 
