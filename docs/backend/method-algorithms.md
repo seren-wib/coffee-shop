@@ -157,11 +157,12 @@ END
 ### ALG-02: 회원 주문 취소 요청 (`Order.request_cancellation`)
 
 #### 1. 개요 및 목적
-회원이 주문 내역에서 취소를 요청할 때, 주문의 현재 상태에 따라 적절한 분기 처리를 수행한다. 아직 결제되지 않은 주문(`PENDING`)은 즉시 취소하고 재고를 복원하며, 결제 완료(`PAID`) 또는 상품 준비 중(`PREPARING`)인 주문은 관리자 확인을 위해 상태를 `CANCEL_REQUESTED`로 전이시킨다. 이미 출고된 주문(`SHIPPED`, `DELIVERED`)은 취소를 불허한다.
+회원이 주문 내역에서 취소를 요청할 때, 주문의 현재 상태에 따라 적절한 분기 처리를 수행한다. 아직 결제되지 않은 주문(`PENDING`)은 즉시 취소하고 재고를 복원하며, 결제 완료(`PAID`) 또는 상품 준비 중(`PREPARING`)인 주문은 요청 전 상태와 취소 사유를 저장한 뒤 관리자 확인을 위해 상태를 `CANCEL_REQUESTED`로 전이시킨다. 이미 출고된 주문(`SHIPPED`, `DELIVERED`)은 취소를 불허한다.
 
 #### 2. 입출력 명세
 - **입력 (Input)**:
   - `self: Order`: 취소 대상 주문 객체
+  - `reason: String`: 회원이 적은 취소 사유 (`PENDING` 주문 즉시 취소 시에는 사용하지 않음)
 - **출력 (Output)**:
   - `success: bool`: 취소 요청 접수 또는 즉시 취소 성공 여부
 
@@ -169,7 +170,7 @@ END
 - **사전 조건**: 대상 주문이 데이터베이스에 존재해야 한다.
 - **사후 조건**:
   - `PENDING` 주문: `order_status`가 `CANCELLED`로 변경되고 재고가 환원된다.
-  - `PAID` / `PREPARING` 주문: `order_status`가 `CANCEL_REQUESTED`로 변경된다.
+  - `PAID` / `PREPARING` 주문: 요청 전 상태가 `status_before_cancel`에, 사유가 `cancel_reason`에 저장되고 `order_status`가 `CANCEL_REQUESTED`로 변경된다.
   - 기타 상태: 상태 변경 없이 `False`를 반환한다.
 
 #### 4. 제어 흐름 다이어그램
@@ -182,7 +183,8 @@ flowchart TD
     SetCancelled --> RestoreStock[각 OrderItem 재고 원상 복구]
     RestoreStock --> CommitTx[트랜잭션 커밋] --> ReturnTrue([True 반환])
     
-    CheckStatus -- PAID 또는 PREPARING --> SetReq[order_status <- CANCEL_REQUESTED]
+    CheckStatus -- PAID 또는 PREPARING --> SaveBefore[status_before_cancel <- 현재 상태<br>cancel_reason <- reason]
+    SaveBefore --> SetReq[order_status <- CANCEL_REQUESTED]
     SetReq --> SaveOrder[주문 상태 저장] --> ReturnTrue
     
     CheckStatus -- SHIPPED / DELIVERED / CANCELLED --> Reject[취소 불가 처리]
@@ -191,7 +193,7 @@ flowchart TD
 
 #### 5. 상세 의사코드 (Pseudocode)
 ```text
-ALGORITHM Order_RequestCancellation(order)
+ALGORITHM Order_RequestCancellation(order, reason)
 BEGIN
     IF order.order_status == OrderStatus.PENDING THEN
         START TRANSACTION
@@ -213,8 +215,13 @@ BEGIN
 
     ELSE IF order.order_status IN [OrderStatus.PAID, OrderStatus.PREPARING] THEN
         // 이미 결제가 완료되었거나 상품을 준비 중이므로 관리자 승인 단계로 전이
+        // 반려 시 되돌아갈 상태와 회원이 적은 사유를 함께 저장
+        order.status_before_cancel <- order.order_status
+        order.cancel_reason <- reason
         order.order_status <- OrderStatus.CANCEL_REQUESTED
-        UPDATE order SET order_status = OrderStatus.CANCEL_REQUESTED
+        UPDATE order SET status_before_cancel = order.status_before_cancel,
+                         cancel_reason = order.cancel_reason,
+                         order_status = OrderStatus.CANCEL_REQUESTED
         RETURN TRUE
 
     ELSE
@@ -229,7 +236,7 @@ END
 ### ALG-03: 관리자 주문 취소 심사 및 환불 (`Order.process_cancellation`)
 
 #### 1. 개요 및 목적
-관리자가 회원의 주문 취소 요청(`CANCEL_REQUESTED`)을 심사하여 승인(`approved=True`) 또는 반려(`approved=False`)한다. 승인 시 원자적으로 주문 상태를 `CANCELLED`로 변경하고, 감소되었던 상품 재고를 복구하며, 연관된 결제 성공 건에 대해 결제 취소(PG 환불)를 실행한다. 반려 시에는 다시 상품 준비 중(`PREPARING`) 상태로 복귀시킨다.
+관리자가 회원의 주문 취소 요청(`CANCEL_REQUESTED`)을 심사하여 승인(`approved=True`) 또는 반려(`approved=False`)한다. 승인 시 원자적으로 주문 상태를 `CANCELLED`로 변경하고, 감소되었던 상품 재고를 복구하며, 연관된 결제 성공 건에 대해 결제 취소(PG 환불)를 실행한다. 반려 시에는 취소 요청 전 상태(`status_before_cancel`, `PAID` 또는 `PREPARING`)로 복귀시킨다.
 
 #### 2. 입출력 명세
 - **입력 (Input)**:
@@ -246,7 +253,7 @@ END
     - 주문 품목들의 옵션 재고가 환원된다 (`increase_stock`).
     - 상태가 `SUCCESS`인 모든 `Payment`의 상태가 `CANCELLED`로 변경되고 환불 사유가 기록된다.
   - `approved == False`:
-    - `order_status`가 `PREPARING`으로 복구된다.
+    - `order_status`가 `status_before_cancel`(요청 전 상태)로 복구된다.
 
 #### 4. 상세 의사코드 (Pseudocode)
 ```text
@@ -278,9 +285,9 @@ BEGIN
             END FOR
 
         ELSE
-            // 관리자가 취소를 거절한 경우 상품 준비 상태로 복구
-            order.order_status <- OrderStatus.PREPARING
-            UPDATE order SET order_status = OrderStatus.PREPARING
+            // 관리자가 취소를 거절한 경우 취소 요청 전 상태(PAID 또는 PREPARING)로 복구
+            order.order_status <- order.status_before_cancel
+            UPDATE order SET order_status = order.status_before_cancel
         END IF
 
         COMMIT TRANSACTION
@@ -371,8 +378,8 @@ BEGIN
         RAISE InvalidArgumentException("택배사 명칭과 운송장 번호는 필수입니다.")
     END IF
 
-    // 주문이 결제 완료(PAID) 또는 준비 중(PREPARING) 상태일 때만 출고 가능
-    IF order.order_status NOT IN [OrderStatus.PAID, OrderStatus.PREPARING] THEN
+    // 주문이 배송 준비(PREPARING) 상태일 때만 출고 가능
+    IF order.order_status != OrderStatus.PREPARING THEN
         RAISE InvalidStateTransitionException("출고할 수 없는 주문 상태입니다: " + order.order_status)
     END IF
 
@@ -458,6 +465,6 @@ END
 | `PAID` | 관리자 주문 확인 및 패킹 시작 | `PREPARING` | `Order.update_status` |
 | `PAID` / `PREPARING` | 사용자 취소 신청 접수 | `CANCEL_REQUESTED` | `ALG-02: Order.request_cancellation` |
 | `CANCEL_REQUESTED` | 관리자 취소 승인 및 PG 환불 | `CANCELLED` | `ALG-03: Order.process_cancellation(approved=True)` |
-| `CANCEL_REQUESTED` | 관리자 취소 거절/반려 | `PREPARING` | `ALG-03: Order.process_cancellation(approved=False)` |
-| `PAID` / `PREPARING` | 택배사 및 운송장 번호 등록 | `SHIPPED` | `ALG-05: Order.register_tracking` |
+| `CANCEL_REQUESTED` | 관리자 취소 거절/반려 | `PAID` / `PREPARING` (요청 전 상태) | `ALG-03: Order.process_cancellation(approved=False)` |
+| `PREPARING` | 택배사 및 운송장 번호 등록 | `SHIPPED` | `ALG-05: Order.register_tracking` |
 | `SHIPPED` | 배송 완료 콜백 / 관리자 완료 처리 | `DELIVERED` | `ALG-05: Order.mark_as_delivered` |

@@ -317,6 +317,8 @@
 | `-` | `order_id` | `String` | None | PK, Max 50 | 고유 비즈니스 주문 번호 (예: ORD-2026-X) |
 | `-` | `user` | `User` | None | FK (PROTECT) | 주문을 접수한 회원 |
 | `-` | `order_status` | `OrderStatus` | `PENDING` | Choices | 주문 및 배송 종합 상태 |
+| `-` | `status_before_cancel` | `OrderStatus` | None | Nullable, Choices (`PAID`, `PREPARING`) | 취소 요청 직전 상태. 관리자가 취소를 반려하면 이 상태로 되돌린다 |
+| `-` | `cancel_reason` | `String` | None | Nullable, Text | 회원이 취소를 요청할 때 적은 사유 |
 | `-` | `total_product_amt` | `int` | None | Non-negative (>= 0) | 주문 상품 총액 합계 (KRW) |
 | `-` | `shipping_fee` | `int` | `0` | Non-negative (>= 0) | 적용된 배송비 (기본 3,000원 등) |
 | `-` | `final_payment_amt` | `int` | None | Non-negative (>= 0) | 최종 결제 대상 금액 (`total + fee`) |
@@ -333,9 +335,9 @@
 | 가시성 | 메서드 시그니처 | 반환형 | 설명 및 알고리즘 개요 |
 |---|---|---|---|
 | `+` | `create_order(user, order_id, recipient_name, recipient_phone, shipping_address, cart_items, shipping_fee=3000)` | `Order` | **주문 생성 (Class Method, Atomic)**: <br>1. 단일 데이터베이스 트랜잭션(`@transaction.atomic`) 시작.<br>2. 장바구니의 각 품목에 대해 단가 계산 및 `option.decrease_stock()` 원자적 호출 (재고 부족 시 `ValueError` 발생 후 롤백).<br>3. 품목별 불변 스냅샷 인스턴스(`OrderItem`) 준비.<br>4. 주문 마스터(`Order`) 인스턴스를 생성하고 상태를 `PENDING`으로 설정.<br>5. `OrderItem` 저장 및 결제 진행된 `CartItem` 삭제 후 생성된 `Order` 반환. |
-| `+` | `request_cancellation()` | `bool` | **회원 주문 취소 요청**: <br>- `order_status == PENDING`인 경우: 즉시 `CANCELLED` 처리 및 재고 롤백 수행.<br>- `order_status in [PAID, PREPARING]`인 경우: 관리자 확인이 필요하므로 상태를 `CANCEL_REQUESTED`로 전이.<br>- 배송 시작 이후(`SHIPPED`, `DELIVERED`)는 취소 불가 (`False` 반환). |
-| `+` | `process_cancellation(approved: bool)` | `bool` | **관리자 취소 요청 처리 (Atomic)**: <br>- 현재 상태가 `CANCEL_REQUESTED`인지 확인.<br>- `approved == True`인 경우: 주문 상태를 `CANCELLED`로 변경하고, 모든 `OrderItem`의 재고를 원상 복구(`increase_stock`)하며, 성공된 결제 건(`Payment`)의 `cancel_payment()`를 호출하여 환불 처리.<br>- `approved == False`인 경우: 취소 거절로 간주하여 주문 상태를 `PREPARING`으로 복귀. |
-| `+` | `register_tracking(courier: String, tracking_no: String)` | `void` | **송장 등록 및 출고 처리**: 관리자가 택배사와 운송장 번호를 등록하면 `courier_name`, `tracking_number`, `shipped_at`을 설정하고 상태를 `SHIPPED`로 전이한다. |
+| `+` | `request_cancellation(reason: String)` | `bool` | **회원 주문 취소 요청**: <br>- `order_status == PENDING`인 경우: 즉시 `CANCELLED` 처리 및 재고 롤백 수행.<br>- `order_status in [PAID, PREPARING]`인 경우: 관리자 확인이 필요하므로 현재 상태를 `status_before_cancel`에, 사유를 `cancel_reason`에 저장하고 상태를 `CANCEL_REQUESTED`로 전이.<br>- 배송 시작 이후(`SHIPPED`, `DELIVERED`)는 취소 불가 (`False` 반환). |
+| `+` | `process_cancellation(approved: bool)` | `bool` | **관리자 취소 요청 처리 (Atomic)**: <br>- 현재 상태가 `CANCEL_REQUESTED`인지 확인.<br>- `approved == True`인 경우: 주문 상태를 `CANCELLED`로 변경하고, 모든 `OrderItem`의 재고를 원상 복구(`increase_stock`)하며, 성공된 결제 건(`Payment`)의 `cancel_payment()`를 호출하여 환불 처리.<br>- `approved == False`인 경우: 취소 거절로 간주하여 주문 상태를 `status_before_cancel`(요청 전 상태)로 복귀. |
+| `+` | `register_tracking(courier: String, tracking_no: String)` | `void` | **송장 등록 및 출고 처리**: 주문 상태가 `PREPARING`일 때만 허용한다. 관리자가 택배사와 운송장 번호를 등록하면 `courier_name`, `tracking_number`, `shipped_at`을 설정하고 상태를 `SHIPPED`로 전이한다. |
 | `+` | `mark_as_delivered()` | `void` | **배송 완료 처리**: 배송이 완료되면 `delivered_at`을 기록하고 상태를 `DELIVERED`로 전이한다. |
 | `+` | `update_status(new_status: OrderStatus)` | `void` | **주문 상태 갱신**: 주문 상태 머신 규칙에 따라 상태를 갱신한다. |
 | `+` | `calculate_total()` | `int` | **총 금액 계산**: 상품 금액 합계와 배송비를 합산한 값을 반환한다. |
@@ -436,7 +438,7 @@ Output: Boolean (성공 여부)
      d. FOR EACH payment IN order.payments WHERE payment.payment_status == SUCCESS:
           payment.cancel_payment("Admin approved cancellation request")
 4. ELSE (approved == False):
-     a. order.order_status <- PREPARING
+     a. order.order_status <- order.status_before_cancel
      b. SAVE order
 5. [트랜잭션 커밋]
 6. RETURN True

@@ -84,6 +84,8 @@ erDiagram
         TEXT order_id PK "e.g., ORD-2026-X"
         INTEGER user_id FK "NOT NULL"
         TEXT order_status "NOT NULL DEFAULT 'PENDING'"
+        TEXT status_before_cancel "NULL"
+        TEXT cancel_reason "NULL"
         INTEGER total_product_amt "NOT NULL >= 0"
         INTEGER shipping_fee "NOT NULL DEFAULT 0 >= 0"
         INTEGER final_payment_amt "NOT NULL >= 0"
@@ -213,6 +215,8 @@ erDiagram
 | `order_id` | `TEXT` | `NO` | `PK` | None | Primary Key (e.g. `'ORD-2026-X'`) | Unique business order identifier |
 | `user_id` | `INTEGER` | `NO` | `FK` | None | `REFERENCES users(user_id)` (RESTRICT / PROTECT) | Purchasing customer identifier |
 | `order_status` | `TEXT` | `NO` | None | `'PENDING'` | `CHECK(order_status IN ('PENDING', 'PAID', 'PREPARING', 'SHIPPED', 'DELIVERED', 'CANCEL_REQUESTED', 'CANCELLED'))` | Current lifecycle state of the order |
+| `status_before_cancel` | `TEXT` | `YES` | None | `NULL` | `CHECK(status_before_cancel IN ('PAID', 'PREPARING'))` | Status the order was in when the member requested cancellation; restored if the request is rejected |
+| `cancel_reason` | `TEXT` | `YES` | None | `NULL` | None | Reason the member entered when requesting cancellation |
 | `total_product_amt`| `INTEGER` | `NO` | None | None | `CHECK(total_product_amt >= 0)` | Sum of all ordered line item subtotals in KRW |
 | `shipping_fee` | `INTEGER` | `NO` | None | `0` | `CHECK(shipping_fee >= 0)` | Calculated shipping charge in KRW |
 | `final_payment_amt`| `INTEGER` | `NO` | None | None | `CHECK(final_payment_amt >= 0)` | Net payable charge (`total_product_amt + shipping_fee`) |
@@ -304,7 +308,7 @@ The following physical indexes are created in `backend/schema.sql` to optimize q
 - **`PREPARING`**: Merchant preparing coffee beans and packaging.
 - **`SHIPPED`**: Courier and tracking number registered (`courier_name`, `tracking_number`, `shipped_at` populated).
 - **`DELIVERED`**: Parcel delivered to recipient (`delivered_at` populated).
-- **`CANCEL_REQUESTED`**: Member requested cancellation while order was in `PAID` or `PREPARING` status.
+- **`CANCEL_REQUESTED`**: Member requested cancellation while order was in `PAID` or `PREPARING` status. The previous status is stored in `status_before_cancel` and the member's reason in `cancel_reason`. If the admin rejects the request, the order returns to `status_before_cancel`.
 - **`CANCELLED`**: Order cancelled and voided. If previously paid, PG refund is processed and inventory is replenished.
 
 ### 5.2 Payment Lifecycle (`payment_status`)
