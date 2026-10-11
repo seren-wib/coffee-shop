@@ -13,8 +13,8 @@
 | SCR-06 | 주문/결제 | 회원 | 주문 상품과 배송지를 확인하고 결제를 진행하는 화면 | 주문 상품 확인, 저장된 배송지 선택, 새 배송지 입력, 주문 금액 확인, 결제 및 결제 재시도 | Place Order, Review Order, Select Shipping Address, Enter New Address, Make Payment, Retry Payment |
 | SCR-07 | 주문 목록 | 회원 | 회원이 자신의 주문 내역과 현재 상태를 확인하는 화면 | 주문 목록 조회, 주문 상태 확인, 주문 상세 화면 이동 | Manage My Orders, View Order List |
 | SCR-08 | 주문 상세 | 회원 | 선택한 주문의 상품·결제·배송 정보를 확인하는 화면 | 주문 상세 조회, 배송 상태 및 송장번호 확인, 배송 추적, 주문 취소 요청 | View Order Details, Track Delivery, Cancel Order |
-| SCR-09 | 회원정보 관리 | 회원 | 회원의 개인정보를 조회하고 수정하는 화면 | 이름·연락처 조회 및 수정 | Manage Account, Edit Profile |
-| SCR-10 | 배송지 관리 | 회원 | 회원이 저장된 배송지를 관리하는 화면 | 배송지 목록 조회, 배송지 추가·수정, 기본 배송지 설정 | Manage Account, Add Address, Edit Address |
+| SCR-09 | 회원정보 관리 | 회원 | 회원의 개인정보를 조회하고 수정하는 화면 | 이름·연락처 조회 및 수정, 비밀번호 변경 | Manage Account, Edit Profile, Change Password |
+| SCR-10 | 배송지 관리 | 회원 | 회원이 저장된 배송지를 관리하는 화면 | 배송지 목록 조회, 배송지 추가·수정·삭제, 기본 배송지 설정 | Manage Account, Add Address, Edit Address, Delete Address, Set Default Address |
 | SCR-11 | 관리자 원두 목록/관리 | 관리자 | 관리자가 판매 원두를 조회하고 관리하는 화면 | 전체 원두 조회, 등록·수정 화면 이동, 재고 확인, 판매 상태 변경 | Manage Products, View Products, Change Sales Status |
 | SCR-12 | 관리자 원두 등록/수정 | 관리자 | 관리자가 원두 정보와 판매 옵션을 등록하거나 수정하는 화면 | 원두 등록·수정, 용량·분쇄도 옵션 관리, 옵션별 재고 조정, 판매 중지·재개 | Register Product, Edit Product, Update Stock, Change Sales Status |
 | SCR-13 | 관리자 주문 목록 | 관리자 | 관리자가 전체 주문과 처리 상태를 확인하는 화면 | 전체 주문 조회, 주문 상태 및 취소 요청 확인, 주문 상세 화면 이동 | Manage Orders, View Orders |
