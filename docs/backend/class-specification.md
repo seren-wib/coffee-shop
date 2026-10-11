@@ -393,7 +393,7 @@
 #### 메서드 (Operations)
 | 가시성 | 메서드 시그니처 | 반환형 | 설명 및 알고리즘 개요 |
 |---|---|---|---|
-| `+` | `process_payment(pg_tid: String)` | `bool` | **결제 승인 완료**: 외부 PG사 승인 성공 콜백 접수 시, `pg_tid`를 저장하고 상태를 `SUCCESS`로 변경하며 승인 일시를 기록한다. 연관된 부모 주문(`order`)의 상태를 `PAID`로 전이시킨다. |
+| `+` | `process_payment(pg_tid: String, result: PaymentStatus)` | `bool` | **결제 결과 처리**: 외부 PG사 콜백을 받아 `pg_tid`를 저장한다. `result`는 `SUCCESS` 또는 `FAILED`다. <br>- 성공: 부모 주문(`order`)이 `PENDING`이고 `paid_amount`가 주문의 `final_payment_amt`와 같을 때만 상태를 `SUCCESS`로 바꾸고 승인 일시를 기록하며 주문을 `PAID`로 전이시킨다. 주문이 이미 취소되었으면 주문 상태를 바꾸지 않는다.<br>- 실패: 상태를 `FAILED`로 바꾸고 `failure_reason`을 기록한다. 주문은 `PENDING`으로 남아 다시 결제할 수 있다. |
 | `+` | `cancel_payment(reason: String)` | `bool` | **결제 취소 및 환불**: 관리자 취소 승인에 따른 환불 처리 시 상태를 `CANCELLED`로 변경하고 취소 사유(`failure_reason`)를 기록한다. |
 
 #### 비즈니스 규칙 및 제약사항

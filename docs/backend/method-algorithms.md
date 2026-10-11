@@ -4,6 +4,8 @@
 
 클래스 명세(`class-specification.md`)와 데이터베이스 스키마(`table-specification.md`)에서 정의된 인터페이스를 바탕으로, 트랜잭션 일관성, 재고 동시성 제어, 불변 스냅샷 생성, 결제 및 배송 상태 머신 전이를 담당하는 **핵심 6대 알고리즘**을 상세히 기술한다.
 
+메서드 이름은 구현 코드(Python)를 따라 snake_case로 적는다. Class Diagram과 시퀀스 다이어그램의 camelCase 이름과 같은 메서드다(예: `create_order` = `createOrder`).
+
 ---
 
 ## 1. 알고리즘 목록 요약
