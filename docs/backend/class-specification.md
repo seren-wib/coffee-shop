@@ -13,18 +13,18 @@
 4. **단일 배송지 및 주문 통합**: 주문 1건당 단일 배송지를 지원하는 구조에 맞추어 `Order` 모델에 배송 및 운송장 정보(`courier_name`, `tracking_number`, `shipped_at`, `delivered_at`)를 통합하여 주문-배송 상태 불일치 문제를 원천 차단한다.
 5. **결제 재시도 이력 보존(1:N)**: 결제 실패 후 재시도(`Retry Payment`) 시 이전 실패 내역과 새로운 결제 시도를 모두 추적할 수 있도록 `Order 1 — 0..* Payment` 관계를 구성한다.
 
-### 1.2 도메인 클래스 목록
+### 1.2 도메인 클래스 명세 요약
 
-| 클래스명 | 계층 / 모듈 | 주 역할 및 책임 요약 |
-|---|---|---|
-| `User` | 계정 관리 (`users`) | 회원/관리자 계정 생성, 자격 증명 검증(로그인), 비밀번호 변경, 프로필 수정 |
-| `UserAddress` | 배송지 관리 (`users`) | 회원 배송지 등록/수정/삭제, 기본 배송지 설정 및 관리 |
-| `Product` | 상품 관리 (`products`) | 원두 기본 정보 관리, 판매 상태 변경, 옵션별 최종 단가 계산 |
-| `ProductOption` | 재고 관리 (`products`) | 용량/분쇄도 옵션 정의, 원자적 재고 차감/증가, 품절 판별 |
-| `CartItem` | 장바구니 (`orders`) | 장바구니 품목 수량 조정, 품목별 소계(Subtotal) 계산 |
-| `Order` | 주문/배송 (`orders`) | 주문 집합체 루트(Aggregate Root), 주문 생성, 취소 요청/승인 처리, 배송 추적 등록, 상태 전이 |
-| `OrderItem` | 주문 상세 (`orders`) | 주문 시점의 상품명, 패키지 용량, 분쇄도, 구매 단가 스냅샷 보존 및 소계 계산 |
-| `Payment` | 결제 관리 (`orders`) | PG 결제 승인 결과 저장, 결제 실패 사유 기록, 취소(환불) 처리 |
+| 클래스명 | 책임 | 핵심 속성 (`private -`) | 메소드명 (`public +`) |
+|---|---|---|---|
+| 회원 (`User`) | 회원/관리자 계정 생성, 자격증명 검증(로그인), 비밀번호 변경, 프로필 수정 | `-user_id: int`, `-email: String`, `-password_hash: String`, `-user_name: String`, `-phone_number: String`, `-role: Role`, `-created_at: DateTime` | `+register(): User`, `+login(): bool`, `+update_profile(): void`, `+change_password(): bool` |
+| 배송지 (`UserAddress`) | 회원 배송지 등록/수정/삭제, 단일 기본 배송지 설정 및 기존 해제 | `-address_id: int`, `-user: User`, `-recipient_name: String`, `-recipient_phone: String`, `-zipcode: String`, `-base_address: String`, `-detail_address: String`, `-is_default: bool` | `+set_default(): void`, `+update_address(): void`, `+delete_address(): bool` |
+| 원두상품 (`Product`) | 원두 기본 정보 관리, 판매 상태 변경, 옵션별 최종 단가 계산 | `-product_id: int`, `-name: String`, `-origin: String`, `-roast_level: RoastLevel`, `-base_price: int`, `-tasting_notes: String`, `-description: String`, `-sales_status: SalesStatus` | `+update_info(): void`, `+change_sales_status(): void`, `+calculate_price(): int` |
+| 상품옵션 (`ProductOption`) | 용량/분쇄도 옵션 정의, 원자적 재고 차감/증가, 품절 판별 및 부모 상태 연동 | `-option_id: int`, `-product: Product`, `-weight_size: String`, `-grind_type: GrindType`, `-extra_price: int`, `-stock_quantity: int` | `+decrease_stock(): bool`, `+increase_stock(): void`, `+is_available(): bool` |
+| 장바구니항목 (`CartItem`) | 장바구니 품목 수량 조정, 품목별 소계(Subtotal) 계산 | `-cart_item_id: int`, `-user: User`, `-option: ProductOption`, `-quantity: int`, `-created_at: DateTime` | `+update_quantity(): void`, `+get_subtotal(): int` |
+| 주문 (`Order`) | 주문 집합체 루트(Aggregate Root), 원자적 주문 생성, 취소 요청/심사 처리, 송장 등록 및 상태 전이 | `-order_id: String`, `-user: User`, `-order_status: OrderStatus`, `-status_before_cancel: OrderStatus`, `-cancel_reason: String`, `-total_product_amt: int`, `-shipping_fee: int`, `-final_payment_amt: int`, `-recipient_*`, `-shipping_address: String`, `-courier_name: String`, `-tracking_number: String` | `+create_order(): Order`, `+request_cancellation(): bool`, `+process_cancellation(): bool`, `+register_tracking(): void`, `+mark_as_delivered(): void`, `+update_status(): void`, `+calculate_total(): int` |
+| 주문상세 (`OrderItem`) | 주문 시점의 상품명, 패키지 용량, 분쇄도, 구매 단가 불변 스냅샷 보존 및 소계 계산 | `-order_item_id: int`, `-order: Order`, `-option: ProductOption`, `-product_name: String`, `-weight_size: String`, `-grind_type: String`, `-order_price: int`, `-quantity: int` | `+calculate_subtotal(): int` |
+| 결제 (`Payment`) | PG 결제 승인 결과 저장, 결제 실패 사유 기록, 금액·상태 불일치 및 관리자 취소 승인 환불 처리 | `-payment_id: int`, `-order: Order`, `-pg_provider: String`, `-pg_tid: String`, `-payment_method: PaymentMethod`, `-payment_status: PaymentStatus`, `-paid_amount: int`, `-failure_reason: String`, `-approved_at: DateTime` | `+process_payment(): bool`, `+cancel_payment(): bool` |
 
 ### 1.3 도메인 열거형 (Domain Enumerations)
 
