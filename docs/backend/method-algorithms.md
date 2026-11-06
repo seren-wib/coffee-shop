@@ -2,22 +2,41 @@
 
 커피 원두 쇼핑몰 시스템의 백엔드 핵심 비즈니스 로직에 대한 **메소드 알고리즘 설계서**이다. HW1 요구사항 명세서 2.4절 및 `docs/deliverables.md`의 **"Method algorithm design and implementation"** 산출물에 해당한다.
 
-클래스 명세(`class-specification.md`)와 데이터베이스 스키마(`table-specification.md`)에서 정의된 인터페이스를 바탕으로, 트랜잭션 일관성, 재고 동시성 제어, 불변 스냅샷 생성, 결제 및 배송 상태 머신 전이를 담당하는 **핵심 6대 알고리즘**을 상세히 기술한다.
+클래스 명세(`class-specification.md`)와 데이터베이스 스키마(`table-specification.md`)에서 정의된 인터페이스를 바탕으로, 전체 8개 도메인 클래스의 모든 메소드 처리 알고리즘을 요약하고, 트랜잭션 일관성·재고 동시성 제어·상태 머신 전이를 담당하는 **핵심 6대 알고리즘(ALG-01~06)**을 상세히 기술한다.
 
 메서드 이름은 구현 코드(Python)를 따라 snake_case로 적는다. Class Diagram과 시퀀스 다이어그램의 camelCase 이름과 같은 메서드다(예: `create_order` = `createOrder`).
 
 ---
 
-## 1. 알고리즘 목록 요약
+## 1. 전체 클래스 메소드 알고리즘 목록
 
-| ID | 알고리즘 명칭 | 대상 클래스 / 메서드 | 주요 책임 및 비즈니스 목적 |
-|---|---|---|---|
-| **ALG-01** | 주문 생성 및 재고 원자적 차감 | `Order.create_order` | 장바구니 품목 검증, 원자적 재고 차감, 주문 스냅샷 생성, 트랜잭션 커밋/롤백 |
-| **ALG-02** | 회원 주문 취소 요청 | `Order.request_cancellation` | 주문 상태에 따른 즉시 취소 또는 취소 요청(`CANCEL_REQUESTED`) 전이 |
-| **ALG-03** | 관리자 주문 취소 심사 및 환불 | `Order.process_cancellation` | 취소 승인 시 재고 원자적 복구, PG 결제 자동 환불 호출, 반려 시 상태 복구 |
-| **ALG-04** | 재고 증감 및 자동 품절 판별 | `ProductOption.decrease_stock`<br>`ProductOption.increase_stock` | 재고 음수 방지 검증, 전체 옵션 소진 시 부모 원두 자동 품절(`SOLD_OUT`) 전환 및 복구 |
-| **ALG-05** | 배송 추적 등록 및 완료 | `Order.register_tracking`<br>`Order.mark_as_delivered` | 운송장 번호 등록, 출고 일시 기록, 주문 상태 전이(`SHIPPED` → `DELIVERED`) |
-| **ALG-06** | 사용자 인증 및 비밀번호 변경 | `User.login`<br>`User.change_password` | 단방향 솔트 해시 대조, 기존 암호 검증 후 신규 해시 갱신 및 보안 유지 |
+| 클래스 | 메소드 | 한 줄 처리 요약 |
+|---|---|---|
+| `User` | `register(email, password, user_name, phone_number, role)` | 비밀번호 8자 이상 검증 및 단방향 해싱(`make_password`) 후 신규 회원 레코드 생성·저장 |
+| `User` | `login(password)` | 입력 평문 비밀번호와 저장된 `password_hash`의 해시 일치 여부 검증 (**ALG-06**) |
+| `User` | `update_profile(name, phone)` | 회원의 이름(`user_name`)과 연락처(`phone_number`)를 갱신하고 영속화 |
+| `User` | `change_password(old_pw, new_pw)` | 기존 비밀번호 검증 및 신규 비밀번호(8자 이상) 단방향 해싱 후 갱신 (**ALG-06**) |
+| `UserAddress` | `set_default()` | 동일 회원의 기존 기본 배송지를 일괄 해제(`False`)한 뒤 현재 배송지를 기본(`True`)으로 설정 |
+| `UserAddress` | `update_address(...)` | 수령인·연락처·주소 정보를 수정하고, 기본 배송지 지정 시 `set_default()` 연동 처리 |
+| `UserAddress` | `delete_address()` | 다른 배송지가 존재할 때 기본 배송지 삭제는 거부(`False`)하고, 그 외에는 삭제 후 `True` 반환 |
+| `Product` | `update_info(...)` | 원두명, 원산지, 로스팅 레벨, 기본 단가, 테이스팅 노트 및 상세 설명 갱신 |
+| `Product` | `change_sales_status(status)` | 판매 중지(`STOPPED`) 또는 판매 재개로 전환하되, 재개 시 전 옵션 재고가 0이면 `SOLD_OUT`으로 설정 |
+| `Product` | `calculate_price(option)` | 원두 기본가(`base_price`)와 옵션 추가 금액(`option.extra_price`)을 합산한 판매 단가 반환 |
+| `ProductOption` | `decrease_stock(quantity)` | 조건부 UPDATE로 재고를 원자적 차감하고, 전 옵션 소진 시 판매 중 원두를 `SOLD_OUT`으로 전환 (**ALG-04**) |
+| `ProductOption` | `increase_stock(quantity)` | 조건부 UPDATE로 재고를 가산하고, `SOLD_OUT` 상태이던 원두를 `ON_SALE`로 자동 복구 (**ALG-04**) |
+| `ProductOption` | `is_available(quantity)` | 현재 재고(`stock_quantity`)가 요청 수량(`quantity`) 이상인지 판별하여 반환 |
+| `CartItem` | `update_quantity(quantity)` | 요청 수량이 1 이상인지 검증한 뒤 장바구니 품목 수량을 갱신·저장 |
+| `CartItem` | `get_subtotal()` | 옵션 결합 단가(`base_price + extra_price`)에 수량(`quantity`)을 곱한 소계 반환 |
+| `Order` | `create_order(user, order_id, ..., cart_items)` | 단일 트랜잭션에서 판매 상태 검증, 원자적 재고 차감, `OrderItem` 스냅샷 생성, 배송비 산출 후 `PENDING` 주문 생성 및 장바구니 삭제 (**ALG-01**) |
+| `Order` | `request_cancellation(reason)` | `PENDING`은 즉시 취소·재고 복원하고, `PAID`/`PREPARING`은 직전 상태·사유 저장 후 `CANCEL_REQUESTED`로 전이 (**ALG-02**) |
+| `Order` | `process_cancellation(approved)` | `CANCEL_REQUESTED` 주문 승인 시 `CANCELLED` 전이·재고 복구·PG 환불 호출, 반려 시 `status_before_cancel`로 복원 (**ALG-03**) |
+| `Order` | `register_tracking(courier, tracking_no)` | `PREPARING` 주문에 택배사·운송장 번호·출고 일시를 조건부 UPDATE로 기록하고 `SHIPPED`로 전이 (**ALG-05**) |
+| `Order` | `mark_as_delivered()` | `SHIPPED` 주문에 배송 완료 일시를 조건부 UPDATE로 기록하고 `DELIVERED`로 전이 (**ALG-05**) |
+| `Order` | `update_status(new_status)` | 상태 머신 규칙 및 조건부 UPDATE(`PAID` → `PREPARING`)로 동시 취소 요청 덮어쓰기를 방지하며 상태 갱신 |
+| `Order` | `calculate_total()` | 상품 총액(`total_product_amt`)과 배송비(`shipping_fee`)를 합산한 최종 결제 금액 반환 |
+| `OrderItem` | `calculate_subtotal()` | 주문 시점 스냅샷 단가(`order_price`)에 구매 수량(`quantity`)을 곱한 품목 소계 반환 |
+| `Payment` | `process_payment(pg_tid, result, amount)` | PG 콜백 검증 후 금액 일치·`PENDING` 주문이면 조건부 UPDATE로 `PAID`/`SUCCESS` 전이, 불일치·상태 변경 시 PG 자동 환불(`CANCELLED`), 실패 시 `FAILED` 기록 |
+| `Payment` | `cancel_payment(reason)` | PG 결제 취소(환불) 요청 후 결제 상태를 `CANCELLED`로 변경하고 `failure_reason`에 사유 기록 |
 
 ---
 
@@ -82,12 +101,21 @@ flowchart TD
 
 #### 5. 상세 의사코드 (Pseudocode)
 ```text
+/*----------------------------------------------------------------------------
+ 1) 메소드명 : Order Order::create_order(User user, String order_id, String recipient_name,
+                                         String recipient_phone, String shipping_address, List<CartItem> cart_items)
+ 2) 매개변수 : user = 주문 회원; order_id = 주문번호(ORD-YYYYMMDD-NNN); recipient_name/phone = 수령인 정보;
+               shipping_address = 배송지 주소; cart_items = 주문 대상 장바구니 품목 목록
+ 3) 기능     : 장바구니 품목의 판매 상태 확인 및 원자적 재고 차감 후 주문(Order)과 스냅샷(OrderItem)을 생성한다.
+ 4) 반환값   : 성공 시 생성된 Order 인스턴스 반환, 실패 시 트랜잭션 롤백 및 예외 발생
+ 5) 알고리즘 :
+----------------------------------------------------------------------------*/
 ALGORITHM Order_CreateOrder(user, order_id, recipient_name, recipient_phone, 
                            shipping_address, cart_items)
 BEGIN
     IF cart_items IS EMPTY THEN
         RAISE EmptyCartException("주문할 장바구니 항목이 존재하지 않습니다.")
-    END IF
+    ENDIF
 
     START TRANSACTION
     TRY
@@ -98,7 +126,7 @@ BEGIN
             // 0. 품절이거나 판매 중지된 원두는 주문할 수 없음
             IF item.option.product.sales_status != SalesStatus.ON_SALE THEN
                 RAISE ProductNotAvailableException("주문할 수 없는 원두입니다: " + item.option.product.name)
-            END IF
+            ENDIF
 
             // 1. 주문 시점 옵션 결합 단가 산출
             unit_price <- item.option.product.base_price + item.option.extra_price
@@ -109,7 +137,7 @@ BEGIN
             stock_decreased <- item.option.decrease_stock(item.quantity)
             IF stock_decreased IS FALSE THEN
                 RAISE InsufficientStockException("재고가 부족합니다: " + item.option.product.name)
-            END IF
+            ENDIF
 
             // 3. 주문 불변 스냅샷 인스턴스 준비
             order_item <- INSTANTIATE OrderItem WITH
@@ -121,14 +149,14 @@ BEGIN
                 quantity <- item.quantity
             
             APPEND order_item TO order_item_instances
-        END FOR
+        ENDFOR
 
         // 4. 배송비와 최종 결제 금액 산출 (상품 금액 30,000원 이상이면 무료배송)
         IF total_product_amt >= 30000 THEN
             shipping_fee <- 0
         ELSE
             shipping_fee <- 3000
-        END IF
+        ENDIF
         final_payment_amt <- total_product_amt + shipping_fee
 
         // 5. 주문 마스터 생성 (기본 상태 PENDING)
@@ -148,7 +176,7 @@ BEGIN
         FOR EACH oi IN order_item_instances DO
             oi.order <- order
             INSERT oi INTO OrderItem
-        END FOR
+        ENDFOR
 
         // 7. 주문 완료된 장바구니 품목 제거
         DELETE FROM CartItem WHERE id IN cart_items
@@ -159,7 +187,7 @@ BEGIN
     CATCH Exception AS e
         ROLLBACK TRANSACTION
         RAISE e
-    END TRY
+    ENDTRY
 END
 ```
 
