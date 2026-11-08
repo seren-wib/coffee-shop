@@ -60,6 +60,19 @@ The Django project is `backend/config`. Domain code is split into three apps:
 - Settings read `SECRET_KEY` and `DEBUG` from `.env` at the repository root through
   python-dotenv. `.env` is never committed; `.env.example` lists the keys.
 
+### Access control and paging
+
+The domain endpoints are not built yet, so these rules are the target design.
+
+- Endpoints that need login use DRF's `IsAuthenticated` permission. Only the token
+  endpoints, sign-up, and the product list and detail are open to guests.
+- Member endpoints for the cart, addresses, and orders filter their querysets by the
+  requesting user. A request for another member's object returns 404.
+- Admin endpoints (product and option editing, stock and sales status, order and shipping
+  handling, cancellation approval) use a permission class that allows only users whose
+  `role` is `ADMIN`. Other users get 403.
+- The product list uses DRF `PageNumberPagination` with a page size of 20.
+
 ## Data
 
 - One SQLite file, `backend/db.sqlite3`, created locally and never committed.
