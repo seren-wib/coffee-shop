@@ -12,6 +12,19 @@ The physical database is designed for **SQLite 3** (`PRAGMA foreign_keys = ON;`)
 3. **Audit Snapshotting**: `order_items` stores frozen snapshots of product attributes (`product_name`, `weight_size`, `grind_type`, `order_price`) at the moment of checkout, ensuring historical orders remain immutable regardless of catalog modifications.
 4. **Data Protection on User Removal**: `orders.user_id` enforces a non-cascading foreign key (`RESTRICT` / `PROTECT`) to preserve transaction, accounting, and taxation records even if a user account is deactivated or deleted.
 
+### 1.2 Table Specification Summary (설계명세서 요약 표)
+
+| 테이블명 | 주요 컬럼 | 제약·인덱스 한 줄 |
+|---|---|---|
+| 회원 (`users`) | `user_id`(INT, PK), `email`(TEXT), `password_hash`(TEXT), `user_name`(TEXT), `phone_number`(TEXT), `role`(TEXT), `created_at`(TEXT) | `NN`(전 컬럼), `UK(email)`, `Default(role='MEMBER')`, `CHECK(role IN ('MEMBER','ADMIN'))` |
+| 배송지 (`user_addresses`) | `address_id`(INT, PK), `user_id`(INT, FK), `recipient_name`(TEXT), `recipient_phone`(TEXT), `zipcode`(TEXT), `base_address`(TEXT), `detail_address`(TEXT), `is_default`(INT), `created_at`(TEXT) | `FK(user_id) ON DELETE CASCADE`, `Default(is_default=0)`, `CHECK(is_default IN (0,1))`, `idx_user_addresses_user_id` |
+| 원두상품 (`products`) | `product_id`(INT, PK), `name`(TEXT), `origin`(TEXT), `roast_level`(TEXT), `base_price`(INT), `tasting_notes`(TEXT), `description`(TEXT), `sales_status`(TEXT), `created_at`(TEXT) | `CHECK(roast_level IN ('LIGHT','MEDIUM','DARK'))`, `CHECK(base_price>=0)`, `Default(sales_status='ON_SALE')`, `CHECK(sales_status IN ('ON_SALE','SOLD_OUT','STOPPED'))`, `idx_products_name`, `idx_products_filter` |
+| 상품옵션 (`product_options`) | `option_id`(INT, PK), `product_id`(INT, FK), `weight_size`(TEXT), `grind_type`(TEXT), `extra_price`(INT), `stock_quantity`(INT) | `FK(product_id) ON DELETE CASCADE`, `UK(product_id, weight_size, grind_type)`, `CHECK(extra_price>=0 AND stock_quantity>=0)` |
+| 장바구니 (`cart_items`) | `cart_item_id`(INT, PK), `user_id`(INT, FK), `option_id`(INT, FK), `quantity`(INT), `created_at`(TEXT) | `FK(user_id, option_id) ON DELETE CASCADE`, `UK(user_id, option_id)`, `Default(quantity=1)`, `CHECK(quantity>0)`, `idx_cart_items_user_id` |
+| 주문 (`orders`) | `order_id`(TEXT, PK, `ORD-YYYYMMDD-NNN`), `user_id`(INT, FK), `order_status`(TEXT), `status_before_cancel`(TEXT), `cancel_reason`(TEXT), `total_product_amt`(INT), `shipping_fee`(INT), `final_payment_amt`(INT), `recipient_name`/`recipient_phone`/`shipping_address`(TEXT), `courier_name`/`tracking_number`(TEXT), `ordered_at`/`shipped_at`/`delivered_at`(TEXT) | `FK(user_id) RESTRICT`, `Default(order_status='PENDING')`, `CHECK(status_before_cancel IN ('PAID','PREPARING'))`, `idx_orders_user_id`, `idx_orders_status_ordered_at`, `idx_orders_tracking` |
+| 주문상세 (`order_items`) | `order_item_id`(INT, PK), `order_id`(TEXT, FK), `option_id`(INT, FK), `product_name`(TEXT), `weight_size`(TEXT), `grind_type`(TEXT), `order_price`(INT), `quantity`(INT) | `FK(order_id) ON DELETE CASCADE`, `FK(option_id) RESTRICT`, `NN`(전 컬럼), `CHECK(order_price>=0 AND quantity>0)`, `idx_order_items_order_id` |
+| 결제 (`payments`) | `payment_id`(INT, PK), `order_id`(TEXT, FK), `pg_provider`(TEXT), `pg_tid`(TEXT), `payment_method`(TEXT), `payment_status`(TEXT), `paid_amount`(INT), `failure_reason`(TEXT), `approved_at`(TEXT) | `FK(order_id) ON DELETE CASCADE`, `UK(pg_tid)`, 부분 유니크 `uq_payments_order_success(order_id WHERE payment_status='SUCCESS')`, `idx_payments_order_id` |
+
 ---
 
 ## 2. Entity-Relationship Diagram (ERD)
