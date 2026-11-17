@@ -105,19 +105,21 @@ environment and run `python manage.py createsuperuser` from `backend/`.
 ## Documents
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) - issues, git workflow, pull requests, commit messages
-- [docs/architecture.md](docs/architecture.md) - system structure and request flow
-- [docs/tech-stack.md](docs/tech-stack.md) - technology choices
-- [docs/deliverables.md](docs/deliverables.md) - required course deliverables per role
+- [docs/specs/](docs/specs/README.md) - stage documents (SRS, SDD, STP, SIP, SMP, project plan); start here
+- [docs/old/](docs/old/) - documents before 2026-11-17, kept as source material
+- [docs/old/architecture.md](docs/old/architecture.md) - system structure and request flow
+- [docs/old/tech-stack.md](docs/old/tech-stack.md) - technology choices
+- [docs/old/deliverables.md](docs/old/deliverables.md) - required course deliverables per role
 
 ### Back-end
 
-- [docs/backend/requirements.md](docs/backend/requirements.md) - requirements definition
-- [docs/backend/class-diagram.drawio.svg](docs/backend/class-diagram.drawio.svg) - class diagram
-- [docs/backend/table-specification.md](docs/backend/table-specification.md) - database schema and table specification
+- [docs/old/backend/requirements.md](docs/old/backend/requirements.md) - requirements definition
+- [docs/old/backend/class-diagram.drawio.svg](docs/old/backend/class-diagram.drawio.svg) - class diagram
+- [docs/old/backend/table-specification.md](docs/old/backend/table-specification.md) - database schema and table specification
 
 ### Front-end
 
-- [docs/frontend/usecase-diagram.drawio.svg](docs/frontend/usecase-diagram.drawio.svg) - use case diagram
-- [docs/frontend/screen-list.md](docs/frontend/screen-list.md) - screen list
-- [docs/frontend/wireframes/](docs/frontend/wireframes/) - wireframes for each screen
-- [docs/frontend/sequence-diagrams/](docs/frontend/sequence-diagrams/) - sequence diagrams
+- [docs/old/frontend/usecase-diagram.drawio.svg](docs/old/frontend/usecase-diagram.drawio.svg) - use case diagram
+- [docs/old/frontend/screen-list.md](docs/old/frontend/screen-list.md) - screen list
+- [docs/old/frontend/wireframes/](docs/old/frontend/wireframes/) - wireframes for each screen
+- [docs/old/frontend/sequence-diagrams/](docs/old/frontend/sequence-diagrams/) - sequence diagrams
