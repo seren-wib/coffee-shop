@@ -2,7 +2,7 @@
 
 작성일 YYYY-MM-DD. <이 문서가 다루는 것, 차수 나눈 방법>. 테스트 이름은 요구사항 ID로 시작한다.
 
-Google Docs: <link>
+Google Docs: https://docs.google.com/document/d/1I-p7EKPVUYGA_oiGZJ9TSVgx9cXEb-q9H8rGxYRFb0Q/edit
 
 | 파일 | 내용 | ID |
 | --- | --- | --- |

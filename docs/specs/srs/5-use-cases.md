@@ -1,6 +1,6 @@
 ## 5. 사용사례
 
-HW1 유스케이스 다이어그램(`docs/old/frontend/usecase-diagram.drawio.svg`)의 사용사례를 화면 단위로 묶었다. 괄호 안은 관련 요구사항과 화면 ID(`docs/old/frontend/screen-list.md`의 SCR-n)다.
+사용사례를 화면 단위로 묶었다. 괄호 안은 관련 요구사항과 화면 ID(SDD 6절의 SCR-n)다.
 
 ### 5.1 행위자
 

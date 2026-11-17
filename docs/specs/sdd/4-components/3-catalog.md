@@ -21,7 +21,6 @@ def customer_products():
 - 응답: 200, 7.4절 페이지 형식. `results` 항목은 `{product_id, name, origin, roast_level, base_price, lowest_price, image_url, sales_status}`. `lowest_price`는 옵션 가격 중 가장 낮은 값이다(옵션이 없으면 `base_price`).
 - 페이지 크기는 20 고정이다. `page_size` 매개변수는 받지 않는다.
 - 결과가 없으면 `results: []`, 화면은 "조건에 맞는 원두가 없습니다"를 보인다(UC-1 2단계).
-- 초안: SEQ-02.
 
 ### 4.3.2 이름 검색 (FR-2)
 

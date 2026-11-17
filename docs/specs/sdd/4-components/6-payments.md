@@ -101,7 +101,7 @@ sequenceDiagram
 - 결과 화면(`/checkout/result`): 200이면 주문번호와 "결제가 완료되었습니다", 오류면 사유와 "다시 결제" 버튼(4.6.2를 다시 부름)을 보인다(UC-6 3·4단계).
 - 부분 유니크 제약 `uq_payments_order_success`가 마지막 방어선이다. 동시에 두 승인이 같은 주문을 `SUCCESS`로 만들려 하면 두 번째는 제약 오류로 롤백되고, 그 결제는 5번의 불일치 분기처럼 PG 취소한다.
 - 외부 호출 뒤 DB 쓰기가 실패하면(프로세스 종료 등) PG는 승인됐는데 결제 기록이 `READY`로 남을 수 있다. 화면이 같은 값으로 확인 API를 다시 부르면 토스가 `ALREADY_PROCESSED_PAYMENT`로 답하므로, 그 코드면 결제 조회(`GET /v1/payments/{paymentKey}`)로 상태를 가져와 4번을 이어서 한다(5번). 운영 절차는 SMP 3절.
-- 초안: `Payment.process_payment`(class-specification 3.8). 초안의 "PG 콜백"을 브라우저 복귀 + 서버 승인으로 바꿨다.
+- 결제 결과는 PG 콜백으로 받지 않는다. 브라우저가 결제창에서 돌아오면 서버가 승인 API를 부른다.
 
 ### 4.6.4 결제창 실패·이탈 (FR-28)
 

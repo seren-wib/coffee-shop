@@ -1,6 +1,6 @@
 ## 5. 데이터 모델
 
-테이블 정의의 원본은 `backend/*/models.py`와 마이그레이션이다(11.1절). 이 절은 그 모델이 가져야 하는 열, 키, 제약과 각 제약이 지키는 요구사항을 적는다. HW2 초안 `docs/old/backend/table-specification.md`를 바탕으로, 2026-11-17 결정(커스텀 사용자 모델, 시간대, 상품 이미지 URL, 택배사 고정 목록)을 반영했다. DB는 SQLite 3이고 Django가 연결마다 `PRAGMA foreign_keys = ON`을 켠다.
+테이블 정의의 원본은 `backend/*/models.py`와 마이그레이션이다(11.1절). 이 절은 그 모델이 가져야 하는 열, 키, 제약과 각 제약이 지키는 요구사항을 적는다. 2026-11-17 결정(커스텀 사용자 모델, 시간대, 상품 이미지 URL, 택배사 고정 목록)을 반영했다. DB는 SQLite 3이고 Django가 연결마다 `PRAGMA foreign_keys = ON`을 켠다.
 
 ### 5.0 ERD
 
@@ -108,9 +108,9 @@ erDiagram
   }
 ```
 
-### 5.0.1 HW2 초안과 달라진 점
+### 5.0.1 지금 코드(`backend/`)와 달라지는 점
 
-| 항목 | 초안(`docs/old/backend/table-specification.md`) | 이 판 | 근거 |
+| 항목 | 지금 코드 | 이 판 | 근거 |
 | --- | --- | --- | --- |
 | 비밀번호 열 | `password_hash` | `password`(Django `AbstractBaseUser`) | 11.1절 커스텀 사용자 모델, NFR-6 |
 | 인증용 열 | 없음 | `is_active`, `last_login`, `is_superuser`(PermissionsMixin) | 11.1절 |
@@ -139,8 +139,8 @@ erDiagram
 | `PaymentMethod` | `CARD`, `EASY_PAY`, `TRANSFER`, `OTHER` | 카드, 간편결제, 계좌이체, 기타 | NFR-18 |
 | `Courier` | `CJ`, `HANJIN`, `LOTTE`, `EPOST`, `LOGEN` | CJ대한통운, 한진택배, 롯데택배, 우체국택배, 로젠택배 | SRS 7.1, 5.10절 |
 
-- 값은 영어 대문자 코드로 저장하고, 한국어 표시는 프론트엔드 `src/lib/`의 표에서 바꾼다(NFR-30). HW2 초안 코드처럼 표시 이름(`get_grind_type_display()`)을 저장하지 않는다. 주문 항목 스냅샷도 코드값을 저장한다(DR-12).
-- `WeightSize` 값은 HW2 초안의 `'200g'` 문자열 대신 대문자 코드로 바꿨다. 이유는 11.1절.
+- 값은 영어 대문자 코드로 저장하고, 한국어 표시는 프론트엔드 `src/lib/`의 표에서 바꾼다(NFR-30). 지금 코드처럼 표시 이름(`get_grind_type_display()`)을 저장하지 않는다. 주문 항목 스냅샷도 코드값을 저장한다(DR-12).
+- `WeightSize` 값은 지금 코드의 `'200g'` 문자열 대신 대문자 코드로 바꿨다. 이유는 11.1절.
 
 ### 5.1 users (회원)
 

@@ -23,7 +23,7 @@ stateDiagram-v2
 | `STOPPED` | 판매 재개 | 재고 있으면 `ON_SALE`, 없으면 `SOLD_OUT` | `resume_sales` | `sales_status='STOPPED'` |
 | `STOPPED` | 재고 변화 | `STOPPED` 그대로 | (위 자동 UPDATE의 WHERE에 걸리지 않음) | DR-7 |
 
-- 자동 전환의 WHERE에 지금 상태를 넣었기 때문에 판매 중지 원두는 재고가 바뀌어도 `SOLD_OUT`이나 `ON_SALE`로 덮이지 않는다(DR-7). HW2 초안 코드의 "재고 0이면 무조건 `SOLD_OUT`" 문제를 이렇게 고친다.
+- 자동 전환의 WHERE에 지금 상태를 넣었기 때문에 판매 중지 원두는 재고가 바뀌어도 `SOLD_OUT`이나 `ON_SALE`로 덮이지 않는다(DR-7). 지금 코드(`backend/`)의 "재고 0이면 무조건 `SOLD_OUT`" 문제를 이렇게 고친다.
 - 관리자는 `SOLD_OUT`을 직접 고르지 못한다. 수정 API의 시리얼라이저에 `sales_status` 필드가 없다(DR-6).
 - 옵션이 하나도 없는 원두는 "모든 옵션 재고 0"으로 보지 않는다. 등록 직후 `ON_SALE`이지만 고객 상세에서 옵션이 없어 담을 수 없다. 화면은 "준비 중"을 보인다.
 
@@ -41,7 +41,6 @@ stateDiagram-v2
 - 처리: `sales_status=ON_SALE`로 INSERT. 옵션은 4.7.4로 따로 추가한다.
 - 응답: 201, 관리자 원두 상세(4.7.12).
 - 오류: 400(필수 항목, 음수 가격, 로스팅 값), 403(회원 토큰).
-- 초안: SEQ-07.
 
 ### 4.7.3 원두 수정 (FR-38)
 
@@ -49,7 +48,6 @@ stateDiagram-v2
 - 입력: 4.7.2의 필드 중 바꿀 것. `sales_status`는 받지 않는다.
 - 처리: 해당 열만 UPDATE. 주문 항목은 스냅샷이라 바뀌지 않는다(DR-12). 장바구니는 가격을 저장하지 않으므로 다음 조회부터 새 가격이다.
 - 응답: 200.
-- 초안: `Product.update_info`.
 
 ### 4.7.4 옵션 추가 (FR-39)
 
@@ -88,7 +86,6 @@ def _sync_sold_out(option_id):
 
 - 비교와 차감이 한 UPDATE 문이라 읽고 비교하고 쓰는 사이에 다른 주문이 끼지 않는다. 0 밑으로는 CHECK 제약도 막는다(5.4절).
 - 호출한 쪽의 트랜잭션 안에서 돈다. 주문의 다른 항목이 실패하면 함께 롤백된다(NFR-14).
-- 초안: `ProductOption.decrease_stock`, ALG-04.
 
 ### 4.7.7 재고 복원 `increase_stock` (DR-6)
 
@@ -122,7 +119,6 @@ def increase_stock(option_id: int, quantity: int) -> None:
 - 처리(`stop_sales`): 4.7.0 표의 조건부 UPDATE. 이미 `STOPPED`이면 0행이고 409 `INVALID_STATE`.
 - 응답: 200, `{product_id, sales_status: "STOPPED"}`.
 - 장바구니에 담긴 그 원두의 옵션은 남지만 `is_available=false`가 되고, 그 항목을 빼기 전까지 주문 생성은 409 `NOT_AVAILABLE`이다(4.4.2, 4.5.3).
-- 초안: `Product.change_sales_status`.
 
 ### 4.7.10 판매 재개 (FR-43)
 

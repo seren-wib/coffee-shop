@@ -1,6 +1,6 @@
 ## 1. 아키텍처
 
-이 절은 배포 단위, 단위 사이의 통신, 데이터가 있는 곳을 정한다. HW2 초안(`docs/old/system-architecture.md`, `docs/old/architecture.md`)은 로컬 PC 한 대에서 Vite 개발 서버와 Django 개발 서버를 띄우는 구성이었다. 이 판은 SRS 7.1절 결정에 따라 운영 환경을 AWS EC2 한 대와 Cloudflare 도메인으로 바꿨다(NFR-20, NFR-21). 인스턴스 사양과 프록시 방식의 근거는 11.1절이다.
+이 절은 배포 단위, 단위 사이의 통신, 데이터가 있는 곳을 정한다. SRS 7.1절 결정에 따라 운영 환경은 AWS EC2 한 대와 Cloudflare 도메인이다(NFR-20, NFR-21). 인스턴스 사양과 프록시 방식의 근거는 11.1절이다.
 
 ![시스템 아키텍처](../../images/system-architecture.drawio.svg)
 

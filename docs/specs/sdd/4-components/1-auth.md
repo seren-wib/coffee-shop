@@ -54,7 +54,6 @@ AUTH_PASSWORD_VALIDATORS = [
 - 오류: 400(형식, 7자 비밀번호, 겹치는 이메일), 429(IP당 시간당 20회 초과).
 - 요청 제한: `throttle_classes = [ScopedRateThrottle]`, `throttle_scope = "register"`(8.3절).
 - 화면(SCR-04): 비밀번호 확인 칸이 비밀번호와 다르면 요청을 보내지 않고 칸 옆에 오류를 보인다. 성공하면 로그인 화면으로 보낸다(UC-2).
-- 초안: `User.register`(class-specification 3.1).
 
 ### 4.1.2 로그인과 토큰 발급 (FR-8, NFR-7)
 
@@ -65,7 +64,6 @@ AUTH_PASSWORD_VALIDATORS = [
 - 오류: 401, 본문은 늘 `{"code": "INVALID_CREDENTIALS", "message": "이메일 또는 비밀번호가 올바르지 않습니다."}`. 이메일이 있는지 알려주지 않는다(NFR-7).
 - 요청 제한: `throttle_classes = [ScopedRateThrottle]`, `throttle_scope = "login"`. IP당 분당 10회를 넘으면 429 `THROTTLED`(8.3절). 테스트 설정은 `DEFAULT_THROTTLE_RATES`를 크게 잡아 FR-8 테스트가 429에 걸리지 않게 한다.
 - `last_login`은 갱신하지 않는다(`UPDATE_LAST_LOGIN=False`, 기본값). 로그인마다 쓰기 잠금을 잡지 않으려는 것이다.
-- 초안: `User.login`, ALG-06.
 
 ### 4.1.3 액세스 토큰 재발급 (FR-9)
 
@@ -109,7 +107,6 @@ sequenceDiagram
 - 응답 인터셉터: 401이고, `config.url`이 `/auth/token/`나 `/auth/token/refresh/`가 아니고, `config._retried`가 없으면 재발급을 한 번 시도한다. 재발급 요청은 같은 인스턴스로 보내되 `_retried=true`를 달아 다시 들어오지 않게 한다.
 - 401이 여러 요청에서 동시에 나면 재발급 요청은 하나만 보내고 나머지는 그 결과를 기다린다(진행 중인 재발급 Promise 하나를 모듈 변수로 공유).
 - 재발급이 실패하면 토큰을 지우고 `/login?next=<현재 경로>`로 보낸다. 로그인 성공 뒤 `next`로 돌아간다(UC-3 2단계). `next`는 `/`로 시작하는 같은 사이트 경로만 받는다(열린 리다이렉트 방지).
-- 초안: `sequence-algorithms.md` 1절 3단계, SEQ-01.
 
 ### 4.1.5 토큰 저장 (FR-8, FR-54)
 
@@ -133,7 +130,6 @@ sequenceDiagram
 - 입력: `user_name`, `phone_number` 중 바꿀 것. 시리얼라이저에서 `email`, `role`은 읽기 전용이라 보내도 바뀌지 않는다.
 - 응답: 200, 4.1.7과 같은 모양.
 - 오류: 400(빈 이름, 연락처 형식). 연락처는 숫자와 `-`만, 20자 이하.
-- 초안: `User.update_profile`.
 
 ### 4.1.9 비밀번호 변경 (FR-13)
 
@@ -145,7 +141,6 @@ sequenceDiagram
   3. `set_password(new_password)`, `save(update_fields=["password"])`.
 - 응답: 204.
 - 이미 발급된 토큰은 만료 때까지 유효하다(폐기 목록 없음, 4.1.3). 옛 비밀번호로 새로 로그인하면 401이다.
-- 초안: `User.change_password`, ALG-06.
 
 ### 4.1.10 권한 클래스 (NFR-9, NFR-10)
 

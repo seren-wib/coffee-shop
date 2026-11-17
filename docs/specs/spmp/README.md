@@ -2,7 +2,7 @@
 
 작성일 YYYY-MM-DD. <이 문서가 다루는 것, 차수 나눈 방법>. 이 문서가 확정되면 SRS로 넘어간다.
 
-Google Docs: <link>
+Google Docs: https://docs.google.com/document/d/12f9rIr1QTdR_3I-XFNKyRkMnlw4ITTjanMyF-jLX8vE/edit
 
 | 파일 | 내용 | ID |
 | --- | --- | --- |

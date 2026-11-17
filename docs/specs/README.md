@@ -4,8 +4,6 @@
 
 Drive 폴더: 내 드라이브 [`projects-docs/coffee-shop`](https://drive.google.com/drive/folders/1cb-Z4lY-fqSHFXUT3KI3MllRmI_Y-s9g) (단계 문서 Google Docs). `main`에 머지될 때마다 `.github/workflows/docs-sync.yml`이 덮어쓴다. Google Docs에서 고치지 않는다. 과제 제출 합본은 따로 `소프트웨어공학/hw/hw1`, `hw/hw2`에 있다.
 
-2026-11-17 전 문서는 [`docs/old/`](../old/)에 있다. 새 문서의 재료로만 쓰고 고치지 않는다.
-
 | 문서 | 폴더 | Google Docs | ID 범위 |
 | --- | --- | --- | --- |
 | 프로젝트 계획서 (SPMP) | [spmp/](spmp/README.md) | [열기](https://docs.google.com/document/d/12f9rIr1QTdR_3I-XFNKyRkMnlw4ITTjanMyF-jLX8vE/edit) | |

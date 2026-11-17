@@ -77,8 +77,6 @@ one Google Doc and submitted from there. The compiled document is not committed.
 - Requirements carry IDs (`DR-n`, `FR-n`, `NFR-n`, `UC-n`). One FR holds one function and one
   NFR one measurable condition. IDs are never renumbered or reused once merged; a dropped one
   stays with "(삭제, date, reason)". Test names and PR bodies cite the IDs.
-- `docs/old/` holds the documents written before 2026-11-17 (HW1, HW2 sources). They are kept
-  as source material and are not edited.
 
 ## Language
 

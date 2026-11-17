@@ -28,7 +28,6 @@ def shipping_fee_for(product_amount: int) -> int:
   5. 있으면 `quantity=new`로 UPDATE(200), 없으면 INSERT(201)(DR-9).
 - 응답: 201 또는 200, `{cart_item_id, option_id, quantity}`.
 - 담는 순간 재고를 잡아 두지 않는다. 재고 차감은 주문 생성 때 한다(SRS 2.6절).
-- 초안: SEQ-03.
 
 ### 4.4.2 장바구니 조회 (FR-20)
 
@@ -71,7 +70,6 @@ def shipping_fee_for(product_amount: int) -> int:
 - 처리: `quantity < 1`이면 400 `VALIDATION_ERROR`. `quantity > stock_quantity`이면 409 `OUT_OF_STOCK`(DR-10). 그 밖에는 UPDATE.
 - 응답: 200, `{cart_item_id, option_id, quantity}`. 화면은 이어서 4.4.2를 다시 불러 금액을 갱신한다.
 - 오류: 404(다른 회원 항목).
-- 초안: `CartItem.update_quantity`.
 
 ### 4.4.4 항목 삭제 (FR-22)
 
