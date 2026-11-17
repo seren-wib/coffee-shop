@@ -9,7 +9,7 @@ Drive 폴더: 내 드라이브 `project-docs/coffee-shop` (단계 문서 Google 
 | 문서 | 폴더 | Google Docs | ID 범위 |
 | --- | --- | --- | --- |
 | 프로젝트 계획서 (SPMP) | [spmp/](spmp/README.md) | 아직 없음 | |
-| 요구사항 명세서 (SRS) | [srs/](srs/README.md) | 아직 없음 |  |
+| 요구사항 명세서 (SRS) | [srs/](srs/README.md) | 아직 없음 | DR-1 ~ DR-24, FR-1 ~ FR-57, NFR-1 ~ NFR-35, UC-1 ~ UC-14 |
 | 설계 명세서 (SDD) | [sdd/](sdd/README.md) | 아직 없음 | |
 | 테스트 계획서 (STP) | [stp/](stp/README.md) | 아직 없음 | |
 | 설치 계획서 (SIP) | [sip/](sip/README.md) | 아직 없음 | |
