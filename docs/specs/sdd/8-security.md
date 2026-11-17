@@ -1,6 +1,6 @@
 ## 8. 보안과 개인정보
 
-시스템은 이름, 이메일, 연락처, 주소를 저장하므로 개인정보 보호법의 안전성 확보 조치(비밀번호 일방향 암호화, 전송 구간 암호화, 접근 통제)를 따른다(SRS 1.4절). 레포가 공개라서 이 절에는 수단만 적고, 서버 주소·계정·고치지 않은 약점은 적지 않는다.
+시스템은 이름, 이메일, 연락처, 주소를 저장하므로 개인정보 보호법의 안전성 확보 조치(비밀번호 일방향 암호화, 전송 구간 암호화, 접근 통제)를 따른다(SRS 1.4절). 레포가 공개라서 이 절에는 수단만 적고, 서버 주소·계정은 적지 않는다. 시연 규모라서 받아들인 한계는 그 근거와 함께 11.2절에 둔다.
 
 ### 8.1 해시
 
@@ -13,7 +13,7 @@
 | 구간 | 수단 | 요구사항 |
 | --- | --- | --- |
 | 브라우저 ↔ Cloudflare | HTTPS. Cloudflare 엣지 인증서. 최소 TLS 버전 1.2. Always Use HTTPS로 80 → 443 | NFR-4, NFR-5 |
-| Cloudflare ↔ EC2 | HTTPS. SSL/TLS 모드 Full (strict), 원 서버에 Cloudflare Origin CA 인증서 | 11.1절 |
+| Cloudflare ↔ EC2 | HTTPS. SSL/TLS 모드 Full (strict), 원 서버에 Cloudflare Origin CA 인증서. strict는 인증서 호스트명을 검사하므로 도메인이 정해진 뒤(SRS 7.2) 그 호스트명을 넣어 발급한다(SIP 3절) | 11.1절 |
 | EC2 ↔ 토스페이먼츠 | HTTPS(인증서 검증 켬) | FR-26 |
 | 저장 데이터 | SQLite 파일은 암호화하지 않는다. EBS 볼륨 암호화를 켠다 | 10.2절 |
 | 토큰 | JWT 서명(HS256, 키는 `SECRET_KEY`). 암호화가 아니므로 토큰에 개인정보를 넣지 않는다(`user_id`, `role`만) | NFR-8 |
@@ -37,7 +37,7 @@
 | 서버 접속 | SSH 키 인증만, 비밀번호 로그인 끔. 보안 그룹은 22번을 운영자 주소에만, 443을 Cloudflare 주소 대역에만 연다 | NFR-20 |
 
 - 요청 제한은 기본 캐시(로컬 메모리)를 쓴다. gunicorn 워커마다 따로 세므로 실제 한도는 워커 수(3)배까지 느슨하다. 시연 규모에서 받아들인다.
-- 클라이언트 IP는 nginx가 `CF-Connecting-IP`를 `X-Real-IP`로 넘기고(Cloudflare 주소 대역에서 온 요청만 믿음), DRF `NUM_PROXIES=1`로 읽는다.
+- 클라이언트 IP: nginx `real_ip` 모듈이 Cloudflare 주소 대역에서 온 요청의 `CF-Connecting-IP`를 `$remote_addr`로 바꾸고, `/api/`로 넘길 때 `X-Forwarded-For`를 그 값 하나로 덮어쓴다(클라이언트가 보낸 값은 버림). DRF는 `X-Forwarded-For`와 `NUM_PROXIES=1`로 IP를 읽는다(DRF는 `X-Real-IP`를 읽지 않는다).
 
 ### 8.4 시크릿
 
@@ -56,18 +56,18 @@
 
 | 남기는 것 | 남기지 않는 것 |
 | --- | --- |
-| 요청 메서드, 경로, 상태 코드, 응답 시간, 클라이언트 IP | 요청·응답 본문 |
+| 요청 메서드, 경로(쿼리 문자열 뺌), 상태 코드, 응답 시간, 클라이언트 IP | 요청·응답 본문 |
 | 업무 이벤트의 ID(`order_id`, `payment_id`, `user_id`) | 비밀번호, 액세스·리프레시 토큰, `Authorization` 헤더 |
 | PG 오류 코드와 메시지 | 토스 `paymentKey` 전체(뒤 8자만), 시크릿 키 |
 | 예외 종류와 스택 트레이스(서버 로그에만) | 연락처, 주소, 받는 사람 이름 |
 
-- nginx 접근 로그 형식에서 쿼리 문자열은 남기되(검색어 확인용) `Authorization`, `Cookie` 헤더는 넣지 않는다. 관리자 주문 검색은 회원 이메일이 쿼리에 들어갈 수 있다. 이메일은 NFR-35 목록에 없지만 로그 보존은 journald 기본 크기 제한 안으로 둔다.
+- nginx 접근 로그는 쿼리 문자열을 빼고 경로(`$uri`)만 남기는 형식을 쓴다. 관리자 주문 검색의 회원 이메일(`?search=`)과 토스가 결과 화면에 붙여 보내는 `paymentKey`(`/checkout/result?paymentKey=...`)가 로그에 남지 않게 하려는 것이다. `Authorization`, `Cookie` 헤더도 넣지 않는다.
 - Django `DEBUG=False`에서 500 오류 이메일(`ADMINS`)은 쓰지 않는다.
 - 확인: 로그인·주문 요청 뒤 `journalctl`과 nginx 로그에서 테스트 연락처·토큰 문자열을 검색해 0건(NFR-35, STP 9절).
 
 ### 8.6 CSP와 브라우저 보안 헤더
 
-nginx가 `index.html`과 정적 파일 응답에 붙인다.
+nginx가 `index.html`과 정적 파일(`/assets/`) 응답에 붙인다(10.3절 두 `location` 모두 같은 헤더 파일을 넣는다).
 
 ```
 Content-Security-Policy:

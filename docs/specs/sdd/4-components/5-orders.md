@@ -68,7 +68,7 @@ def next_order_id(today: date) -> str:
 flowchart TD
   A([시작]) --> B[트랜잭션 시작, 쓰기 잠금]
   B --> C[이 회원의 장바구니 항목 읽기<br>옵션·원두 함께]
-  C --> D{주문 가능한 항목이 있나}
+  C --> D{장바구니 항목이 있나}
   D -- 없음 --> X1[400 EMPTY_CART]
   D -- 있음 --> E[항목마다]
   E --> F{원두 ON_SALE?}
@@ -86,20 +86,21 @@ flowchart TD
   N --> O[커밋, 201]
 ```
 
-  1. 장바구니 항목 중 4.4.2의 `is_available`이 참인 것만 주문 대상이다(FR-23 "주문 가능한 모든 항목"). 거짓인 항목은 장바구니에 그대로 남는다. 대상이 0개면 400 `EMPTY_CART`.
-  2. 판매 상태는 화면 표시와 관계없이 여기서 다시 확인한다(NFR-16). 1번에서 걸렀어도 잠금을 잡은 뒤 읽은 값으로 한 번 더 본다.
+  1. 이 회원의 장바구니 항목 전부가 주문 대상이다. 서버는 항목을 조용히 빼지 않는다. 0개면 400 `EMPTY_CART`.
+  2. 항목마다 원두가 `ON_SALE`인지 잠금을 잡은 뒤 읽은 값으로 확인한다. 하나라도 아니면 롤백하고 409 `NOT_AVAILABLE`(NFR-16, DR-8). 화면 표시와 관계없이 서버가 다시 본다.
   3. 재고는 `decrease_stock(option_id, quantity)`(4.7.6절) 조건부 UPDATE로 줄인다. 한 항목이라도 0행이면 예외를 던져 트랜잭션 전체가 롤백된다. 앞 항목에서 줄인 재고도 돌아간다(NFR-14).
   4. 스냅샷: `product_name`, `weight_size`, `grind_type`(코드값), `order_price = base_price + extra_price`(DR-12).
   5. `total_product_amt = Σ(order_price × quantity)`, `shipping_fee = shipping_fee_for(total)`, `final_payment_amt = total + fee`(DR-13 ~ DR-15). 요청 본문의 금액은 받지 않는다.
   6. 배송지 복사: `recipient_name`, `recipient_phone`, `shipping_address = f"({zipcode}) {base_address} {detail_address}".strip()`(DR-18). 저장된 배송지는 `user=request.user`로 찾고, 없으면 404.
 - 응답: 201, 4.5.6의 주문 상세 모양(`status=PENDING`).
-- 오류: 400(`EMPTY_CART`, 배송지 형식), 404(다른 회원 배송지), 409(`NOT_AVAILABLE`, `OUT_OF_STOCK`, `RETRY`). 409 본문의 `details.cart_item_ids`에 문제 항목을 넣어 화면이 어느 항목인지 보인다(UC-5 4단계).
+- 오류: 400(`EMPTY_CART`, 배송지 형식), 404(다른 회원 배송지), 409(`NOT_AVAILABLE`, `OUT_OF_STOCK`, `RETRY`). 409 본문의 `details.cart_item_ids`에 문제 항목을 넣어 화면이 어느 항목인지 보인다(UC-5 4단계). 재고·장바구니는 요청 전 그대로다(FR-23, NFR-14).
+- SRS FR-23의 "주문 가능한 모든 항목"은 화면 쪽 규칙으로 읽는다. 장바구니 화면은 주문할 수 없는 항목이 있으면 주문하기를 끄고 그 항목을 빼라고 안내한다(6.5절). 그래서 서버에 도착하는 주문은 늘 장바구니 전체이고, 섞여 있으면 409다. 이 해석은 11.2절에 적었다.
 - 동시성: 재고 1개 옵션에 동시 주문이 들어와도 쓰기 트랜잭션이 하나씩 돌고, 두 번째부터는 조건부 UPDATE가 0행이라 409다(NFR-15). 3.1절 스파이크로 확인한다.
 - 초안: `Order.create_order`, ALG-01. 초안과 달리 주문번호를 호출자가 넘기지 않고 이 함수가 만든다.
 
 ### 4.5.4 주문 화면 금액 표시 (FR-24)
 
-- 주문 화면(SCR-06)은 주문을 만들기 전에 `GET /api/cart/`(4.4.2)의 `items`(`is_available=true`만), `product_amount`, `shipping_fee`, `total_amount`를 보인다. 같은 `shipping_fee_for`를 쓰므로 주문 생성 뒤 금액과 같다.
+- 주문 화면(SCR-06)은 주문을 만들기 전에 `GET /api/cart/`(4.4.2)의 `items`, `product_amount`, `shipping_fee`, `total_amount`를 보인다. 같은 `shipping_fee_for`를 쓰므로 주문 생성 뒤 금액과 같다.
 - 결과 화면과 주문 상세는 저장된 `total_product_amt`, `shipping_fee`, `final_payment_amt`를 보인다.
 
 ### 4.5.5 내 주문 목록 (FR-30, FR-55)

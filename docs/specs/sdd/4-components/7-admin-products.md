@@ -39,7 +39,7 @@ stateDiagram-v2
 - 경로: `POST /api/admin/products/`.
 - 입력: `name`, `origin`, `roast_level`, `base_price`(0 이상 정수), `tasting_notes`(선택), `description`(선택), `image_url`(선택, `https://`).
 - 처리: `sales_status=ON_SALE`로 INSERT. 옵션은 4.7.4로 따로 추가한다.
-- 응답: 201, 원두 상세(관리자용, 옵션 포함).
+- 응답: 201, 관리자 원두 상세(4.7.12).
 - 오류: 400(필수 항목, 음수 가격, 로스팅 값), 403(회원 토큰).
 - 초안: SEQ-07.
 
@@ -121,20 +121,27 @@ def increase_stock(option_id: int, quantity: int) -> None:
 - 경로: `POST /api/admin/products/{id}/stop/`.
 - 처리(`stop_sales`): 4.7.0 표의 조건부 UPDATE. 이미 `STOPPED`이면 0행이고 409 `INVALID_STATE`.
 - 응답: 200, `{product_id, sales_status: "STOPPED"}`.
-- 장바구니에 담긴 그 원두의 옵션은 남지만 `is_available=false`가 되고 주문에서 빠진다(4.4.2, 4.5.3).
+- 장바구니에 담긴 그 원두의 옵션은 남지만 `is_available=false`가 되고, 그 항목을 빼기 전까지 주문 생성은 409 `NOT_AVAILABLE`이다(4.4.2, 4.5.3).
 - 초안: `Product.change_sales_status`.
 
 ### 4.7.10 판매 재개 (FR-43)
 
 - 경로: `POST /api/admin/products/{id}/resume/`.
-- 처리(`resume_sales`, 한 트랜잭션): 재고가 있는 옵션이 있으면 `ON_SALE`, 없으면 `SOLD_OUT`으로 `WHERE sales_status='STOPPED'` UPDATE. 0행이면 409.
+- 처리(`resume_sales`, 한 트랜잭션): 재고가 있는 옵션이 있거나 옵션이 하나도 없으면 `ON_SALE`(4.7.0 마지막 줄과 같은 규칙), 옵션이 있는데 모두 재고 0이면 `SOLD_OUT`으로 `WHERE sales_status='STOPPED'` UPDATE. 0행이면 409.
 - 응답: 200, `{product_id, sales_status}`.
 
 ### 4.7.11 관리자 이름 검색 (FR-56)
 
 - `GET /api/admin/products/?search=에티`. 고객용과 같은 `name__icontains`이지만 판매 중지 원두를 뺀 쿼리셋이 아니라 전체에서 찾는다.
 
-### 4.7.12 관리자 원두 시퀀스 (SEQ-07, SEQ-08)
+### 4.7.12 관리자 원두 상세 (FR-37 ~ FR-41)
+
+- 경로: `GET /api/admin/products/{id}/`(SRS 6.2에 없음, 7.7절).
+- 응답: 200, `{product_id, name, origin, roast_level, base_price, tasting_notes, description, image_url, sales_status, created_at, options: [{option_id, weight_size, grind_type, extra_price, price, stock_quantity, is_available}]}`. 판매 중지 원두도 돌려준다.
+- 4.7.2 ~ 4.7.5, 4.7.8 ~ 4.7.10의 응답 본문도 이 모양이다. 그래서 등록 응답에서 `sales_status=ON_SALE`을 확인할 수 있다(FR-37 검증).
+- 오류: 404(없는 ID).
+
+### 4.7.13 관리자 원두 시퀀스 (SEQ-07, SEQ-08)
 
 ```mermaid
 sequenceDiagram

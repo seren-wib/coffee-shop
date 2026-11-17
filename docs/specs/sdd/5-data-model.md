@@ -119,6 +119,8 @@ erDiagram
 | 결제 주문 번호 | 없음 | `payments.pg_order_id`(PG에 넘기는 시도별 번호) | 4.6.1절, 11.2절 |
 | 결제 수단 | NOT NULL | NULL 허용(승인 응답에서 채움) | 결제 시작 시점엔 수단을 모름(FR-25) |
 | `payments.order_id` 삭제 규칙 | CASCADE | PROTECT | 주문은 지우지 않고, 결제 기록은 환불 근거라 남긴다(NFR-17과 같은 이유) |
+| 주문번호 길이 | `order_id` 최대 50자 | `VARCHAR(16)`(`ORD-YYYYMMDD-NNN` 고정 길이). 일련번호 세 자리라 하루 999건 상한(4.5.2절) | DR-11 |
+| 주문 항목 분쇄도 | 표시 이름(`get_grind_type_display()`) 저장 | 코드값 저장, 화면이 이름으로 바꾼다. 표시 이름 표(`src/lib/labels.js`)의 기존 값은 바꾸지 않고 더하기만 한다(옛 주문 표시가 바뀌지 않게) | DR-12 |
 | 시각 기본값 | `DATETIME('now','localtime')` | ORM이 넣는 UTC 시각(`USE_TZ=True`). 화면과 주문번호 날짜만 `Asia/Seoul` | 11.1절 시간대 |
 | 부분 유니크 인덱스, CHECK | 문서에만 있음 | 모델 `Meta.constraints`로 둔다 | 11.1절 |
 
@@ -276,7 +278,7 @@ erDiagram
 | `approved_at` | DATETIME | NULL 허용 | FR-26 |
 
 - 부분 유니크 제약 `uq_payments_order_success`: `UNIQUE(order_id) WHERE payment_status = 'SUCCESS'`. 승인 응답이 동시에 두 번 처리돼도 성공 결제는 하나뿐이다(DR-24, FR-29의 409).
-- 카드 번호, 유효기간, 계좌번호 열은 두지 않는다. 승인 응답 원문도 저장하지 않는다(NFR-18).
+- 카드 번호, 유효기간, 계좌번호 열은 두지 않는다. 승인 응답 원문도 저장하지 않는다(NFR-18). `payment_method`는 수단의 종류 코드(카드, 간편결제 등)일 뿐 카드·계좌 정보가 아니다.
 
 ### 5.9 상태 열이 바뀌는 곳
 

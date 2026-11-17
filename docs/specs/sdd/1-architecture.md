@@ -67,8 +67,8 @@ flowchart LR
 
 | 배포 단위 | 무엇 | 실행 방식 | 요구사항 |
 | --- | --- | --- | --- |
-| 프론트엔드 | React 19 SPA를 Vite로 빌드한 정적 파일(`frontend/dist`) | nginx가 `/`에서 파일을 내준다. 없는 경로는 `index.html`로 돌려 React Router가 처리한다 | NFR-19, NFR-21 |
-| 백엔드 | Django + Django REST Framework 앱(`backend/`) | gunicorn이 WSGI로 띄우고, systemd 서비스가 재시작을 맡는다 | NFR-19, NFR-22, NFR-28 |
+| 프론트엔드 | React SPA(버전은 `frontend/package.json`이 원본, 2026-11-17 기준 React 19)를 Vite로 빌드한 정적 파일(`frontend/dist`) | nginx가 `/`에서 파일을 내준다. 없는 경로는 `index.html`로 돌려 React Router가 처리한다 | NFR-19, NFR-21 |
+| 백엔드 | Django + Django REST Framework 앱(`backend/`, 버전은 `backend/requirements.txt`가 원본) | gunicorn이 WSGI로 띄우고, systemd 서비스가 재시작을 맡는다 | NFR-19, NFR-22, NFR-28 |
 | 데이터베이스 | SQLite 파일 하나 | 백엔드 프로세스 안에서 파일로 연다. 별도 서버 없음 | NFR-20, 11.1절 |
 | 웹 서버 | nginx | systemd 서비스. TLS 종단, 정적 파일, `/api/` 역방향 프록시 | NFR-4, NFR-5 |
 | 백업 작업 | `sqlite3 .backup` 셸 스크립트 | systemd timer가 하루 한 번 실행하고 7개를 남긴다 | NFR-25 |

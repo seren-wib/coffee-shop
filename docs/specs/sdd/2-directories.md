@@ -51,7 +51,8 @@ coffee-shop/
 │       └── tests/                # (예정)
 ├── frontend/
 │   ├── index.html
-│   ├── package.json              # npm 스크립트: dev, build, lint
+│   ├── package.json              # npm 스크립트: dev, build, lint(oxlint)
+│   ├── .oxlintrc.json            # oxlint 설정 (NFR-29)
 │   ├── vite.config.js            # 개발 서버의 /api 프록시
 │   └── src/
 │       ├── main.jsx              # 라우터 장착

@@ -18,6 +18,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "common.pagination.StandardPagination",
     "EXCEPTION_HANDLER": "common.exceptions.api_exception_handler",
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],  # NFR-28
+    "DEFAULT_THROTTLE_RATES": {"login": "10/min", "register": "20/hour"},  # 8.3절
+    "NUM_PROXIES": 1,   # nginx가 X-Forwarded-For를 클라이언트 IP로 덮어쓴다 (10.3절)
 }
 
 SIMPLE_JWT = {
@@ -49,7 +51,8 @@ AUTH_PASSWORD_VALIDATORS = [
   3. 같은 이메일이 있으면 400 `VALIDATION_ERROR`, `fields.email`에 "이미 가입된 이메일입니다".
   4. `User.objects.create_user(email, password, ...)`가 `set_password`로 해시하고 `role=MEMBER`로 저장한다.
 - 응답: 201, `{user_id, email, user_name, phone_number, role}`. 비밀번호와 해시는 응답에 없다.
-- 오류: 400(형식, 7자 비밀번호, 겹치는 이메일).
+- 오류: 400(형식, 7자 비밀번호, 겹치는 이메일), 429(IP당 시간당 20회 초과).
+- 요청 제한: `throttle_classes = [ScopedRateThrottle]`, `throttle_scope = "register"`(8.3절).
 - 화면(SCR-04): 비밀번호 확인 칸이 비밀번호와 다르면 요청을 보내지 않고 칸 옆에 오류를 보인다. 성공하면 로그인 화면으로 보낸다(UC-2).
 - 초안: `User.register`(class-specification 3.1).
 
@@ -60,6 +63,7 @@ AUTH_PASSWORD_VALIDATORS = [
 - 처리: `authenticate(email=..., password=...)`. 없는 이메일, 틀린 비밀번호, 비활성 계정이 모두 같은 분기로 간다.
 - 응답: 200, `{access, refresh, user: {user_id, email, user_name, role}}`.
 - 오류: 401, 본문은 늘 `{"code": "INVALID_CREDENTIALS", "message": "이메일 또는 비밀번호가 올바르지 않습니다."}`. 이메일이 있는지 알려주지 않는다(NFR-7).
+- 요청 제한: `throttle_classes = [ScopedRateThrottle]`, `throttle_scope = "login"`. IP당 분당 10회를 넘으면 429 `THROTTLED`(8.3절). 테스트 설정은 `DEFAULT_THROTTLE_RATES`를 크게 잡아 FR-8 테스트가 429에 걸리지 않게 한다.
 - `last_login`은 갱신하지 않는다(`UPDATE_LAST_LOGIN=False`, 기본값). 로그인마다 쓰기 잠금을 잡지 않으려는 것이다.
 - 초안: `User.login`, ALG-06.
 

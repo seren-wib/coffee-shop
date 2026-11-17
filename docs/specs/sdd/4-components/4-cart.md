@@ -55,12 +55,13 @@ def shipping_fee_for(product_amount: int) -> int:
   ],
   "product_amount": 36000,
   "shipping_fee": 0,
-  "total_amount": 36000
+  "total_amount": 36000,
+  "can_order": true
 }
 ```
 
 - `is_available = 원두 ON_SALE and quantity <= stock_quantity`. 담은 뒤 품절됐거나 재고가 줄어 수량이 넘치면 거짓이다.
-- `product_amount`는 `is_available=true` 항목만 더한다. 주문 대상이 "주문 가능한 모든 항목"이라서(FR-23) 예상 금액도 같은 기준으로 맞춘다. 화면은 거짓 항목을 흐리게 보이고 "주문할 수 없는 상품"이라고 적는다.
+- `product_amount = Σ(price × quantity)`, 모든 항목을 더한다(FR-20 검증). 주문 생성도 장바구니 전체를 대상으로 하므로(4.5.3) 같은 기준이다. `is_available=false` 항목이 하나라도 있으면 응답 `can_order=false`이고, 화면은 그 항목을 표시하고 주문하기를 끈다.
 - 판매 중지된 원두의 옵션도 장바구니에는 남는다(회원이 직접 뺀다). 그 원두의 상세는 404지만 장바구니 응답은 이름과 가격을 보여준다.
 
 ### 4.4.3 수량 변경 (FR-21)
