@@ -13,7 +13,7 @@
 | 구간 | 수단 | 요구사항 |
 | --- | --- | --- |
 | 브라우저 ↔ Cloudflare | HTTPS. Cloudflare 엣지 인증서. 최소 TLS 버전 1.2. Always Use HTTPS로 80 → 443 | NFR-4, NFR-5 |
-| Cloudflare ↔ EC2 | HTTPS. SSL/TLS 모드 Full (strict), 원 서버에 Cloudflare Origin CA 인증서. strict는 인증서 호스트명을 검사하므로 도메인이 정해진 뒤(SRS 7.2) 그 호스트명을 넣어 발급한다(SIP 3절) | 11.1절 |
+| Cloudflare ↔ EC2 | HTTPS. SSL/TLS 모드 Full (strict), 원 서버에 Cloudflare Origin CA 인증서. strict는 인증서 호스트명을 검사하므로 운영 도메인의 호스트명을 넣어 발급한다(SIP 3절) | 11.1절 |
 | EC2 ↔ 토스페이먼츠 | HTTPS(인증서 검증 켬) | FR-26 |
 | 저장 데이터 | SQLite 파일은 암호화하지 않는다. EBS 볼륨 암호화를 켠다 | 10.2절 |
 | 토큰 | JWT 서명(HS256, 키는 `SECRET_KEY`). 암호화가 아니므로 토큰에 개인정보를 넣지 않는다(`user_id`, `role`만) | NFR-8 |
@@ -21,7 +21,7 @@
 - Django 보안 설정(운영):
   - `SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")`. nginx가 붙인 헤더로 HTTPS 요청임을 안다.
   - `SECURE_SSL_REDIRECT = False`. 전환은 Cloudflare가 하고, nginx는 443만 연다. 이중 전환으로 루프가 생기지 않게 한다.
-  - `SECURE_HSTS_SECONDS`는 Django가 아니라 Cloudflare HSTS 설정으로 둔다. 도메인이 정해진 뒤(SRS 7.2) 짧은 값으로 시작한다.
+  - `SECURE_HSTS_SECONDS`는 Django가 아니라 Cloudflare HSTS 설정으로 둔다. 처음엔 짧은 값으로 시작한다.
   - `SECURE_CONTENT_TYPE_NOSNIFF = True`, `X_FRAME_OPTIONS = "DENY"`.
 
 ### 8.3 접근 통제

@@ -8,7 +8,7 @@
 | --- | --- | --- | --- | --- |
 | `SECRET_KEY` | 시크릿 | 개발: 각자 `.env` / 운영: EC2 `.env` | 개발, 운영 | JWT 서명, Django 서명. 없으면 서버가 뜨지 않는다 |
 | `DEBUG` | 설정 | `.env` | 개발 `True`, 운영 `False` | NFR-12. `True`일 때만 `/admin/` URL을 붙인다(11.1절) |
-| `ALLOWED_HOSTS` | 설정 | `.env`, 쉼표로 여러 개 | 개발 `localhost,127.0.0.1`, 운영 도메인(SRS 7.2 미결) | Host 헤더 검사 |
+| `ALLOWED_HOSTS` | 설정 | `.env`, 쉼표로 여러 개 | 개발 `localhost,127.0.0.1`, 운영 도메인(이름은 서버 `.env`에만) | Host 헤더 검사 |
 | `SQLITE_PATH` | 설정 | `.env` | 개발 기본 `backend/db.sqlite3`, 운영은 릴리스 폴더 밖의 데이터 폴더 | DB 파일 위치. 배포로 릴리스 폴더가 바뀌어도 DB는 그대로 |
 | `TOSS_SECRET_KEY` | 시크릿 | `.env` | 개발, 운영(둘 다 테스트 키) | 토스페이먼츠 승인·취소 API Basic 인증(4.6.5) |
 | `PAYMENTS_CLIENT` | 설정 | `.env`(없으면 `orders.pg.TossPaymentsClient`) | 테스트 설정은 `orders.pg.FakePaymentsClient` | 4.6.5 |
