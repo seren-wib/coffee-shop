@@ -1,0 +1,92 @@
+# Builds each stage document from docs/specs/ and, once Google is set up, overwrites the same Google Doc so its link never changes.
+# Auth is keyless: GitHub OIDC -> Google Workload Identity Federation -> service account docs-sync (no repo secret).
+# Until .github/google-docs.json exists, it only builds and keeps the HTML as an artifact.
+name: docs-sync
+
+on:
+  push:
+    branches: [main]
+    paths: ['docs/specs/**', 'docs/images/**', '.github/google-docs.json']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: docs-sync
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install tools
+        run: npm install --no-save marked@15.0.12 @mermaid-js/mermaid-cli@11.4.2
+
+      - name: Render Mermaid blocks to PNG
+        run: |
+          echo '{"args":["--no-sandbox"]}' > /tmp/puppeteer.json
+          find docs/specs -name '*.md' -print0 | while IFS= read -r -d '' f; do
+            if grep -q '^```mermaid' "$f"; then
+              npx mmdc -p /tmp/puppeteer.json -i "$f" -o "$f" -e png -b white -s 2
+            fi
+          done
+
+      - name: Render SVG images to PNG
+        # Google Docs cannot show SVG. images.weserv.nl renders the file at this commit (public repos only;
+        # in a private repo the step leaves the SVG as is and Docs shows nothing for it).
+        run: |
+          git ls-files 'docs/**/*.svg' | while IFS= read -r f; do
+            url="https://images.weserv.nl/?url=raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/${f}&output=png&w=1600"
+            curl -sSf -o "$f.png" "$url" || echo "SVG to PNG failed: $f"
+          done
+
+      - name: Build documents
+        run: node .github/scripts/build-docs.mjs docs/specs dist/docs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: dist/docs
+
+      - name: Check Google setup
+        id: setup
+        run: |
+          if [ -f .github/google-docs.json ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Google sync not set up yet: built only."
+          fi
+
+      - name: Google auth
+        if: steps.setup.outputs.ready == 'true'
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/1015980947829/locations/global/workloadIdentityPools/github/providers/github-actions
+          service_account: docs-sync@project-docs-sync-515005.iam.gserviceaccount.com
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/drive
+
+      - name: Overwrite Google Docs
+        if: steps.setup.outputs.ready == 'true'
+        env:
+          TOKEN: ${{ steps.auth.outputs.access_token }}
+        run: |
+          for doc in $(node -e 'console.log(Object.keys(require("./.github/google-docs.json")).join(" "))'); do
+            id=$(node -e "console.log(require('./.github/google-docs.json')['$doc'])")
+            [ -f "dist/docs/$doc.html" ] || continue
+            curl -sSf -X PATCH \
+              -H "Authorization: Bearer $TOKEN" \
+              -H "Content-Type: text/html; charset=UTF-8" \
+              --data-binary "@dist/docs/$doc.html" \
+              "https://www.googleapis.com/upload/drive/v3/files/$id?uploadType=media&supportsAllDrives=true" > /dev/null
+            echo "$doc -> $id"
+          done
