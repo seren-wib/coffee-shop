@@ -35,8 +35,9 @@ function dropFileTables(md) {
     /^\|\s*\[[^\]]*\]\([^)]+\)/m.test(block) ? '' : block);
 }
 // Google Docs ignores % widths and max-width on imported images; only px works.
-// Page body is 624px wide (Letter/A4 with 1in margins), so cap width there and scale height to match.
+// Page body is 624px wide and 864px tall (Letter/A4 with 1in margins); shrink to fit both, keeping the ratio.
 const MAX_W = 624;
+const MAX_H = 864; // page body height: Letter/A4 with 1in margins
 function pngSize(buf) {
   if (buf.length < 24 || buf.toString('ascii', 12, 16) !== 'IHDR') return null;
   return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
@@ -64,7 +65,8 @@ function clean(md, file) {
     const src64 = `data:${type};base64,${buf.toString('base64')}`;
     const size = type === 'image/png' ? pngSize(buf) : null;
     if (!size) return `![${alt}](${src64})`;
-    const w = Math.min(size.w, MAX_W), h = Math.round(size.h * w / size.w);
+    const k = Math.min(MAX_W / size.w, MAX_H / size.h, 1);
+    const w = Math.round(size.w * k), h = Math.round(size.h * k);
     return `<img src="${src64}" alt="${esc(alt)}" width="${w}" height="${h}">`;
   });
   return s.trim();
