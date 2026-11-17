@@ -29,6 +29,19 @@ function ordered(readme) {
   }
   return files;
 }
+// Remove only file-list tables: a table block whose rows link files in the first cell. Other tables stay.
+function dropFileTables(md) {
+  return md.replace(/(?:^\|.*\|[ \t]*(?:\n|$))+/gm, block =>
+    /^\|\s*\[[^\]]*\]\([^)]+\)/m.test(block) ? '' : block);
+}
+// Google Docs ignores % widths and max-width on imported images; only px works.
+// Page body is 624px wide (Letter/A4 with 1in margins), so cap width there and scale height to match.
+const MAX_W = 624;
+function pngSize(buf) {
+  if (buf.length < 24 || buf.toString('ascii', 12, 16) !== 'IHDR') return null;
+  return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+}
+const esc = t => t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 // A sub-folder README contributes its own text (heading and table removed) and then its files.
 function withIndex(readme) {
   if (!fs.existsSync(readme)) return [];
@@ -38,7 +51,7 @@ function withIndex(readme) {
 function clean(md, file) {
   let s = md.replace(/<!--[\s\S]*?-->\n?/g, '');
   // Drop the file table of a sub-folder README; the files follow anyway.
-  if (path.basename(file) === 'README.md') s = s.replace(/^\|.*\|\s*$\n?/gm, '');
+  if (path.basename(file) === 'README.md') s = dropFileTables(s);
   // Inline local images so Docs does not need a public URL.
   s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (all, alt, src) => {
     if (/^https?:|^data:/.test(src)) return all;
@@ -47,7 +60,12 @@ function clean(md, file) {
     if (p.endsWith('.svg') && fs.existsSync(p + '.png')) p += '.png';
     const type = MIME[path.extname(p).toLowerCase()];
     if (!type || !fs.existsSync(p)) return all;
-    return `![${alt}](data:${type};base64,${fs.readFileSync(p).toString('base64')})`;
+    const buf = fs.readFileSync(p);
+    const src64 = `data:${type};base64,${buf.toString('base64')}`;
+    const size = type === 'image/png' ? pngSize(buf) : null;
+    if (!size) return `![${alt}](${src64})`;
+    const w = Math.min(size.w, MAX_W), h = Math.round(size.h * w / size.w);
+    return `<img src="${src64}" alt="${esc(alt)}" width="${w}" height="${h}">`;
   });
   return s.trim();
 }
@@ -56,10 +74,11 @@ fs.mkdirSync(out, { recursive: true });
 for (const doc of DOCS) {
   const readme = path.join(specs, doc, 'README.md');
   if (!fs.existsSync(readme)) continue;
-  const head = fs.readFileSync(readme, 'utf8').replace(/<!--[\s\S]*?-->\n?/g, '').replace(/^\|.*\|\s*$\n?/gm, '').trim();
+  const head = fs.readFileSync(readme, 'utf8').replace(/<!--[\s\S]*?-->\n?/g, '');
+  const headText = dropFileTables(head).trim();
   const parts = ordered(readme).map(f => clean(fs.readFileSync(f, 'utf8'), f));
   const stamp = `> 이 문서는 레포 \`docs/specs/${doc}/\`의 커밋 \`${sha}\`에서 만들어졌다. 고칠 때는 레포를 고친다.`;
-  const md = [head, stamp, ...parts].join('\n\n') + '\n';
+  const md = [headText, stamp, ...parts].join('\n\n') + '\n';
   fs.writeFileSync(path.join(out, `${doc}.md`), md);
   fs.writeFileSync(path.join(out, `${doc}.html`), `<html><head><meta charset="utf-8"></head><body>${marked.parse(md)}</body></html>\n`);
   console.log(`${doc}: ${parts.length} files`);
