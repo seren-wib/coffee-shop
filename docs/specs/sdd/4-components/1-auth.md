@@ -73,7 +73,7 @@ AUTH_PASSWORD_VALIDATORS = [
 - 입력: `refresh`.
 - 응답: 200, `{access}`.
 - 오류: 401 `INVALID_TOKEN`(만료, 서명 위조, 형식 오류).
-- 리프레시 토큰은 돌려쓰기(rotation)와 폐기 목록(blacklist)을 쓰지 않는다. 7일이 지나면 다시 로그인한다. 폐기 목록이 없으므로 로그아웃은 브라우저에서 토큰을 지우는 것으로 끝난다(FR-54, 11.2절).
+- 리프레시 토큰은 돌려쓰기(rotation)와 폐기 목록(blacklist)을 쓰지 않는다. 7일이 지나면 다시 로그인한다. 폐기 목록이 없으므로 로그아웃은 브라우저에서 토큰을 지우는 것으로 끝난다(FR-54, 11.1절).
 
 ### 4.1.4 프론트엔드 401 처리와 재요청 (FR-10)
 
@@ -115,7 +115,7 @@ sequenceDiagram
 
 - 액세스 토큰과 리프레시 토큰은 `localStorage`의 `coffee.access`, `coffee.refresh`에 둔다. 새로 고침해도 로그인이 유지된다.
 - `src/auth/tokenStore.js` 한 파일만 이 키를 읽고 쓴다. 다른 파일은 `getAccess()`, `setTokens()`, `clearTokens()`만 부른다.
-- `localStorage`는 페이지의 스크립트가 읽을 수 있어서 XSS에 약하다. CSP와 출력 이스케이프(8.6절)로 막는다. httpOnly 쿠키를 쓰지 않은 이유는 11.2절.
+- `localStorage`는 페이지의 스크립트가 읽을 수 있어서 XSS에 약하다. CSP와 출력 이스케이프(8.6절)로 막는다. httpOnly 쿠키를 쓰지 않은 이유는 11.1절.
 
 ### 4.1.6 로그아웃 (FR-54)
 

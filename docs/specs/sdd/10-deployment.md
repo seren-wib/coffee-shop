@@ -116,7 +116,8 @@ flowchart LR
   L -- 아니오 --> N[직전 릴리스로 링크 되돌림<br>백업으로 DB 복원 여부 판단]
 ```
 
-- 배포는 운영자가 서버에서 `deploy/deploy.sh <태그>`를 실행하는 수동 방식이다. 같은 스크립트를 누가 실행해도 같은 결과가 난다(NFR-24). GitHub Actions로 자동 배포할지는 11.2절 미결이다.
+- 배포는 운영자가 서버에서 `deploy/deploy.sh <태그>`를 실행하는 수동 방식이다. 같은 스크립트를 누가 실행해도 같은 결과가 난다(NFR-24). GitHub Actions 자동 배포는 이번 학기엔 쓰지 않는다(11.1절).
+- SQLite DB 파일은 배포하지 않는다. 레포에는 DB 파일이 없고(`db.sqlite3`는 커밋 금지), 처음 설치할 때 한 번 `migrate`가 `/srv/coffee-shop/data/db.sqlite3`를 빈 테이블로 만들고 `create_admin`(FR-53)으로 관리자를 넣는다(SIP 3절). 그 뒤 배포는 같은 파일에 새 마이그레이션만 적용하므로 데이터가 남는다. SQLite는 따로 띄우는 서버 프로세스가 없고, gunicorn 안의 Django가 파일을 직접 연다(1.2절).
 - 프론트엔드는 서버에서 빌드한다(Node.js 24는 빌드에만 쓰고, nginx는 빌드 결과 정적 파일만 내준다. SRS 1.4절).
 - `migrate` 전에 백업을 하나 더 만든다. 일일 백업과 섞이지 않게 `/var/backups/coffee-shop/pre-deploy/db-<태그>.sqlite3`로 따로 두고 최근 3개만 남긴다. 마이그레이션이 데이터를 바꾸는 배포를 되돌릴 때 이 파일로 복원한다.
 - 롤백: `current`를 직전 릴리스로 되돌리고 gunicorn을 재시작한다. 이번 배포에 마이그레이션이 있었다면 배포 직전 백업으로 DB를 복원한다. 롤백 리허설 1회가 NFR-24의 측정이다(SIP 2절, STP 8절).
@@ -128,8 +129,8 @@ flowchart LR
 | --- | --- | --- |
 | 재부팅 뒤 자동 시작(NFR-22) | `nginx.service`, `coffee-shop.service`, `coffee-shop-backup.timer` 모두 `enable`. gunicorn 서비스는 `Restart=always` | 재부팅 후 5분 안에 `/api/health/` 200 |
 | 백업(NFR-25) | `deploy/backup.sh`: `sqlite3 -cmd ".timeout 20000" <DB> ".backup <폴더>/db-YYYYMMDD.sqlite3"`(잠금이면 20초까지 기다림) 뒤 8번째부터 지움. 실패하면 0이 아닌 종료 코드로 끝나 journald에 남는다. timer `OnCalendar=*-*-* 04:00 Asia/Seoul`, `Persistent=true` | 백업 폴더 파일 7개, 복원 리허설 1회 |
-| 감시(NFR-23) | 외부에서 5분마다 `GET https://<도메인>/api/health/` | 실패 비율 1% 이하. 도구는 11.2절 미결 |
+| 감시(NFR-23) | 외부에서 5분마다 `GET https://<도메인>/api/health/` | 실패 비율 1% 이하. 도구는 UptimeRobot 무료 요금제(11.1절) |
 | 디스크 | journald 최대 크기 200MB, 릴리스 폴더 최근 3개만 | |
 
-- 백업 파일은 같은 EBS 볼륨에 있다. 인스턴스나 볼륨이 통째로 사라지면 백업도 사라진다. 다른 곳으로 복사할지는 11.2절 미결이다.
+- 백업 파일은 같은 EBS 볼륨에 있다. 인스턴스나 볼륨이 통째로 사라지면 백업도 사라진다. 시연·평가 2주 동안은 인스턴스 밖으로 복사하지 않기로 했다(11.1절). 데이터가 사라지면 시드 명령(NFR-3)으로 다시 만든다.
 - `sqlite3 .backup`은 WAL 모드에서도 쓰는 중인 DB를 일관된 상태로 복사한다. 파일 복사(`cp`)는 쓰지 않는다.

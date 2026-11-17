@@ -202,7 +202,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 - 등록(`/admin/products/new`): `POST /api/admin/products/`(4.7.2) 뒤 수정 화면으로 가서 옵션을 넣는다.
 - 수정: `GET /api/admin/products/:id/`(관리자 상세), 저장은 `PATCH`(4.7.3). 옵션 추가는 `POST .../options/`(4.7.4), 옵션 줄의 추가 금액·재고 저장은 `PATCH .../options/:oid/`(4.7.5, 4.7.8).
 - 와이어프레임과 다른 점: 이미지 URL 칸을 더한다(SRS 7.1). 판매 상태 선택 상자 대신 판매 중지·재개 버튼을 둔다. 품절은 고를 수 없고 재고에 따라 표시만 된다(DR-6).
-- 관리자 원두 상세 조회 경로 `GET /api/admin/products/{id}/`는 SRS 6.2 목록에 없다. 수정 화면을 채우려고 필요해서 11.2절에 SRS 추가 제안으로 적었다.
+- 관리자 원두 상세 조회 경로 `GET /api/admin/products/{id}/`는 SRS 6.2 목록에 없다. 수정 화면을 채우려고 필요해서 둔 경로다(11.1절).
 
 ### 6.14 SCR-13 관리자 주문 목록 (FR-44, FR-45, FR-57)
 

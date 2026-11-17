@@ -117,7 +117,7 @@ erDiagram
 | 상품 이미지 | 없음 | `products.image_url`(선택) | SRS 7.1 |
 | 주문 시각 열 | `ordered_at` | `created_at` | FR-30, FR-44 검증 열이 `created_at` 정렬 |
 | 택배사 | `courier_name` 자유 문자열 | `courier_code`(고정 5개). API는 `courier_name`(한국어 이름)으로 내보낸다 | SRS 7.1, FR-34, FR-35 |
-| 결제 주문 번호 | 없음 | `payments.pg_order_id`(PG에 넘기는 시도별 번호) | 4.6.1절, 11.2절 |
+| 결제 주문 번호 | 없음 | `payments.pg_order_id`(PG에 넘기는 시도별 번호) | 4.6.1절, 11.1절 |
 | 결제 수단 | NOT NULL | NULL 허용(승인 응답에서 채움) | 결제 시작 시점엔 수단을 모름(FR-25) |
 | `payments.order_id` 삭제 규칙 | CASCADE | PROTECT | 주문은 지우지 않고, 결제 기록은 환불 근거라 남긴다(NFR-17과 같은 이유) |
 | 주문번호 길이 | `order_id` 최대 50자 | `VARCHAR(16)`(`ORD-YYYYMMDD-NNN` 고정 길이). 일련번호 세 자리라 하루 999건 상한(4.5.2절) | DR-11 |
@@ -140,7 +140,7 @@ erDiagram
 | `Courier` | `CJ`, `HANJIN`, `LOTTE`, `EPOST`, `LOGEN` | CJ대한통운, 한진택배, 롯데택배, 우체국택배, 로젠택배 | SRS 7.1, 5.10절 |
 
 - 값은 영어 대문자 코드로 저장하고, 한국어 표시는 프론트엔드 `src/lib/`의 표에서 바꾼다(NFR-30). HW2 초안 코드처럼 표시 이름(`get_grind_type_display()`)을 저장하지 않는다. 주문 항목 스냅샷도 코드값을 저장한다(DR-12).
-- `WeightSize` 값은 HW2 초안의 `'200g'` 문자열 대신 대문자 코드로 바꿨다. 11.2절 미결에 이유와 확인 신호를 적었다.
+- `WeightSize` 값은 HW2 초안의 `'200g'` 문자열 대신 대문자 코드로 바꿨다. 이유는 11.1절.
 
 ### 5.1 users (회원)
 

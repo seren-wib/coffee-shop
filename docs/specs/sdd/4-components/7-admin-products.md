@@ -37,7 +37,7 @@ stateDiagram-v2
 ### 4.7.2 원두 등록 (FR-37)
 
 - 경로: `POST /api/admin/products/`.
-- 입력: `name`, `origin`, `roast_level`, `base_price`(0 이상 정수), `tasting_notes`(선택), `description`(선택), `image_url`(선택, `https://`).
+- 입력: `name`, `origin`(4.3.7절 고정 목록 중 하나, 목록 밖이면 400), `roast_level`, `base_price`(0 이상 정수), `tasting_notes`(선택), `description`(선택), `image_url`(선택, `https://`).
 - 처리: `sales_status=ON_SALE`로 INSERT. 옵션은 4.7.4로 따로 추가한다.
 - 응답: 201, 관리자 원두 상세(4.7.12).
 - 오류: 400(필수 항목, 음수 가격, 로스팅 값), 403(회원 토큰).
@@ -114,7 +114,7 @@ def increase_stock(option_id: int, quantity: int) -> None:
   - 새 값이 1 이상이면 `SOLD_OUT` → `ON_SALE`.
   - `STOPPED`는 그대로(DR-7).
 - 오류: 400(음수, DR-5).
-- 관리자가 "늘리기·줄이기"를 고르는 대신 새 수량을 넣는다. 화면(SCR-12)은 재고 칸에 지금 값을 채워 두고 바꾼 값을 보낸다. 관리자가 화면을 보는 사이 주문으로 재고가 줄었다면 관리자 값으로 덮인다. 시연 규모에선 받아들이고, 11.2절에 남겼다.
+- 관리자가 "늘리기·줄이기"를 고르는 대신 새 수량을 넣는다. 화면(SCR-12)은 재고 칸에 지금 값을 채워 두고 바꾼 값을 보낸다. 관리자가 화면을 보는 사이 주문으로 재고가 줄었다면 관리자 값으로 덮인다. 시연 규모에선 받아들이고, 11.1절에 남겼다.
 
 ### 4.7.9 판매 중지 (FR-42)
 
