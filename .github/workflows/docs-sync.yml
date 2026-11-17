@@ -30,6 +30,10 @@ jobs:
       - name: Install tools
         run: npm install --no-save marked@15.0.12 @mermaid-js/mermaid-cli@11.4.2
 
+      # ubuntu runners ship no CJK font, so Korean in Mermaid PNGs renders as boxes.
+      - name: Install CJK font
+        run: sudo apt-get update && sudo apt-get install -y fonts-noto-cjk
+
       - name: Render Mermaid blocks to PNG
         run: |
           echo '{"args":["--no-sandbox"]}' > /tmp/puppeteer.json
