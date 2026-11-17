@@ -23,6 +23,7 @@ erDiagram
     TEXT phone_number
     TEXT role
     BOOL is_active
+    BOOL is_superuser
     DATETIME last_login
     DATETIME created_at
   }
@@ -132,8 +133,8 @@ erDiagram
 | `RoastLevel` | `LIGHT`, `MEDIUM`, `DARK` | 라이트, 미디엄, 다크 | DR-1 |
 | `WeightSize` | `200G`, `500G`, `1KG` | 200g, 500g, 1kg | DR-2 |
 | `GrindType` | `WHOLE_BEAN`, `HAND_DRIP`, `ESPRESSO` | 홀빈, 핸드드립용, 에스프레소용 | DR-2 |
-| `SalesStatus` | `ON_SALE`, `SOLD_OUT`, `STOPPED` | 판매 중, 품절, 판매 중지 | 2.2절 표, DR-6 |
-| `OrderStatus` | `PENDING`, `PAID`, `PREPARING`, `SHIPPED`, `DELIVERED`, `CANCEL_REQUESTED`, `CANCELLED` | 결제 대기, 결제 완료, 배송 준비, 배송 중, 배송 완료, 취소 요청, 취소 | 2.6절 표, DR-19 |
+| `SalesStatus` | `ON_SALE`, `SOLD_OUT`, `STOPPED` | 판매 중, 품절, 판매 중지 | SRS 2.2절 표, DR-6 |
+| `OrderStatus` | `PENDING`, `PAID`, `PREPARING`, `SHIPPED`, `DELIVERED`, `CANCEL_REQUESTED`, `CANCELLED` | 결제 대기, 결제 완료, 배송 준비, 배송 중, 배송 완료, 취소 요청, 취소 | SRS 2.6절 표, DR-19 |
 | `PaymentStatus` | `READY`, `SUCCESS`, `FAILED`, `CANCELLED` | 결제 대기, 결제 성공, 결제 실패, 결제 취소 | DR-24 |
 | `PaymentMethod` | `CARD`, `EASY_PAY`, `TRANSFER`, `OTHER` | 카드, 간편결제, 계좌이체, 기타 | NFR-18 |
 | `Courier` | `CJ`, `HANJIN`, `LOTTE`, `EPOST`, `LOGEN` | CJ대한통운, 한진택배, 롯데택배, 우체국택배, 로젠택배 | SRS 7.1, 5.10절 |
@@ -155,7 +156,7 @@ erDiagram
 | `role` | VARCHAR(10) | NOT NULL, 기본 `MEMBER`, `CHECK(role IN ('MEMBER','ADMIN'))` | FR-7(가입은 항상 MEMBER), NFR-10 |
 | `is_active` | BOOL | NOT NULL, 기본 TRUE | Django 인증. 비활성 계정은 로그인 401 |
 | `is_superuser` | BOOL | NOT NULL, 기본 FALSE | PermissionsMixin. 개발용 `/admin/`에서만 의미가 있다 |
-| `last_login` | DATETIME | NULL | Django 인증 |
+| `last_login` | DATETIME | NULL | `AbstractBaseUser`가 만드는 열. 로그인 때 갱신하지 않으므로 늘 NULL이다(4.1.2) |
 | `created_at` | DATETIME | NOT NULL, 생성 시각 | |
 
 - `is_staff`는 열로 두지 않고 `role == ADMIN`을 돌려주는 속성으로 둔다. 개발 환경 `/admin/`만 쓴다.
@@ -192,7 +193,7 @@ erDiagram
 | `sales_status` | VARCHAR(10) | NOT NULL, 기본 `ON_SALE`, `CHECK(sales_status IN ('ON_SALE','SOLD_OUT','STOPPED'))` | DR-6 ~ DR-8, FR-37 |
 | `created_at` | DATETIME | NOT NULL | 목록 정렬(최근 등록 순) |
 
-- 복합 인덱스 `idx_products_filter(origin, roast_level, base_price)`. 고객 목록은 판매 중지 원두를 빼므로 `sales_status`로 거르는 조건이 늘 붙는다. 시연 규모(100종)에서는 인덱스 없이도 빠르지만 NFR-1 측정 때 실행 계획을 같이 본다.
+- 복합 인덱스 `idx_products_filter(origin, roast_level, base_price)`는 원산지·로스팅·가격 필터(FR-3 ~ FR-5)를 위한 것이다. 고객 목록에 늘 붙는 판매 중지 제외 조건(`sales_status`)은 값이 셋뿐이라 인덱스에 넣지 않았다. 시연 규모(100종)에서는 인덱스 없이도 빠르지만 NFR-1 측정 때 실행 계획을 같이 본다.
 - 원두 삭제 API는 없다. 판매를 멈출 땐 판매 중지를 쓴다(FR-42). 주문된 옵션이 있으면 `order_items.option_id` PROTECT가 삭제를 막는다.
 
 ### 5.4 product_options (옵션·재고)
@@ -246,7 +247,7 @@ erDiagram
 
 - 인덱스 `idx_orders_status_created(order_status, created_at DESC)`: 관리자 상태 필터(FR-45)와 회원 상태 필터(FR-55).
 - CHECK `ck_orders_shipped_fields`: `order_status IN ('SHIPPED','DELIVERED')`이면 `courier_code`, `tracking_number`, `shipped_at`이 NOT NULL이다(SRS 2.6절 표 "택배사와 송장번호를 등록해야 한다"). 취소 요청은 배송 중 전에만 들어오므로(DR-20) 취소 요청·취소 주문의 이 열은 늘 비어 있다.
-- 주문 상태는 4.5.2절 전환표에 있는 조건부 UPDATE로만 바뀐다. 모델에 `save()`로 상태를 바꾸는 메서드를 두지 않는다(DR-19).
+- 주문 상태는 4.5.1절 전환표에 있는 조건부 UPDATE로만 바뀐다. 모델에 `save()`로 상태를 바꾸는 메서드를 두지 않는다(DR-19).
 
 ### 5.7 order_items (주문 항목)
 
@@ -287,7 +288,7 @@ erDiagram
 | `products.sales_status` | `decrease_stock`, `increase_stock`, `set_stock`, `stop_sales`, `resume_sales` | 4.7.6 ~ 4.7.10 |
 | `product_options.stock_quantity` | `decrease_stock`, `increase_stock`, `set_stock` | 4.7.6 ~ 4.7.8 |
 | `orders.order_status` | `create_order`, `cancel_pending_order`, `request_cancel`, `mark_paid`, `prepare`, `ship`, `deliver`, `approve_cancel`, `reject_cancel` | 4.5, 4.6, 4.8 |
-| `payments.payment_status` | `start_payment`, `confirm_payment`, `cancel_success_payment` | 4.6 |
+| `payments.payment_status` | `start_payment`, `confirm_payment`, `fail_payment`, `cancel_success_payment`, `cancel_pending_order` | 4.6, 4.5.8 |
 | `user_addresses.is_default` | `create_address`, `set_default_address`, `delete_address` | 4.2 |
 
 ### 5.10 택배사 조회 주소

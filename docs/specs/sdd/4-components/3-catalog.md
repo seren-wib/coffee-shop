@@ -18,7 +18,7 @@ def customer_products():
 
 - 경로: `GET /api/products/`, 공개.
 - 입력: `page`(기본 1). 검색·필터는 4.3.2 ~ 4.3.5.
-- 응답: 200, 7.4절 페이지 형식. `results` 항목은 `{product_id, name, origin, roast_level, base_price, min_price, image_url, sales_status}`. `min_price`는 옵션 가격 중 가장 낮은 값이다(옵션이 없으면 `base_price`).
+- 응답: 200, 7.4절 페이지 형식. `results` 항목은 `{product_id, name, origin, roast_level, base_price, lowest_price, image_url, sales_status}`. `lowest_price`는 옵션 가격 중 가장 낮은 값이다(옵션이 없으면 `base_price`).
 - 페이지 크기는 20 고정이다. `page_size` 매개변수는 받지 않는다.
 - 결과가 없으면 `results: []`, 화면은 "조건에 맞는 원두가 없습니다"를 보인다(UC-1 2단계).
 - 초안: SEQ-02.
@@ -41,7 +41,7 @@ def customer_products():
 ### 4.3.5 로스팅 정도 필터 (FR-5)
 
 - 매개변수 `roast_level`. `LIGHT`, `MEDIUM`, `DARK` 밖의 값은 400.
-- 4.3.2 ~ 4.3.5는 django-filter 없이 뷰의 `get_queryset()`에서 차례로 `filter()`를 이어 붙인다. 여러 조건이 함께 오면 AND다(SRS 3.1절).
+- 4.3.2 ~ 4.3.5는 django-filter 없이 `products/queries.py`의 함수가 `customer_products()`(4.3.0)에 차례로 `filter()`를 이어 붙이고, 뷰의 `get_queryset()`이 그 함수를 부른다. 여러 조건이 함께 오면 AND다(SRS 3.1절).
 
 ### 4.3.6 원두 상세 (FR-6)
 

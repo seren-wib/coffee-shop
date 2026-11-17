@@ -24,7 +24,7 @@ Google Docs: (아직 없음)
 | --- | --- |
 | `docs/old/system-architecture.md`, `docs/old/architecture.md` | 1절(로컬 배치 → EC2 배치) |
 | `docs/old/backend/class-specification.md` | 1.5절, 4절 각 소절, 5.0.2절 |
-| `docs/old/backend/method-algorithms.md` ALG-01 ~ ALG-06 | 4.5.3, 4.5.8, 4.5.9, 4.8.7, 4.8.8, 4.7.6, 4.7.7, 4.8.5, 4.8.6, 4.1.2, 4.1.9 |
+| `docs/old/backend/method-algorithms.md` ALG-01 ~ ALG-06 | 4.5.3, 4.5.8, 4.5.9, 4.8.7, 4.8.8, 4.7.6, 4.7.7, 4.8.4, 4.8.5, 4.8.6, 4.1.2, 4.1.9 |
 | `docs/old/backend/table-specification.md` | 5절 |
 | `docs/old/backend/nonfunctional-design.md` | 7 ~ 10절 |
 | `docs/old/frontend/screen-list.md`, `wireframes/` | 6절 |

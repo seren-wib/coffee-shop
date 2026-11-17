@@ -4,7 +4,9 @@
 
 HW2 초안의 클래스 명세(`docs/old/backend/class-specification.md`)와 메소드 알고리즘(`docs/old/backend/method-algorithms.md`, ALG-01 ~ ALG-06), 시퀀스 다이어그램(`docs/old/frontend/sequence-diagrams/`, SEQ-01 ~ SEQ-09)을 이 절로 옮겼다. 초안의 모델 메서드(`Order.create_order` 등)는 앱의 서비스 함수로 옮겼다(1.5절). 대응은 각 소절 끝의 "초안" 줄에 적는다.
 
-| 파일 | 부품 | FR | 시퀀스 |
+초안 SEQ-02(조회), SEQ-03(담기), SEQ-06(내 정보·배송지)은 브라우저가 API 하나를 부르고 응답을 받는 한 번 왕복이라 따로 시퀀스 다이어그램을 그리지 않았다. 아래 표의 해당 칸은 초안 대응만 뜻한다.
+
+| 파일 | 부품 | FR | 초안 시퀀스 |
 | --- | --- | --- | --- |
 | [1-auth.md](1-auth.md) | 4.1 회원과 인증 | FR-7 ~ FR-13, FR-54 | SEQ-01, SEQ-06 |
 | [2-addresses.md](2-addresses.md) | 4.2 배송지 | FR-14 ~ FR-18 | SEQ-06 |

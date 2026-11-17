@@ -1,6 +1,6 @@
 ## 9. 환경과 시크릿
 
-이름과 설정 위치만 적는다. 값은 적지 않는다(NFR-13). 백엔드는 레포 루트의 `.env`를 python-dotenv로 읽는다(`backend/config/settings.py`). 새 변수를 더하면 `.env.example`에 이름을 같이 더한다(CONTRIBUTING).
+이름과 설정 위치만 적는다. 값은 적지 않는다(NFR-13). 백엔드는 환경 변수 `DOTENV_PATH`가 가리키는 `.env`를 python-dotenv로 읽는다(`backend/config/settings.py`). 개발은 값이 없어 레포 루트의 `.env`, 운영은 systemd 서비스가 `DOTENV_PATH=/srv/coffee-shop/.env`(릴리스 폴더 밖, 10.2절)를 넣는다. 새 변수를 더하면 `.env.example`에 이름을 같이 더한다(CONTRIBUTING).
 
 ### 9.1 백엔드 (Django, 실행 때)
 

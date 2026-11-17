@@ -1,6 +1,6 @@
 ## 4.7 관리자 원두·재고
 
-`products` 앱의 관리자용 뷰와 `products/services.py`. 모든 경로는 `/api/admin/products/` 아래이고 `IsAuthenticated + IsAdminRole`이다(NFR-10, 4.1.10). 재고와 판매 상태를 바꾸는 함수는 이 절의 다섯 개뿐이다(2.1절).
+`products` 앱의 관리자용 뷰와 `products/services.py`. 모든 경로는 `/api/admin/products/` 아래이고 `IsAuthenticated + IsAdminRole`이다(NFR-10, 4.1.10). 재고를 바꾸는 함수는 `decrease_stock`, `increase_stock`, `set_stock` 셋이고(2.1절), 판매 상태는 이 셋과 `stop_sales`, `resume_sales`만 바꾼다(5.9절).
 
 ### 4.7.0 판매 상태 기계 (DR-6, DR-7)
 
@@ -55,7 +55,7 @@ stateDiagram-v2
 
 - 경로: `POST /api/admin/products/{id}/options/`.
 - 입력: `weight_size`, `grind_type`, `extra_price`(0 이상), `stock_quantity`(0 이상).
-- 처리(한 트랜잭션): INSERT 뒤 `stock_quantity > 0`이면 `increase_stock`과 같은 판매 상태 확인(SOLD_OUT → ON_SALE)을 한다. 판매 중지 원두면 그대로다.
+- 처리(한 트랜잭션): 재고 0으로 INSERT한 뒤 요청의 재고 수량으로 `set_stock`(4.7.8)을 부른다. 재고를 바꾸는 길이 셋뿐이라는 규칙(2.1절)을 지키고, 판매 상태 전환도 `set_stock`이 맡는다. 그래서 옵션 없는 `ON_SALE` 원두에 재고 0 옵션을 처음 넣으면 `SOLD_OUT`이 되고(4.7.0), 재고가 있으면 `SOLD_OUT` → `ON_SALE`이다. 판매 중지 원두면 그대로다.
 - 응답: 201, 옵션.
 - 오류: 409 `DUPLICATE_OPTION`(같은 원두에 같은 용량·분쇄도, `uq_product_options_combo`, DR-3), 400(음수 추가 금액, 목록 밖 용량·분쇄도).
 
@@ -98,7 +98,7 @@ def _sync_sold_out(option_id):
 def increase_stock(option_id: int, quantity: int) -> None:
     ProductOption.objects.filter(pk=option_id) \
         .update(stock_quantity=F("stock_quantity") + quantity)
-    product_id = ...
+    product_id = ProductOption.objects.values_list("product_id", flat=True).get(pk=option_id)
     Product.objects.filter(pk=product_id, sales_status=SalesStatus.SOLD_OUT) \
         .update(sales_status=SalesStatus.ON_SALE)
 ```

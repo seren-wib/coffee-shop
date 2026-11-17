@@ -18,7 +18,7 @@
 
 - 경로: `GET /api/admin/orders/{id}/`.
 - 응답: 200. 4.5.6 회원용 상세의 모든 필드에 더해 `member: {user_id, email, user_name, phone_number}`, `status_before_cancel`, 결제 기록 전부(`pg_order_id`, 실패 사유 포함)와 `allowed_actions` 배열을 준다.
-- `allowed_actions`는 지금 상태에서 가능한 동작이다: `PAID` → `["prepare"]`, `PREPARING` → `["ship"]`, `SHIPPED` → `["deliver"]`, `CANCEL_REQUESTED` → `["cancel_approve", "cancel_reject"]`, 그 밖 → `[]`. 화면(SCR-14)은 이 배열로 버튼을 보인다. HW2 와이어프레임의 "배송 상태 드롭다운 + 상태 변경" 대신 동작별 버튼을 둔다(6.14절).
+- `allowed_actions`는 지금 상태에서 가능한 동작이다: `PAID` → `["prepare"]`, `PREPARING` → `["ship"]`, `SHIPPED` → `["deliver"]`, `CANCEL_REQUESTED` → `["cancel_approve", "cancel_reject"]`, 그 밖 → `[]`. 화면(SCR-14)은 이 배열로 버튼을 보인다. HW2 와이어프레임의 "배송 상태 드롭다운 + 상태 변경" 대신 동작별 버튼을 둔다(6.15절).
 - `pg_tid`는 화면에 뒤 8자만 보인다.
 
 ### 4.8.4 배송 준비 (FR-47)
@@ -89,9 +89,10 @@ sequenceDiagram
   API->>DB: 주문 CANCEL_REQUESTED 확인, SUCCESS 결제 찾기
   API->>PG: POST /v1/payments/{paymentKey}/cancel
   PG-->>API: 200 (CANCELED)
+  API->>DB: UPDATE payments SET CANCELLED WHERE SUCCESS
   API->>DB: BEGIN IMMEDIATE
   API->>DB: UPDATE orders SET CANCELLED WHERE CANCEL_REQUESTED
-  API->>DB: 재고 복원, payments SET CANCELLED
+  API->>DB: 재고 복원
   API->>DB: COMMIT
   API-->>UI: 200 {status: CANCELLED}
   Note over A,UI: 배송 처리

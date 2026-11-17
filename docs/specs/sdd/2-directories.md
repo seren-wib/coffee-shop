@@ -31,7 +31,7 @@ coffee-shop/
 │   │   ├── migrations/           # (예정)
 │   │   ├── serializers.py        # (예정)
 │   │   ├── services.py           # (예정) 재고 증감, 판매 상태 전환 (DR-5 ~ DR-7)
-│   │   ├── filters.py            # (예정) 검색·필터 (FR-2 ~ FR-5, FR-56)
+│   │   ├── queries.py            # (예정) customer_products(), 검색·필터 함수 (FR-1 ~ FR-5, FR-56)
 │   │   ├── views.py              # (예정) 고객용 + 관리자용
 │   │   ├── urls.py               # (예정) /api/products/, /api/admin/products/
 │   │   ├── management/commands/
@@ -53,6 +53,7 @@ coffee-shop/
 │   ├── index.html
 │   ├── package.json              # npm 스크립트: dev, build, lint(oxlint)
 │   ├── .oxlintrc.json            # oxlint 설정 (NFR-29)
+│   ├── .env.example              # (예정) VITE_ 변수 이름만 (9.2절)
 │   ├── vite.config.js            # 개발 서버의 /api 프록시
 │   └── src/
 │       ├── main.jsx              # 라우터 장착
@@ -73,7 +74,7 @@ coffee-shop/
 ├── deploy/                       # (예정) 운영 설정 틀. 주소·키 값은 넣지 않는다
 │   ├── nginx/coffee-shop.conf    # 정적 파일, /api/ 프록시, 실제 IP 헤더
 │   ├── systemd/                  # gunicorn 서비스, 백업 서비스와 timer
-│   ├── deploy.sh                 # 릴리스 폴더 만들기, migrate, 빌드, 심볼릭 링크 전환 (10절)
+│   ├── deploy.sh                 # 릴리스 폴더, 의존성, 빌드, 백업, migrate, 링크 전환 (10.4절)
 │   └── backup.sh                 # sqlite3 .backup, 7개 남기기 (NFR-25)
 ├── spikes/                       # (예정) 설계 전 확인 코드 (3절)
 ├── docs/
