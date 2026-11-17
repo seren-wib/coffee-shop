@@ -68,6 +68,17 @@ one Google Doc and submitted from there. The compiled document is not committed.
 
 - `docs/` is Markdown first: documents as Markdown, with images and diagram sources next to
   them. Any other format needs a reason in the PR description.
+- Stage documents live in `docs/specs/`, one folder per document and one file per numbered
+  section: `spmp/` (project plan), `srs/` (requirements), `sdd/` (design), `stp/` (test plan),
+  `sip/` (installation plan), `smp/` (maintenance plan). Start from `docs/specs/README.md`.
+- Which change goes where: a requirement goes to `srs/`, a design or technical choice to `sdd/`
+  (its reason to `sdd/11-rationale.md`), a requirement-level policy to `srs/7-decisions.md`,
+  scope and schedule to `spmp/`.
+- Requirements carry IDs (`DR-n`, `FR-n`, `NFR-n`, `UC-n`). One FR holds one function and one
+  NFR one measurable condition. IDs are never renumbered or reused once merged; a dropped one
+  stays with "(삭제, date, reason)". Test names and PR bodies cite the IDs.
+- `docs/old/` holds the documents written before 2026-11-17 (HW1, HW2 sources). They are kept
+  as source material and are not edited.
 
 ## Language
 
