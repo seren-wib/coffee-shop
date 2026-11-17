@@ -1,6 +1,6 @@
 ## 6. 화면 설계
 
-화면은 HW1 와이어프레임 14장(`docs/old/frontend/wireframes/`)과 화면 목록(`docs/old/frontend/screen-list.md`)을 따른다(SRS 7.1 "화면 흐름은 HW1 와이어프레임을 따른다"). 이 절은 경로, 접근 권한, 공통 레이아웃, 디자인 규칙과 화면마다 쓰는 API를 정한다. 와이어프레임과 SRS가 다른 곳은 SRS를 따르고, 각 화면의 "와이어프레임과 다른 점"에 적는다.
+화면은 HW1 와이어프레임 14장(`docs/images/wireframes/`)을 따른다(SRS 7.1 "화면 흐름은 HW1 와이어프레임을 따른다"). 이 절은 경로, 접근 권한, 공통 레이아웃, 디자인 규칙과 화면마다 쓰는 API를 정한다. 와이어프레임과 SRS가 다른 곳은 SRS를 따르고, 각 화면의 "와이어프레임과 다른 점"에 적는다.
 
 ### 6.0 라우트와 접근
 
@@ -77,7 +77,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 
 ### 6.1 SCR-01 원두 목록 (FR-1 ~ FR-5, NFR-2, UC-1)
 
-![SCR-01](../../old/frontend/wireframes/wireframes-01.drawio.svg)
+![SCR-01](../../images/wireframes/wireframes-01.drawio.svg)
 
 - 구성: 검색창(이름), 필터 세 개(원산지 선택, 가격 범위 선택, 로스팅 정도 선택), 초기화 버튼, 원두 카드 격자(4열), 페이지 버튼.
 - 카드: 이미지, 이름, 원산지·로스팅, `lowest_price`부터 시작하는 가격("15,000원~"), 품절이면 "품절" 배지. 카드를 누르면 `/products/:id`.
@@ -89,7 +89,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 
 ### 6.2 SCR-02 원두 상세 (FR-6, FR-19)
 
-![SCR-02](../../old/frontend/wireframes/wireframes-02.drawio.svg)
+![SCR-02](../../images/wireframes/wireframes-02.drawio.svg)
 
 - 구성: 이미지, 이름·원산지·로스팅·맛 노트, 설명, 용량 버튼(200g/500g/1kg), 분쇄도 선택, 선택한 옵션의 추가 금액·재고·판매 가능 여부, 수량(−/+), 합계, 장바구니 담기 버튼.
 - 데이터: `GET /api/products/:id/`(4.3.6). 용량·분쇄도를 고르면 `options`에서 맞는 옵션을 찾는다. 없는 조합은 고를 수 없게 흐리게 보인다.
@@ -99,7 +99,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 
 ### 6.3 SCR-03 로그인 (FR-8, FR-10)
 
-![SCR-03](../../old/frontend/wireframes/wireframes-03.drawio.svg)
+![SCR-03](../../images/wireframes/wireframes-03.drawio.svg)
 
 - 구성: 이메일, 비밀번호, 로그인 버튼, 회원가입 링크.
 - 데이터: `POST /api/auth/token/`(4.1.2). 성공하면 토큰 저장 뒤 `next`(없으면 `/`)로 간다.
@@ -107,7 +107,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 
 ### 6.4 SCR-04 회원가입 (FR-7)
 
-![SCR-04](../../old/frontend/wireframes/wireframes-04.drawio.svg)
+![SCR-04](../../images/wireframes/wireframes-04.drawio.svg)
 
 - 구성: 이메일, 비밀번호(8자 이상), 비밀번호 확인, 이름, 연락처, 회원가입 버튼.
 - 화면 검증: 비밀번호 8자 미만, 확인 칸 불일치면 요청을 보내지 않는다(FR-7).
@@ -115,7 +115,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 
 ### 6.5 SCR-05 장바구니 (FR-20 ~ FR-22)
 
-![SCR-05](../../old/frontend/wireframes/wireframes-05.drawio.svg)
+![SCR-05](../../images/wireframes/wireframes-05.drawio.svg)
 
 - 구성: 항목 목록(이미지, 이름/용량/분쇄도, 단가, 수량 −/+, 소계, 삭제), 상품 금액, 예상 배송비, 예상 결제금액, 주문하기 버튼.
 - 데이터: `GET /api/cart/`(4.4.2). 수량은 `PATCH /api/cart/items/:id/`(4.4.3), 삭제는 `DELETE`(4.4.4) 뒤 다시 조회.
@@ -124,7 +124,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 
 ### 6.6 SCR-06 주문/결제 (FR-23 ~ FR-25)
 
-![SCR-06](../../old/frontend/wireframes/wireframes-06.drawio.svg)
+![SCR-06](../../images/wireframes/wireframes-06.drawio.svg)
 
 - 구성: 주문 상품(장바구니 전체), 배송지(저장된 배송지 선택 또는 "새 배송지 입력"), 배송 정보 입력 칸, 상품 금액·배송비·최종 결제금액, 결제 수단 안내("결제창에서 선택"), "N원 결제하기" 버튼.
 - 데이터: 들어올 때 `GET /api/cart/`, `GET /api/me/addresses/`. 기본 배송지를 먼저 골라 둔다. 배송지가 없으면 새 배송지 입력 칸을 펼친다.
@@ -147,7 +147,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 
 ### 6.8 SCR-07 주문 목록 (FR-30, FR-55, UC-7)
 
-![SCR-07](../../old/frontend/wireframes/wireframes-07.drawio.svg)
+![SCR-07](../../images/wireframes/wireframes-07.drawio.svg)
 
 - 구성: 상태 탭(전체, 결제 대기, 결제 완료, 배송 준비, 배송 중, 배송 완료, 취소 요청, 취소), 주문 행(주문번호, 주문일, 결제금액, 상태 배지, 상세보기), 페이지 버튼.
 - 데이터: `GET /api/orders/?status&page`(4.5.5). 탭은 URL 쿼리 `status`와 같다.
@@ -155,7 +155,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 
 ### 6.9 SCR-08 주문 상세 (FR-29, FR-31 ~ FR-35, UC-7 ~ UC-9)
 
-![SCR-08](../../old/frontend/wireframes/wireframes-08.drawio.svg)
+![SCR-08](../../images/wireframes/wireframes-08.drawio.svg)
 
 - 구성: 주문 정보(번호, 날짜, 상태), 주문 상품(주문 당시 가격), 결제 정보(금액 세 줄, 결제 기록), 배송 정보(수령인, 연락처, 주소, 택배사, 송장번호, 배송 조회 링크, 배송 완료 시각), 동작 버튼.
 - 데이터: `GET /api/orders/:id/`(4.5.6).
@@ -169,7 +169,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 
 ### 6.10 SCR-09 회원정보 관리 (FR-11 ~ FR-13, UC-10)
 
-![SCR-09](../../old/frontend/wireframes/wireframes-09.drawio.svg)
+![SCR-09](../../images/wireframes/wireframes-09.drawio.svg)
 
 - 구성: 이메일(수정 불가), 이름, 연락처, 수정 저장 버튼. 아래에 현재 비밀번호, 새 비밀번호, 새 비밀번호 확인, 비밀번호 변경 버튼.
 - 데이터: `GET /api/me/`(4.1.7), `PATCH /api/me/`(4.1.8), `POST /api/me/password/`(4.1.9).
@@ -179,7 +179,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 
 ### 6.11 SCR-10 배송지 관리 (FR-14 ~ FR-18)
 
-![SCR-10](../../old/frontend/wireframes/wireframes-10.drawio.svg)
+![SCR-10](../../images/wireframes/wireframes-10.drawio.svg)
 
 - 구성: 새 배송지 추가 버튼, 배송지 카드(기본 표시 ●/○, 수령인/연락처, 우편번호·주소, 수정, 삭제, 기본으로 설정).
 - 데이터: `GET /api/me/addresses/`(4.2.1), 추가 `POST`(4.2.2), 수정 `PATCH`(4.2.3), 삭제 `DELETE`(4.2.4), 기본 지정 `POST .../default/`(4.2.5). 추가·수정은 같은 입력 상자를 쓴다.
@@ -188,7 +188,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 
 ### 6.12 SCR-11 관리자 원두 목록 (FR-36, FR-42, FR-43, FR-56)
 
-![SCR-11](../../old/frontend/wireframes/wireframes-11.drawio.svg)
+![SCR-11](../../images/wireframes/wireframes-11.drawio.svg)
 
 - 구성: 이름 검색, 판매 상태 필터, 원두 등록 버튼, 표(ID, 원두명, 원산지, 로스팅, 기본가격, 옵션 수/총 재고, 판매 상태, 관리).
 - 데이터: `GET /api/admin/products/?search&sales_status&page`(4.7.1, 4.7.11).
@@ -196,7 +196,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 
 ### 6.13 SCR-12 관리자 원두 등록/수정 (FR-37 ~ FR-41)
 
-![SCR-12](../../old/frontend/wireframes/wireframes-12.drawio.svg)
+![SCR-12](../../images/wireframes/wireframes-12.drawio.svg)
 
 - 구성: 원두명, 원산지, 로스팅 정도, 기본 가격, 테이스팅 노트, 설명, 이미지 URL, 저장·취소 버튼. 수정 화면에는 아래에 옵션 표(용량, 분쇄도, 추가금액, 재고수량, 판매 가능 여부)와 옵션 추가 줄, 판매 상태와 판매 중지·재개 버튼.
 - 등록(`/admin/products/new`): `POST /api/admin/products/`(4.7.2) 뒤 수정 화면으로 가서 옵션을 넣는다.
@@ -206,7 +206,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 
 ### 6.14 SCR-13 관리자 주문 목록 (FR-44, FR-45, FR-57)
 
-![SCR-13](../../old/frontend/wireframes/wireframes-13.drawio.svg)
+![SCR-13](../../images/wireframes/wireframes-13.drawio.svg)
 
 - 구성: 주문번호·회원 이메일 검색, 상태 탭, 표(주문번호, 주문일, 회원, 결제금액, 주문 상태, 상세).
 - 데이터: `GET /api/admin/orders/?search&status&page`(4.8.1, 4.8.2, 4.8.9).
@@ -214,7 +214,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 
 ### 6.15 SCR-14 관리자 주문 상세/배송 처리 (FR-46 ~ FR-51, UC-13, UC-14)
 
-![SCR-14](../../old/frontend/wireframes/wireframes-14.drawio.svg)
+![SCR-14](../../images/wireframes/wireframes-14.drawio.svg)
 
 - 구성: 주문·회원 정보, 주문 상품, 결제 정보(최종 금액, 결제 기록별 상태·PG 거래 ID 뒤 8자·실패 사유), 배송 처리(택배사 선택, 송장번호 입력), 취소 요청(사유, 요청 전 상태), 동작 버튼.
 - 데이터: `GET /api/admin/orders/:id/`(4.8.3).

@@ -78,7 +78,7 @@ coffee-shop/
 │   └── backup.sh                 # sqlite3 .backup, 7개 남기기 (NFR-25)
 ├── spikes/                       # (예정) 설계 전 확인 코드 (3절)
 ├── docs/
-│   ├── old/                      # 2026-11-17 전 문서. 재료로만 쓰고 고치지 않는다
+│   ├── images/                   # 문서 그림 (아키텍처, 와이어프레임)
 │   └── specs/                    # 단계 문서 원본 (spmp, srs, sdd, stp, sip, smp)
 ├── .github/
 │   └── pull_request_template.md

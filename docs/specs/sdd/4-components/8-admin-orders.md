@@ -27,7 +27,6 @@
 - 처리(`prepare`): `UPDATE orders SET order_status='PREPARING' WHERE order_id=? AND order_status='PAID'`. 0행이면 409(결제 대기, 취소 요청 등).
 - 같은 순간 회원이 취소를 요청했다면 둘 중 먼저 잠금을 잡은 쪽만 1행이다. 취소 요청 상태가 배송 준비로 덮이지 않는다.
 - 응답: 200, 관리자 주문 상세.
-- 초안: `Order.update_status`, ALG-05 끝 문단.
 
 ### 4.8.5 송장 등록과 배송 시작 (FR-48)
 
@@ -36,14 +35,12 @@
 - 처리(`ship`): 4.5.1 표의 조건부 UPDATE(`WHERE order_status='PREPARING'`)로 `courier_code`, `tracking_number`, `shipped_at=now`, `SHIPPED`를 한 문장에 쓴다.
 - 응답: 200.
 - 오류: 400(송장번호 빈 값·형식, 목록 밖 택배사), 409(배송 준비가 아님).
-- 초안: `Order.register_tracking`, ALG-05.
 
 ### 4.8.6 배송 완료 (FR-49)
 
 - 경로: `POST /api/admin/orders/{id}/deliver/`.
 - 처리(`deliver`): `WHERE order_status='SHIPPED'` 조건부 UPDATE로 `DELIVERED`, `delivered_at=now`.
 - 응답: 200. 오류: 409.
-- 초안: `Order.mark_as_delivered`, ALG-05.
 
 ### 4.8.7 취소 승인 (FR-50, DR-21)
 
@@ -57,7 +54,6 @@
 - 응답: 200, 관리자 주문 상세(`status=CANCELLED`, 결제 `CANCELLED`).
 - 같은 승인이 두 번 오면: 두 번째 요청은 1단계에서 409이거나, 동시에 들어왔으면 2단계 PG 취소는 "이미 취소" 성공으로 지나가고 3단계에서 0행이라 409다. 어느 쪽이든 재고는 한 번만 돌아간다(DR-21, FR-50 검증).
 - PG 취소를 DB보다 먼저 하는 이유: DB를 먼저 `CANCELLED`로 바꾸면 PG 오류 때 "주문은 취소, 결제는 성공"인 상태가 남고, 승인 경로가 `CANCEL_REQUESTED`만 받으므로 다시 시도할 길이 없다. 반대로 PG 먼저면 실패해도 주문이 요청 상태로 남아 재시도할 수 있다. 다른 관리자가 그 사이 반려하면 "결제는 취소, 주문은 결제 완료"가 될 수 있는데, 관리자가 한 명인 시연 환경에서는 받아들이고 11.1절에 남겼다.
-- 초안: `Order.process_cancellation(approved=True)`, ALG-03. 초안은 DB 먼저였다.
 
 ### 4.8.8 취소 반려 (FR-51)
 
@@ -65,7 +61,7 @@
 - 처리(`reject_cancel`): `UPDATE orders SET order_status = status_before_cancel, status_before_cancel = NULL WHERE order_id=? AND order_status='CANCEL_REQUESTED'`. 0행이면 409.
 - `cancel_reason`은 지우지 않는다. 관리자 상세에서 반려된 요청의 사유를 볼 수 있다.
 - 응답: 200, `status`가 `PAID` 또는 `PREPARING`.
-- 초안: `Order.process_cancellation(approved=False)`, ALG-03. HW2 초안 코드가 늘 `PREPARING`으로 돌리던 문제를 `status_before_cancel`로 고친다.
+- 지금 코드(`backend/`)는 반려하면 늘 `PREPARING`으로 돌린다. `status_before_cancel`로 요청 전 상태(`PAID` 또는 `PREPARING`)로 돌리도록 고친다.
 
 ### 4.8.9 주문 검색 (FR-57)
 

@@ -43,11 +43,9 @@
 - 경로: `DELETE /api/me/addresses/{id}/`, 회원.
 - 처리(`delete_address`): 대상이 기본이고 이 회원의 배송지가 2개 이상이면 409 `DEFAULT_ADDRESS_DELETE`, "다른 배송지를 먼저 기본으로 정해 주세요". 그 밖에는 지운다.
 - 응답: 204.
-- 초안: `UserAddress.delete_address`.
 
 ### 4.2.5 기본 배송지 지정 (FR-18)
 
 - 경로: `POST /api/me/addresses/{id}/default/`, 회원.
 - 처리(`set_default_address`, 한 트랜잭션): 다른 기본을 해제하는 UPDATE, 대상의 `is_default=TRUE` UPDATE 순서. 해제를 먼저 해야 부분 유니크 제약에 걸리지 않는다.
 - 응답: 200, 지정한 배송지.
-- 초안: `UserAddress.set_default`.

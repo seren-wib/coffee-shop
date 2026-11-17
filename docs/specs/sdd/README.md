@@ -1,8 +1,8 @@
 # coffee-shop 설계 명세서 (SDD)
 
-작성일 2026-11-17. 커피 원두 쇼핑몰 시스템을 어떻게 만들지 정한다. 요구사항 명세서(SRS, `docs/specs/srs/`)의 DR·FR·NFR·UC ID를 절마다 달아, 각 설계가 어느 요구사항을 실현하는지 추적한다. HW2 설계 초안(`docs/old/backend/`, `docs/old/frontend/`, `docs/old/system-architecture.md`)을 재료로 다시 쓰면서, 로컬 PC 시연이던 배치를 AWS EC2 한 대와 Cloudflare 도메인으로 바꿨다. SRS와 같이 이번 학기 범위 전체를 1차로 두고 차수는 나누지 않는다. 코드는 이 문서를 따른다. 둘이 어긋나면 같은 PR에서 한쪽을 고친다. 이 문서가 확정되면 테스트 계획서(STP)와 구현으로 넘어간다.
+작성일 2026-11-17. 커피 원두 쇼핑몰 시스템을 어떻게 만들지 정한다. 요구사항 명세서(SRS, `docs/specs/srs/`)의 DR·FR·NFR·UC ID를 절마다 달아, 각 설계가 어느 요구사항을 실현하는지 추적한다. 운영 환경은 AWS EC2 한 대와 Cloudflare 도메인이다. SRS와 같이 이번 학기 범위 전체를 1차로 두고 차수는 나누지 않는다. 코드는 이 문서를 따른다. 둘이 어긋나면 같은 PR에서 한쪽을 고친다. 이 문서가 확정되면 테스트 계획서(STP)와 구현으로 넘어간다.
 
-Google Docs: (아직 없음)
+Google Docs: https://docs.google.com/document/d/1PlaC-17Gyowrh1pv8trCXmzSOFiTax6zaEr2K5VWSrA/edit
 
 | 파일 | 내용 | ID |
 | --- | --- | --- |
@@ -17,16 +17,3 @@ Google Docs: (아직 없음)
 | [9-environment.md](9-environment.md) | 환경과 시크릿: 변수 이름과 설정 위치 | NFR-13 |
 | [10-deployment.md](10-deployment.md) | 배포: 브랜치 모델, 서버 배치, nginx, 배포 흐름, 백업·감시 | NFR-20 ~ NFR-25 |
 | [11-rationale.md](11-rationale.md) | 설계 근거: 확정한 기술 결정과 미결 | |
-
-## HW2 초안 대응
-
-| HW2 초안 | 이 문서 |
-| --- | --- |
-| `docs/old/system-architecture.md`, `docs/old/architecture.md` | 1절(로컬 배치 → EC2 배치) |
-| `docs/old/backend/class-specification.md` | 1.5절, 4절 각 소절, 5.0.2절 |
-| `docs/old/backend/method-algorithms.md` ALG-01 ~ ALG-06 | 4.5.3, 4.5.8, 4.5.9, 4.8.7, 4.8.8, 4.7.6, 4.7.7, 4.8.4, 4.8.5, 4.8.6, 4.1.2, 4.1.9 |
-| `docs/old/backend/table-specification.md` | 5절 |
-| `docs/old/backend/nonfunctional-design.md` | 7 ~ 10절 |
-| `docs/old/frontend/screen-list.md`, `wireframes/` | 6절 |
-| `docs/old/frontend/sequence-diagrams/` SEQ-01 ~ SEQ-09 | 4절 시퀀스(4-components/README.md 표) |
-| `docs/old/frontend/sequence-algorithms.md` | 4.1.4, 6.0.2, 6.0.3절 |

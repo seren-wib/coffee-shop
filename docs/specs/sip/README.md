@@ -2,7 +2,7 @@
 
 작성일 YYYY-MM-DD. <이 문서가 다루는 것, 차수 나눈 방법>. 소프트웨어를 각 환경에 올리고 거기서 동작을 확인하는 방법을 적는다.
 
-Google Docs: <link>
+Google Docs: https://docs.google.com/document/d/1aWak-aiFeJwPIUQ34yuOHpkcLaF5M0V-BJD6rZjnhGc/edit
 
 | 파일 | 내용 | ID |
 | --- | --- | --- |
