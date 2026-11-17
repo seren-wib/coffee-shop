@@ -2,6 +2,10 @@
 
 이 절은 배포 단위, 단위 사이의 통신, 데이터가 있는 곳을 정한다. HW2 초안(`docs/old/system-architecture.md`, `docs/old/architecture.md`)은 로컬 PC 한 대에서 Vite 개발 서버와 Django 개발 서버를 띄우는 구성이었다. 이 판은 SRS 7.1절 결정에 따라 운영 환경을 AWS EC2 한 대와 Cloudflare 도메인으로 바꿨다(NFR-20, NFR-21). 인스턴스 사양과 프록시 방식의 근거는 11.1절이다.
 
+![시스템 아키텍처](../../images/system-architecture.drawio.svg)
+
+전체 구성은 위 다이어그램과 같다. 브라우저는 Cloudflare를 거쳐 EC2의 nginx로 들어오고, nginx가 정적 파일과 `/api/`(gunicorn·Django)를 나눈다. 데이터는 같은 인스턴스의 SQLite 파일 하나이고 하루 한 번 백업한다. 결제창과 택배사 조회 페이지는 브라우저가 직접 연다. 아래 1.1 ~ 1.5절이 각 부분을 나눠 설명한다.
+
 ### 1.1 시스템 맥락
 
 ```mermaid

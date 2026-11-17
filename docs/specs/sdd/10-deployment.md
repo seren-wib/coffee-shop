@@ -22,23 +22,23 @@
 
 ```mermaid
 flowchart TB
-  subgraph ec2[EC2 · Ubuntu 24.04]
+  subgraph ec2["EC2 · Ubuntu 24.04"]
     direction TB
-    subgraph rel[/srv/coffee-shop/]
-      current[current → releases/&lt;태그&gt;]
+    subgraph rel["/srv/coffee-shop/"]
+      current["current → releases/&lt;태그&gt;"]
       releases[releases/<br>최근 3개 릴리스]
-      venv[releases/&lt;태그&gt;/.venv]
-      dist[releases/&lt;태그&gt;/frontend/dist]
+      venv["releases/&lt;태그&gt;/.venv"]
+      dist["releases/&lt;태그&gt;/frontend/dist"]
     end
-    data[(/srv/coffee-shop/data/<br>db.sqlite3)]
-    env[/srv/coffee-shop/.env<br>권한 600/]
-    backup[(/var/backups/coffee-shop/<br>최근 7개)]
+    data[("/srv/coffee-shop/data/<br>db.sqlite3")]
+    env["/srv/coffee-shop/.env<br>권한 600"]
+    backup[("/var/backups/coffee-shop/<br>최근 7개")]
     nginx[nginx.service]
     guni[coffee-shop.service<br>gunicorn 워커 3]
     timer[coffee-shop-backup.timer<br>하루 한 번]
   end
-  nginx -->|/| dist
-  nginx -->|/api/ 유닉스 소켓| guni
+  nginx -->|"/"| dist
+  nginx -->|"/api/ 유닉스 소켓"| guni
   guni --> current
   guni --> data
   guni --> env
