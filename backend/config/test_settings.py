@@ -21,6 +21,6 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         **REST_FRAMEWORK.get("DEFAULT_THROTTLE_RATES", {}),
         "login": "10000/min",
-        "signup": "10000/min",
+        "register": "10000/min",
     },
 }
