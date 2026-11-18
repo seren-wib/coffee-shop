@@ -154,7 +154,7 @@
 | `test_fr57_search_by_number_or_email` | FR-57 | 주문번호 일부, 회원 이메일로 각각 일치만 |
 | `test_fr46_order_detail` | FR-46 | 200, 회원·항목·결제 기록·배송지·취소 사유 |
 | `test_fr47_prepare` | FR-47 | `PAID` → 200 `PREPARING`. `PENDING` 409 |
-| `test_fr48_ship` | FR-48 | 200 `SHIPPED`, `shipped_at`, `courier_code`. 송장번호 비면 400, 모르는 택배사 400 |
+| `test_fr48_ship` | FR-48 | 200 `SHIPPED`, `shipped_at`, `courier_code`. 송장번호 비면 400, 숫자 없는 송장번호(`---`) 400, 모르는 택배사 400 |
 | `test_fr49_deliver` | FR-49 | 200 `DELIVERED`, `delivered_at` |
 | `test_fr50_approve_cancel` | FR-50, DR-21 | 200 `CANCELLED`, 재고 복구, 결제 `CANCELLED`, PG `cancel` 1회. 두 번째 승인 409, 재고 한 번만 복구 |
 | `test_fr50_pg_error_keeps_cancel_requested` | FR-50 | 가짜 PG 취소 오류 → 502 `PG_ERROR`, 주문 `CANCEL_REQUESTED`, 재고 그대로 |
