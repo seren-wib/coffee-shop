@@ -25,6 +25,7 @@ erDiagram
     BOOL is_active
     BOOL is_superuser
     DATETIME last_login
+    DATETIME privacy_agreed_at
     DATETIME created_at
   }
   user_addresses {
@@ -115,6 +116,7 @@ erDiagram
 | 비밀번호 열 | `password_hash` | `password`(Django `AbstractBaseUser`) | 11.1절 커스텀 사용자 모델, NFR-6 |
 | 인증용 열 | 없음 | `is_active`, `last_login`, `is_superuser`(PermissionsMixin) | 11.1절 |
 | 상품 이미지 | 없음 | `products.image_url`(선택) | SRS 7.1 |
+| 개인정보 동의 시각 | 없음 | `users.privacy_agreed_at` | FR-58 (2026-11-19 추가) |
 | 주문 시각 열 | `ordered_at` | `created_at` | FR-30, FR-44 검증 열이 `created_at` 정렬 |
 | 택배사 | `courier_name` 자유 문자열 | `courier_code`(고정 5개). API는 `courier_name`(한국어 이름)으로 내보낸다 | SRS 7.1, FR-34, FR-35 |
 | 결제 주문 번호 | 없음 | `payments.pg_order_id`(PG에 넘기는 시도별 번호) | 4.6.1절, 11.1절 |
@@ -157,6 +159,7 @@ erDiagram
 | `is_active` | BOOL | NOT NULL, 기본 TRUE | Django 인증. 비활성 계정은 로그인 401 |
 | `is_superuser` | BOOL | NOT NULL, 기본 FALSE | PermissionsMixin. 개발용 `/admin/`에서만 의미가 있다 |
 | `last_login` | DATETIME | NULL | `AbstractBaseUser`가 만드는 열. 로그인 때 갱신하지 않으므로 늘 NULL이다(4.1.2) |
+| `privacy_agreed_at` | DATETIME | NULL. 가입(4.1.1)이 채운다. 관리 명령으로 만든 관리자 계정만 NULL | FR-58 (2026-11-19 추가) |
 | `created_at` | DATETIME | NOT NULL, 생성 시각 | |
 
 - `is_staff`는 열로 두지 않고 `role == ADMIN`을 돌려주는 속성으로 둔다. 개발 환경 `/admin/`만 쓴다.

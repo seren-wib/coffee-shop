@@ -41,19 +41,21 @@ AUTH_PASSWORD_VALIDATORS = [
 - 비밀번호 해시는 Django 기본 `PBKDF2PasswordHasher`(`pbkdf2_sha256`)다. `PASSWORD_HASHERS`는 바꾸지 않는다(NFR-6).
 - 액세스 토큰에는 `user_id`, `role` 클레임을 넣는다. `role`은 화면에서 관리자 메뉴를 보일지 정하는 데만 쓰고, 서버의 권한 판단은 늘 DB의 `role`로 한다(NFR-10).
 
-### 4.1.1 회원가입 (FR-7)
+### 4.1.1 회원가입 (FR-7, FR-58)
 
 - 경로: `POST /api/auth/register/`, 공개.
-- 입력: `email`, `password`, `user_name`, `phone_number`. `role`은 시리얼라이저 필드에 없어서 보내도 무시된다.
+- 입력: `email`, `password`, `user_name`, `phone_number`, `privacy_agreed`(불리언, 2026-11-19 추가). `role`은 시리얼라이저 필드에 없어서 보내도 무시된다.
 - 처리:
   1. `email`을 소문자로 바꾸고 형식을 확인한다.
   2. `validate_password(password)`로 8자 이상인지 본다.
   3. 같은 이메일이 있으면 400 `VALIDATION_ERROR`, `fields.email`에 "이미 가입된 이메일입니다".
-  4. `User.objects.create_user(email, password, ...)`가 `set_password`로 해시하고 `role=MEMBER`로 저장한다.
+  4. `privacy_agreed`가 `true`가 아니면(빠짐, `false`) 400 `VALIDATION_ERROR`, `fields.privacy_agreed`에 "개인정보 수집·이용에 동의해야 가입할 수 있습니다"(FR-58).
+  5. `User.objects.create_user(email, password, ...)`가 `set_password`로 해시하고 `role=MEMBER`, `privacy_agreed_at=timezone.now()`로 저장한다. `privacy_agreed` 값 자체는 열로 두지 않는다(5.1절).
 - 응답: 201, `{user_id, email, user_name, phone_number, role}`. 비밀번호와 해시는 응답에 없다.
-- 오류: 400(형식, 7자 비밀번호, 겹치는 이메일), 429(IP당 시간당 20회 초과).
+- 오류: 400(형식, 7자 비밀번호, 겹치는 이메일, 동의 없음), 429(IP당 시간당 20회 초과).
 - 요청 제한: `throttle_classes = [ScopedRateThrottle]`, `throttle_scope = "register"`(8.3절).
-- 화면(SCR-04): 비밀번호 확인 칸이 비밀번호와 다르면 요청을 보내지 않고 칸 옆에 오류를 보인다. 성공하면 로그인 화면으로 보낸다(UC-2).
+- 화면(SCR-04): 비밀번호 확인 칸이 비밀번호와 다르거나 동의 칸이 비어 있으면 요청을 보내지 않고 칸 옆에 오류를 보인다. 성공하면 로그인 화면으로 보낸다(UC-2).
+- 관리 명령(FR-53)으로 만든 관리자 계정은 이 경로를 지나지 않으므로 `privacy_agreed_at`이 NULL이다.
 
 ### 4.1.2 로그인과 토큰 발급 (FR-8, NFR-7)
 
