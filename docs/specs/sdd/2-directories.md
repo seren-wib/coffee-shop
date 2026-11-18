@@ -1,14 +1,17 @@
 ## 2. 디렉터리 구조
 
-구현이 끝났을 때의 레포 구조다. `(예정)`은 2026-11-17 현재 레포에 없고 구현(텀프로젝트 마감 2026-11-30 24:00)에서 만드는 것이다. (2026-11-19 변경. 이전에는 출처 없는 날짜 2026-11-22) 테이블 정의의 원본은 모델과 마이그레이션이고 `backend/schema.sql`은 지운다(11.1절).
+구현이 끝났을 때의 레포 구조다. `(예정)`은 2026-11-17 현재 레포에 없고 구현(텀프로젝트 마감 2026-11-30 24:00)에서 만드는 것이다. (2026-11-19 변경. 이전에는 출처 없는 날짜 2026-11-22) 2026-11-19에 스파이크(#73)와 CI(#77)로 생긴 파일을 반영했다. 테이블 정의의 원본은 모델과 마이그레이션이고 `backend/schema.sql`은 지운다(11.1절).
 
 ```
 coffee-shop/
 ├── backend/
 │   ├── manage.py
 │   ├── requirements.txt          # 고정 버전 의존성 (NFR-19)
+│   ├── requirements-dev.txt      # 개발·CI 전용(black). 운영 서버에는 설치하지 않음 (STP 1.3절)
 │   ├── config/
 │   │   ├── settings.py           # 환경 변수로 운영·개발을 가른다 (9절)
+│   │   ├── test_settings.py      # 테스트 설정: 메모리 SQLite, 가짜 시크릿 (STP 1.2절)
+│   │   ├── test_settings_file.py # 동시 주문 테스트용 파일 SQLite (NFR-15, STP 1.2절)
 │   │   ├── urls.py               # /api/ 경로 묶음. /admin/은 DEBUG일 때만 (11.1절)
 │   │   └── wsgi.py               # gunicorn 진입점
 │   ├── common/                   # (예정) 앱 공통
@@ -51,7 +54,7 @@ coffee-shop/
 │       └── tests/                # (예정)
 ├── frontend/
 │   ├── index.html
-│   ├── package.json              # npm 스크립트: dev, build, lint(oxlint)
+│   ├── package.json              # npm 스크립트: dev, build, lint(oxlint), test(vitest)
 │   ├── .oxlintrc.json            # oxlint 설정 (NFR-29)
 │   ├── .env.example              # (예정) VITE_ 변수 이름만 (9.2절)
 │   ├── vite.config.js            # 개발 서버의 /api 프록시
@@ -76,11 +79,14 @@ coffee-shop/
 │   ├── systemd/                  # gunicorn 서비스, 백업 서비스와 timer
 │   ├── deploy.sh                 # 릴리스 폴더, 의존성, 빌드, 백업, migrate, 링크 전환 (10.4절)
 │   └── backup.sh                 # sqlite3 .backup, 7개 남기기 (NFR-25)
-├── spikes/                       # (예정) 설계 전 확인 코드 (3절)
+├── spikes/                       # 설계 전 확인 코드, 스파이크 하나에 폴더 하나 (3절)
 ├── docs/
 │   ├── images/                   # 문서 그림 (아키텍처, 와이어프레임)
 │   └── specs/                    # 단계 문서 원본 (spmp, srs, sdd, stp, sip, smp)
 ├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml                # backend, frontend 검사 (STP 7절)
+│   │   └── docs-sync.yml         # main의 docs/specs → Google Docs
 │   └── pull_request_template.md
 ├── .env.example                  # 환경 변수 이름만 (NFR-13, 9절)
 ├── .editorconfig, .gitattributes, .prettierrc, pyproject.toml   # 형식 규칙 (NFR-29)

@@ -59,7 +59,7 @@ Vite는 `VITE_`로 시작하는 변수만 빌드 결과에 넣는다. 빌드 결
 | AWS | EC2 인스턴스, Elastic IP, 보안 그룹, EBS | 운영자 |
 | Cloudflare | DNS 영역, 프록시, SSL/TLS 설정, Origin CA 인증서 발급 | 운영자 |
 | 토스페이먼츠 개발자 센터 | 테스트 클라이언트 키, 테스트 시크릿 키 | 운영자 |
-| GitHub | 레포. 지금은 Actions 시크릿 없음(CI 미도입, STP 7절) | 팀 |
+| GitHub | 레포, Actions CI(`ci.yml`의 `backend`·`frontend` 작업, STP 7절). Actions 시크릿은 없다. `main` 필수 검사 등록은 레포 관리자 몫으로 남아 있다(STP 7.2절) (2026-11-19 변경. 이전에는 "CI 미도입") | 팀 |
 
 계정 이름과 로그인 정보는 이 문서에 쓰지 않는다. 처음 한 번 하는 설정 절차는 SIP 3절이다.
 
