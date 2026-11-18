@@ -1,8 +1,8 @@
-**Question:** with a Toss Payments test key, do the payment window, `successUrl` return, server confirm, full cancel, double cancel, amount mismatch, `failUrl`, 10-minute expiry and `Idempotency-Key` behave as SDD 4.6 assumes? **Answer:** not run yet (waiting for the test key).
+**Question:** with a Toss Payments test key, do the payment window, `successUrl` return, server confirm, full cancel, double cancel, amount mismatch, `failUrl`, 10-minute expiry and `Idempotency-Key` behave as SDD 4.6 assumes? **Answer:** partly (2026-11-19). Closing the window does not go to `failUrl`; `requestPayment()` rejects with `USER_CANCEL`. The other six steps need the card company's identity check, which only the account owner can pass; see SDD 3.2.
 
 # toss-confirm-cancel
 
-Spike for SDD 3.2.
+Spike for SDD 3.2. Run on 2026-11-19 (step 5 only).
 
 ## Keys
 
