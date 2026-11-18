@@ -10,6 +10,7 @@ urlpatterns = [
     path("api/health/", health, name="health"),
     path("api/", include("users.urls")),
     path("api/", include("products.urls")),
+    path("api/", include("orders.urls")),
 ]
 
 # The Django admin exists only in development (SDD 11.1).
