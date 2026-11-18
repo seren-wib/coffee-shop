@@ -1,6 +1,16 @@
 """Read-side querysets for products (SDD 4.3.0 ~ 4.3.5). No django-filter."""
 
-from django.db.models import Case, F, IntegerField, Min, Prefetch, Value, When
+from django.db.models import (
+    Case,
+    Count,
+    F,
+    IntegerField,
+    Min,
+    Prefetch,
+    Sum,
+    Value,
+    When,
+)
 from django.db.models.functions import Coalesce
 from rest_framework.exceptions import ValidationError
 
@@ -85,4 +95,35 @@ def filter_customer_products(params):
     # Lowest option price; the base price when there is no option (4.3.1).
     return qs.annotate(
         lowest_price=F("base_price") + Coalesce(Min("options__extra_price"), Value(0))
+    )
+
+
+def admin_products(params):
+    """Every product including STOPPED, with option totals (4.7.1, 4.7.11)."""
+    qs = (
+        Product.objects.prefetch_related(
+            Prefetch("options", queryset=ordered_options())
+        )
+        .annotate(
+            option_count=Count("options"),
+            total_stock=Coalesce(Sum("options__stock_quantity"), Value(0)),
+        )
+        .order_by("-created_at", "-product_id")
+    )
+
+    search = (params.get("search") or "").strip()
+    if search:
+        qs = qs.filter(name__icontains=search)
+
+    sales_status = params.get("sales_status")
+    if sales_status:
+        if sales_status not in SalesStatus.values:
+            raise ValidationError({"sales_status": ["판매 상태를 확인해 주세요."]})
+        qs = qs.filter(sales_status=sales_status)
+    return qs
+
+
+def admin_product_detail():
+    return Product.objects.prefetch_related(
+        Prefetch("options", queryset=ordered_options())
     )
