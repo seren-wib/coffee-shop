@@ -43,6 +43,12 @@ class OrderModelTests(TestCase):
         order.shipped_at = timezone.now()
         order.save()
 
+    def test_fr51_cancel_request_keeps_previous_status(self):
+        order = make_order(self.user, self.option, status=OrderStatus.PAID)
+        order.order_status = OrderStatus.CANCEL_REQUESTED
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            order.save()
+
     def test_nfr17_member_with_orders_cannot_be_deleted(self):
         make_order(self.user, self.option)
         with self.assertRaises(ProtectedError):

@@ -9,6 +9,8 @@ _seq = count(1)
 
 def make_order(user, option, quantity=1, status=OrderStatus.PENDING, **fields):
     n = next(_seq)
+    if status == OrderStatus.CANCEL_REQUESTED:
+        fields.setdefault("status_before_cancel", OrderStatus.PAID)
     price = option.price
     total = price * quantity
     fee = 0 if total >= 30000 else 3000

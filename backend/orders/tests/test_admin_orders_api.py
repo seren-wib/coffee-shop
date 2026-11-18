@@ -135,6 +135,12 @@ class AdminOrderApiTests(APITestCase):
             ).status_code,
             400,
         )
+        self.assertEqual(
+            self._post(
+                order, "ship", {"courier_code": "CJ", "tracking_number": "---"}
+            ).status_code,
+            400,
+        )
         res = self._post(
             order, "ship", {"courier_code": "CJ", "tracking_number": "1234-5678"}
         )
