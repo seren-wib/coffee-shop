@@ -58,9 +58,11 @@ POST   /api/orders/{id}/cancel/                    결제 대기 주문 취소 (
 POST   /api/orders/{id}/cancel-request/            취소 요청 (FR-33)
 POST   /api/orders/{id}/payments/                  결제 시작, 재결제 (FR-25, FR-29)
 POST   /api/payments/confirm/                      PG 결제 결과 확인 (FR-26 ~ FR-28)
+POST   /api/payments/fail/                         결제창 실패 기록 (FR-28, 2026-11-19 추가)
 
 GET    /api/admin/products/                        전체 원두 목록, 이름 검색 (FR-36, FR-56)
 POST   /api/admin/products/                        원두 등록 (FR-37)
+GET    /api/admin/products/{id}/                   원두 상세, 수정 화면용 (FR-38 ~ FR-41, 2026-11-19 추가)
 PATCH  /api/admin/products/{id}/                   원두 수정 (FR-38)
 POST   /api/admin/products/{id}/options/           옵션 추가 (FR-39)
 PATCH  /api/admin/products/{id}/options/{oid}/     옵션 수정, 재고 조정 (FR-40, FR-41)
