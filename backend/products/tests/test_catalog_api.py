@@ -16,7 +16,7 @@ def names(res):
 
 class ProductListTests(APITestCase):
     def test_fr1_list_pages_by_20_without_stopped(self):
-        for i in range(21):
+        for i in range(22):
             make_product(name=f"판매 {i}")
         make_product(name="품절", sales_status=SalesStatus.SOLD_OUT)
         make_product(name="중지 1", sales_status=SalesStatus.STOPPED)
@@ -27,7 +27,7 @@ class ProductListTests(APITestCase):
 
         self.assertEqual(first.status_code, 200)
         body = first.json()
-        self.assertEqual(body["count"], 22)
+        self.assertEqual(body["count"], 23)
         self.assertEqual(len(body["results"]), 20)
         self.assertEqual(body["next"], "/api/products/?page=2")
         all_names = names(first) | names(second)
