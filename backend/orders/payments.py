@@ -12,7 +12,7 @@ from rest_framework import status
 
 from common.exceptions import DomainError
 from orders.models import Order, OrderStatus, Payment, PaymentMethod, PaymentStatus
-from orders.pg import PgError, get_client, masked
+from orders.pg import PgError, PgResult, get_client, masked
 from orders.services import own_order
 
 logger = logging.getLogger(__name__)
@@ -89,7 +89,7 @@ def confirm_payment(user, *, payment_key, pg_order_id, amount):
         if order.order_status == OrderStatus.CANCELLED:
             # Cancelled with the order before approval; Toss takes no money
             # until confirm is called, so there is nothing to cancel at the PG.
-            raise _order_gone()
+            raise _closed(ORDER_GONE)
         raise DomainError("INVALID_STATE", "이미 끝난 결제입니다.")
 
     client = get_client()
@@ -98,12 +98,14 @@ def confirm_payment(user, *, payment_key, pg_order_id, amount):
         if not result.ok and result.code == "ALREADY_PROCESSED_PAYMENT":
             # Approved earlier but our write was lost: read the PG state (SDD 4.6.3).
             result = client.get(payment_key)
-    except PgError:
-        logger.warning("confirm timeout payment_id=%s", payment.payment_id)
+            if result.ok and result.order_id not in (None, pg_order_id):
+                result = PgResult(ok=False, code="ORDER_MISMATCH", message=None)
+    except PgError as e:
+        logger.warning("confirm %s payment_id=%s", e.code, payment.payment_id)
         raise _pg_error() from None  # status unknown: keep READY
 
-    if not result.ok:
-        reason = f"{result.code}: {result.message}"
+    if not result.approved:
+        reason = f"{result.code or result.status}: {result.message or ''}"
         Payment.objects.filter(
             pk=payment.pk, payment_status=PaymentStatus.READY
         ).update(payment_status=PaymentStatus.FAILED, failure_reason=reason[:500])
@@ -114,17 +116,16 @@ def confirm_payment(user, *, payment_key, pg_order_id, amount):
         )
 
     method = TOSS_METHODS.get(result.method, PaymentMethod.OTHER)
-    if _mark_paid(payment, order, payment_key, method, result):
+    outcome = _mark_paid(payment, order, payment_key, method, result)
+    if outcome == PAID:
         order.refresh_from_db()
         return order
 
-    # Approved but the amount differs or the order was cancelled meanwhile:
-    # keep the PG key, cancel at the PG, close the payment (DR-23, FR-27).
-    mismatch = result.total_amount != order.final_payment_amt
-    reason = MISMATCH if mismatch else ORDER_GONE
+    # Approved but it cannot stand: refund at the PG, close the payment with the
+    # reason, and tell the member why (DR-23, FR-27).
     try:
         cancel = client.cancel(
-            payment_key, reason, idempotency_key=f"cancel-{payment.payment_id}"
+            payment_key, outcome, idempotency_key=f"cancel-{payment.payment_id}"
         )
     except PgError:
         raise _pg_error() from None
@@ -136,50 +137,75 @@ def confirm_payment(user, *, payment_key, pg_order_id, amount):
             cancel.code,
         )
         raise _pg_error()
-    Payment.objects.filter(pk=payment.pk, payment_status=PaymentStatus.READY).update(
-        payment_status=PaymentStatus.CANCELLED, failure_reason=reason
+    # READY, or CANCELLED by a newer attempt meanwhile: either way record the refund.
+    Payment.objects.filter(
+        pk=payment.pk,
+        payment_status__in=[PaymentStatus.READY, PaymentStatus.CANCELLED],
+    ).update(
+        payment_status=PaymentStatus.CANCELLED,
+        pg_tid=payment_key,
+        failure_reason=outcome,
     )
-    if mismatch:
-        raise DomainError(
-            "PAYMENT_MISMATCH", "결제 금액이 주문 금액과 달라 취소했습니다."
-        )
-    raise _order_gone()
+    raise _closed(outcome)
 
 
-def _order_gone():
-    return DomainError("ORDER_NOT_PENDING", "이미 취소된 주문이라 결제를 취소했습니다.")
+PAID = "PAID"
+ALREADY_PAID = "이미 결제된 주문"
+CLOSED_ERRORS = {
+    MISMATCH: ("PAYMENT_MISMATCH", "결제 금액이 주문 금액과 달라 취소했습니다."),
+    ORDER_GONE: ("ORDER_NOT_PENDING", "이미 취소된 주문이라 결제를 취소했습니다."),
+    ALREADY_PAID: ("ALREADY_PAID", "이미 결제된 주문이라 이 결제를 취소했습니다."),
+    REPLACED: ("INVALID_STATE", "새 결제가 시작돼 이 결제를 취소했습니다."),
+}
+
+
+def _closed(reason):
+    code, message = CLOSED_ERRORS[reason]
+    return DomainError(code, message)
 
 
 def _mark_paid(payment, order, payment_key, method, result):
-    """Record the PG answer; PAID + SUCCESS only if the amount matches and the order
-    is still PENDING (mark_paid in SDD 4.5.1). Returns whether it was paid."""
+    """mark_paid in SDD 4.5.1: the payment becomes SUCCESS first, and the order PAID
+    only in the same savepoint. Returns PAID or the reason the approval cannot stand."""
     with transaction.atomic():
-        Payment.objects.filter(
+        recorded = Payment.objects.filter(
             pk=payment.pk, payment_status=PaymentStatus.READY
         ).update(
             pg_tid=payment_key,
             payment_method=method,
             paid_amount=result.total_amount,
         )
+    if recorded == 0:
+        return REPLACED  # a newer attempt closed this one while the PG approved it
     if result.total_amount != order.final_payment_amt:
-        return False
+        return MISMATCH
     try:
         with transaction.atomic():
-            paid = Order.objects.filter(
-                pk=order.pk, order_status=OrderStatus.PENDING
-            ).update(order_status=OrderStatus.PAID)
-            if paid == 0:
-                return False
-            Payment.objects.filter(
+            success = Payment.objects.filter(
                 pk=payment.pk, payment_status=PaymentStatus.READY
             ).update(
                 payment_status=PaymentStatus.SUCCESS,
                 approved_at=result.approved_at or timezone.now(),
             )
+            if success == 0:
+                return REPLACED
+            paid = Order.objects.filter(
+                pk=order.pk, order_status=OrderStatus.PENDING
+            ).update(order_status=OrderStatus.PAID)
+            if paid == 0:
+                # Undo the SUCCESS above; read why only after the savepoint ends.
+                transaction.set_rollback(True)
     except IntegrityError:
         # Another approval already made this order's one SUCCESS (uq_payments_order_success).
-        return False
-    return True
+        return ALREADY_PAID
+    if paid == 0:
+        return _not_pending_reason(order)
+    return PAID
+
+
+def _not_pending_reason(order):
+    current = Order.objects.values_list("order_status", flat=True).get(pk=order.pk)
+    return ORDER_GONE if current == OrderStatus.CANCELLED else ALREADY_PAID
 
 
 @transaction.atomic

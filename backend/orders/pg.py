@@ -5,6 +5,7 @@ Only the fields in PgResult are kept; the raw response is never stored (NFR-18).
 """
 
 import base64
+import http.client
 import json
 import logging
 import socket
@@ -28,6 +29,19 @@ class PgResult:
     approved_at: datetime | None = None
     code: str | None = None
     message: str | None = None
+    order_id: str | None = None
+
+    @property
+    def approved(self):
+        # Only DONE means the money was taken (e.g. a virtual account waits).
+        return self.ok and self.status == "DONE"
+
+
+def _json(raw):
+    try:
+        return json.loads(raw or b"{}")
+    except ValueError as e:
+        raise PgError("BAD_RESPONSE", "결제사 응답을 읽지 못했습니다.") from e
 
 
 class PgError(Exception):
@@ -80,10 +94,15 @@ class TossPaymentsClient:
         data = json.dumps(body).encode() if body is not None else None
         try:
             with urllib.request.urlopen(request, data=data, timeout=self.TIMEOUT) as r:
-                payload = json.loads(r.read() or b"{}")
-                return self._result(payload)
+                return self._result(_json(r.read()))
         except urllib.error.HTTPError as e:
-            payload = json.loads(e.read() or b"{}")
+            if e.code >= 500:
+                # The PG failed on its side: whether it approved is unknown.
+                raise PgError("PG_UNAVAILABLE", "결제사 응답에 문제가 있습니다.") from e
+            try:
+                payload = _json(e.read())
+            except PgError:
+                payload = {}
             logger.warning(
                 "toss %s %s -> %s %s",
                 method,
@@ -92,13 +111,18 @@ class TossPaymentsClient:
                 payload.get("code"),
             )
             return PgResult(
-                ok=False, code=payload.get("code"), message=payload.get("message")
+                ok=False,
+                code=payload.get("code") or f"HTTP_{e.code}",
+                message=payload.get("message"),
             )
         except (TimeoutError, socket.timeout) as e:
             raise PgError("TIMEOUT", "결제사 응답이 늦어지고 있습니다.") from e
         except urllib.error.URLError as e:
             if isinstance(e.reason, (TimeoutError, socket.timeout)):
                 raise PgError("TIMEOUT", "결제사 응답이 늦어지고 있습니다.") from e
+            raise PgError("NETWORK", "결제사에 연결하지 못했습니다.") from e
+        except (OSError, http.client.HTTPException) as e:
+            # Connection reset or dropped mid-response: status unknown.
             raise PgError("NETWORK", "결제사에 연결하지 못했습니다.") from e
 
     @staticmethod
@@ -107,6 +131,7 @@ class TossPaymentsClient:
         return PgResult(
             ok=True,
             status=payload.get("status"),
+            order_id=payload.get("orderId"),
             total_amount=payload.get("totalAmount"),
             method=payload.get("method"),
             approved_at=datetime.fromisoformat(approved) if approved else None,
