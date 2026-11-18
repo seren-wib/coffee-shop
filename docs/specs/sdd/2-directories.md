@@ -40,7 +40,7 @@ coffee-shop/
 │   │   ├── admin_views.py        # 관리자용 (4.7)
 │   │   ├── urls.py               # (예정) /api/products/, /api/admin/products/
 │   │   ├── management/commands/
-│   │   │   └── seed_demo.py      # (예정) 시연 데이터 100·50·500 (NFR-3)
+│   │   │   └── seed_demo.py      # 시연 데이터 100·50·500 (NFR-3)
 │   │   └── tests/                # (예정)
 │   └── orders/
 │       ├── models.py             # CartItem, Order, OrderItem, Payment, 열거형
