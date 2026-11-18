@@ -1,0 +1,14 @@
+{
+  "name": "toss-confirm-cancel-spike",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@tosspayments/tosspayments-sdk": "2.10.0"
+  },
+  "devDependencies": {
+    "vite": "8.3.8"
+  }
+}
