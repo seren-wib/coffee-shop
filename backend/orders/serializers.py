@@ -237,3 +237,16 @@ class OrderSummarySerializer(serializers.ModelSerializer):
     def get_first_item_name(self, order):
         items = sorted(order.items.all(), key=lambda i: i.order_item_id)
         return items[0].product_name if items else None
+
+
+class ConfirmSerializer(serializers.Serializer):
+    # Toss's own names, passed through from successUrl (SDD 7.1).
+    paymentKey = serializers.CharField(max_length=200)
+    orderId = serializers.CharField(max_length=64)
+    amount = serializers.IntegerField(min_value=0)
+
+
+class FailSerializer(serializers.Serializer):
+    orderId = serializers.CharField(max_length=64, required=False, allow_blank=True)
+    code = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    message = serializers.CharField(max_length=400, required=False, allow_blank=True)

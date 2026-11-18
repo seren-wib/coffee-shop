@@ -47,7 +47,7 @@
 | `test_dr21_cancel_restores_stock_once` | DR-21 | 같은 주문 취소 승인 서비스를 두 번 부름 → 재고는 주문 수량만큼 한 번만 늘어남, 두 번째는 409 |
 | `test_fr35_tracking_url_strips_dash_and_encodes` | FR-35 | `CJ`, `1234-5678-9012` → 조회 주소에 `123456789012`, 택배사 5곳 모두 주소 생성 |
 
-### 2.3 결제 (`orders/tests/test_payments.py`, 가짜 PG)
+### 2.3 결제 (`orders/tests/test_payments.py`, 가짜 PG. `test_pg.py`는 `urlopen`을 바꿔 `TossPaymentsClient`만)
 
 | 테스트 | SRS | 기대 |
 | --- | --- | --- |
@@ -57,6 +57,19 @@
 | `test_dr23_success_on_cancelled_order_is_cancelled` | DR-22, DR-23, FR-27 | 이미 `CANCELLED`인 주문의 승인 성공 → PG `cancel` 1회, 주문 `CANCELLED` 유지 |
 | `test_dr24_failure_keeps_order_pending` | DR-24, FR-28 | 가짜 PG 실패 코드 → 결제 `FAILED` + 실패 사유, 주문 `PENDING` |
 | `test_fr26_timeout_keeps_payment_ready` | FR-26 | 가짜 PG 시간 초과 → 502 `PG_ERROR` 예외, 결제 `READY` 유지 |
+| `test_dr22_confirm_twice_does_not_call_pg_again` | DR-22, FR-26 | 성공한 결제를 다시 확인 → 같은 결과, PG `confirm` 1회 |
+| `test_fr26_already_processed_reads_payment_from_pg` | FR-26 | PG가 `ALREADY_PROCESSED_PAYMENT` → `get`으로 상태를 읽어 주문 `PAID` |
+| `test_fr50_other_pg_cancel_error_raises_pg_error` | FR-50 | PG 취소가 다른 오류 → 502 `PG_ERROR` 예외, 결제 `SUCCESS` 그대로 |
+| `test_dr24_attempt_replaced_during_approval_is_refunded` | DR-24, FR-29 | 승인 중에 새 결제 시작으로 대체된 시도 → PG `cancel` 1회, 결제 `CANCELLED`(`pg_tid` 남김), 주문 `PENDING`, `SUCCESS` 0행 |
+| `test_dr24_second_success_on_same_order_is_refunded_as_already_paid` | DR-24, FR-29 | 같은 주문에 성공 결제가 이미 있으면 승인한 결제를 PG 취소, 409 `ALREADY_PAID` |
+| `test_fr26_status_other_than_done_is_not_paid` | FR-26 | 승인 응답 `status`가 `DONE`이 아니면(`WAITING_FOR_DEPOSIT`) 402, 주문 `PENDING` |
+| `test_fr26_already_processed_but_cancelled_at_pg_is_not_paid` | FR-26 | `ALREADY_PROCESSED_PAYMENT` 뒤 조회가 `CANCELED` → 주문 `PENDING` |
+| `test_fr26_already_processed_for_another_order_is_not_paid` | FR-26 | 조회한 결제의 `orderId`가 다르면 주문 `PENDING` |
+| `test_fr26_confirm_sends_basic_auth_and_parses_result` (`test_pg.py`) | FR-26, NFR-18 | Basic 인증(시크릿 키 + `:`), 본문 3개 필드, 시간 제한 10초, 결과에 카드 정보 없음 |
+| `test_fr28_http_error_returns_code_and_message` (`test_pg.py`) | FR-28 | HTTP 4xx → `ok=False`, 토스 `code` |
+| `test_fr26_timeout_raises_pg_error` (`test_pg.py`) | FR-26 | 소켓·URL 시간 초과 → `PgError("TIMEOUT")` |
+| `test_fr26_unknown_outcomes_raise_pg_error` (`test_pg.py`) | FR-26 | HTTP 5xx, JSON 아닌 본문, 연결 끊김 → `PgError`(결과 모름, 결제 `READY` 유지) |
+| `test_fr50_cancel_sends_idempotency_key` (`test_pg.py`) | FR-50 | 취소 요청에 `Idempotency-Key` 헤더, `/v1/payments/{paymentKey}/cancel` |
 | `test_dr21_cancel_treats_already_cancelled_as_success` | DR-21, FR-50 | 가짜 PG가 `ALREADY_CANCELED_PAYMENT` → 결제 `CANCELLED`, 예외 없음 |
 | `test_fr50_cancel_sends_idempotency_key` | FR-50 | `cancel` 호출 기록에 `cancel-<payment_id>` 키 |
 
