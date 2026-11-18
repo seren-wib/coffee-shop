@@ -1,0 +1,172 @@
+{
+  "mode": "DEFERRED",
+  "spare": 1,
+  "rounds": 30,
+  "requests": 300,
+  "round1": {
+    "status": {
+      "409": 9,
+      "201": 1
+    },
+    "state": {
+      "stock_quantity": 0,
+      "sales_status": "ON_SALE",
+      "orders": 1,
+      "order_items": 1,
+      "cart_items": 9,
+      "journal_mode": "wal"
+    },
+    "p95_ms": 34.49
+  },
+  "status_total": {
+    "409": 198,
+    "201": 30,
+    "500": 72
+  },
+  "codes_total": {
+    "OUT_OF_STOCK": 198,
+    "OK": 30,
+    "DB_ERROR": 72
+  },
+  "database_is_locked": 72,
+  "rounds_with_201_not_1": 0,
+  "rounds_state_mismatch": [],
+  "final_stock_values": {
+    "0": 30
+  },
+  "journal_modes": {
+    "wal": 30
+  },
+  "p95_ms_all": 34.44,
+  "p50_ms_all": 20.3,
+  "max_ms_all": 42.38,
+  "round_p95_ms_median": 24.93
+}
+{
+  "mode": "DEFERRED",
+  "spare": 0,
+  "rounds": 30,
+  "requests": 300,
+  "round1": {
+    "status": {
+      "409": 9,
+      "201": 1
+    },
+    "state": {
+      "stock_quantity": 0,
+      "sales_status": "SOLD_OUT",
+      "orders": 1,
+      "order_items": 1,
+      "cart_items": 9,
+      "journal_mode": "wal"
+    },
+    "p95_ms": 63.16
+  },
+  "status_total": {
+    "409": 202,
+    "201": 30,
+    "500": 68
+  },
+  "codes_total": {
+    "NOT_AVAILABLE": 202,
+    "OK": 30,
+    "DB_ERROR": 68
+  },
+  "database_is_locked": 68,
+  "rounds_with_201_not_1": 0,
+  "rounds_state_mismatch": [],
+  "final_stock_values": {
+    "0": 30
+  },
+  "journal_modes": {
+    "wal": 30
+  },
+  "p95_ms_all": 48.7,
+  "p50_ms_all": 21.49,
+  "max_ms_all": 63.16,
+  "round_p95_ms_median": 24.2
+}
+{
+  "mode": "IMMEDIATE",
+  "spare": 1,
+  "rounds": 30,
+  "requests": 300,
+  "round1": {
+    "status": {
+      "409": 9,
+      "201": 1
+    },
+    "state": {
+      "stock_quantity": 0,
+      "sales_status": "ON_SALE",
+      "orders": 1,
+      "order_items": 1,
+      "cart_items": 9,
+      "journal_mode": "wal"
+    },
+    "p95_ms": 48.94
+  },
+  "status_total": {
+    "409": 270,
+    "201": 30
+  },
+  "codes_total": {
+    "OUT_OF_STOCK": 270,
+    "OK": 30
+  },
+  "database_is_locked": 0,
+  "rounds_with_201_not_1": 0,
+  "rounds_state_mismatch": [],
+  "final_stock_values": {
+    "0": 30
+  },
+  "journal_modes": {
+    "wal": 30
+  },
+  "p95_ms_all": 54.96,
+  "p50_ms_all": 28.96,
+  "max_ms_all": 91.75,
+  "round_p95_ms_median": 42.78
+}
+{
+  "mode": "IMMEDIATE",
+  "spare": 0,
+  "rounds": 30,
+  "requests": 300,
+  "round1": {
+    "status": {
+      "409": 9,
+      "201": 1
+    },
+    "state": {
+      "stock_quantity": 0,
+      "sales_status": "SOLD_OUT",
+      "orders": 1,
+      "order_items": 1,
+      "cart_items": 9,
+      "journal_mode": "wal"
+    },
+    "p95_ms": 51.72
+  },
+  "status_total": {
+    "409": 270,
+    "201": 30
+  },
+  "codes_total": {
+    "NOT_AVAILABLE": 270,
+    "OK": 30
+  },
+  "database_is_locked": 0,
+  "rounds_with_201_not_1": 0,
+  "rounds_state_mismatch": [],
+  "final_stock_values": {
+    "0": 30
+  },
+  "journal_modes": {
+    "wal": 30
+  },
+  "p95_ms_all": 41.96,
+  "p50_ms_all": 26.42,
+  "max_ms_all": 61.73,
+  "round_p95_ms_median": 35.17
+}

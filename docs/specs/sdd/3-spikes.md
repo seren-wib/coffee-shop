@@ -1,23 +1,27 @@
 ## 3. 스파이크
 
-SPMP 5절(위험 관리)은 아직 비어 있어서 SPMP가 정한 핵심 불확실성은 없다. 이 설계에서 구현 전에 확인해야 하는 기술 질문은 아래 두 가지다. 2026-11-17 현재 둘 다 **아직 돌리지 않았고**, 결과 칸은 비워 둔다. 코드는 `spikes/<이름>/`에 커밋하고, README 첫 줄에 질문과 답을 적는다. 결과가 나오면 이 절과 11절을 같은 PR에서 고친다.
+SPMP 5절(위험 관리)은 아직 비어 있어서 SPMP가 정한 핵심 불확실성은 없다. 이 설계에서 구현 전에 확인해야 하는 기술 질문은 아래 두 가지다. 2026-11-19에 3.1을 돌렸고, 3.2는 토스페이먼츠 테스트 키를 기다리는 중이라 아직 돌리지 않았다. 코드는 `spikes/<이름>/`에 커밋하고, README 첫 줄에 질문과 답을 적는다. 결과가 나오면 이 절과 11절을 같은 PR에서 고친다.
 
 ### 3.1 sqlite-concurrent-order
 
 - 질문: SQLite(WAL)와 gunicorn 워커 3개에서, 재고 1개 옵션에 동시 주문 10건이 들어오면 성공 1건, 재고 0, 나머지는 잠금 오류 없이 409로 끝나는가(NFR-15)?
-- 결론: **아직 돌리지 않았다.**
-- 방법(계획): Django 6.1, Python 3.12, `DATABASES["default"]["OPTIONS"]`에 `transaction_mode="IMMEDIATE"`, `timeout=20`, `init_command`로 WAL 설정. 4.5.3절의 `create_order`를 그대로 쓰고, gunicorn 워커 3개 앞에서 스레드 10개가 동시에 `POST /api/orders/`를 보낸다. 같은 실험을 `transaction_mode` 기본값(DEFERRED)으로도 한 번 돌려 비교한다.
+- 결론: **그렇다(IMMEDIATE).** 30라운드 모두 201 1건, 409 9건, 500 0건, 재고 0, 주문 1행이었다. 기본값 DEFERRED에서는 30라운드 중 29라운드에서 `database is locked` 500이 나왔다(300건 중 68건). 두 모드 모두 재고가 틀린 라운드는 0이었다.
+- 방법: Django 6.1, Python 3.12(실제로 돌린 건 3.14.4, 아래), `DATABASES["default"]["OPTIONS"]`에 `transaction_mode="IMMEDIATE"`, `timeout=20`, `init_command`로 WAL 설정. 4.5.3절의 `create_order`를 그대로 쓰고, gunicorn 워커 3개 앞에서 스레드 10개가 동시에 `POST /api/orders/`를 보낸다. 같은 실험을 `transaction_mode` 기본값(DEFERRED)으로도 돌려 비교한다. 조건마다 10건을 30라운드 돌렸고, 라운드마다 데이터를 다시 넣었다. 코드와 원자료는 `spikes/sqlite-concurrent-order/`.
+- 실행 환경: WSL2 Ubuntu 26.04.1(논리 CPU 16개), Python 3.14.4, Django 6.1.1, gunicorn 27.0.1(sync 워커 3개), SQLite 라이브러리 3.46.1, DB 파일은 WSL ext4 디스크. 클라이언트도 같은 PC다. 운영과 같은 EC2 t3.micro(2 vCPU)에서는 재지 않았으므로 응답 시간은 로컬 값이다.
 - 결과:
 
 | 단계 | 확인 | 결과 |
 | --- | --- | --- |
-| 1 | IMMEDIATE, 동시 10건: 201 개수, 409 개수, 500 개수 | 안 잼 |
-| 2 | 1 뒤 옵션 재고, 주문 행 수 | 안 잼 |
-| 3 | DEFERRED, 동시 10건: `database is locked` 발생 횟수 | 안 잼 |
-| 4 | IMMEDIATE, 동시 10건 응답 시간 p95 | 안 잼 |
+| 1 | IMMEDIATE, 동시 10건: 201 개수, 409 개수, 500 개수 | 첫 라운드 201 1, 409 9, 500 0. 30라운드 합계 201 30, 409 270, 500 0 |
+| 2 | 1 뒤 옵션 재고, 주문 행 수 | 재고 0, 주문 1행(주문 항목 1행, 장바구니 9행 남음). 30라운드 모두 같음 |
+| 3 | DEFERRED, 동시 10건: `database is locked` 발생 횟수 | 첫 라운드 0. 30라운드 합계 300건 중 68건(29라운드에서 1~4건씩). 재고·주문 행은 30라운드 모두 맞음 |
+| 4 | IMMEDIATE, 동시 10건 응답 시간 p95 | 첫 라운드 51.72 ms, 300건 전체 41.96 ms(최대 61.73 ms). 로컬 값 |
 
-- 설계에 반영한 사실: 아직 없음. 지금 설계는 SQLite가 쓰기 트랜잭션을 하나씩만 허용한다는 문서상 성질과, 조건부 UPDATE(`WHERE stock_quantity >= n`)로 비교와 차감을 한 문장에서 끝낸다는 두 겹 방어에 기댄다(4.7.6절).
-- 남은 선택: 1단계에서 500(잠금 오류)이 나오면 `timeout`을 늘리거나 워커 수를 줄인다. 그래도 나면 11.1절 SQLite 결정의 재검토 신호다.
+- 진 요청의 409 코드는 재고 1개 옵션 하나뿐인 원두에서 전부 `NOT_AVAILABLE`이었다. 첫 주문의 `_sync_sold_out`(4.7.6절)이 원두를 `SOLD_OUT`으로 바꾸므로, 나머지는 조건부 UPDATE에 닿기 전에 판매 상태 확인(4.5.3절 2번)에서 멈춘다. 같은 원두에 재고가 있는 다른 옵션을 하나 더 둔 조건에서는 원두가 `ON_SALE`로 남아 409가 전부 `OUT_OF_STOCK`이었다(IMMEDIATE 270건, 500 0건, p95 54.96 ms. DEFERRED는 `database is locked` 72건).
+- DEFERRED의 잠금 오류는 20초 `timeout`을 기다리지 않고 바로 왔다(서버 처리 최대 16.86 ms). 읽기로 시작한 트랜잭션이 그 사이 다른 연결이 커밋한 뒤 쓰기로 올라가지 못하면 SQLite가 대기 없이 `SQLITE_BUSY`를 돌려주기 때문이다. 그래서 `timeout`을 늘려도 DEFERRED의 500은 줄지 않는다.
+
+- 설계에 반영한 사실: `transaction_mode="IMMEDIATE"`(9.1절)는 필수다. 기본값이면 동시 주문에서 500이 난다. 재고는 두 모드 모두 맞았으므로 조건부 UPDATE(`WHERE stock_quantity >= n`, 4.7.6절)와 트랜잭션 롤백이 재고를 지킨다는 설계는 그대로다. 재고 1개 옵션 하나뿐인 원두의 동시 주문에서 진 쪽은 `OUT_OF_STOCK`이 아니라 `NOT_AVAILABLE`을 받는다. 화면 문구(6절)는 두 코드를 모두 "주문할 수 없는 항목"으로 다뤄야 한다.
+- 남은 선택: 없음. IMMEDIATE에서 500이 0건이라 11.1절 SQLite 결정의 재검토 신호는 오지 않았다. 운영 서버(t3.micro)에서 같은 스크립트로 다시 잴지는 배포 단계에서 정한다.
 
 ### 3.2 toss-confirm-cancel
 
