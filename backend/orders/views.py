@@ -1,4 +1,4 @@
-"""Member cart (SDD 4.4) and orders (SDD 4.5). Member-only by the default IsAuthenticated."""
+"""Member cart (SDD 4.4), orders (SDD 4.5) and payments (SDD 4.6). Member-only by the default IsAuthenticated."""
 
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from common.pagination import StandardPagination
-from orders import services
+from orders import payments, services
 from orders.models import Order, OrderStatus
 from orders.serializers import (
     CancelRequestSerializer,
@@ -14,6 +14,8 @@ from orders.serializers import (
     CartItemRefSerializer,
     CartQuantitySerializer,
     CartSerializer,
+    ConfirmSerializer,
+    FailSerializer,
     OrderCreateSerializer,
     OrderDetailSerializer,
     OrderSummarySerializer,
@@ -97,3 +99,52 @@ class OrderCancelRequestView(APIView):
             request.user, order_id, s.validated_data["reason"]
         )
         return Response(OrderDetailSerializer(order).data)
+
+
+class PaymentStartView(APIView):
+    def post(self, request, order_id):
+        payment = payments.start_payment(request.user, order_id)
+        return Response(
+            {
+                "payment_id": payment.payment_id,
+                "pg_order_id": payment.pg_order_id,
+                "amount": payment.paid_amount,
+                "order_name": payments.order_name(payment.order),
+                "customer_name": request.user.user_name,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class PaymentConfirmView(APIView):
+    def post(self, request):
+        s = ConfirmSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        data = s.validated_data
+        order = payments.confirm_payment(
+            request.user,
+            payment_key=data["paymentKey"],
+            pg_order_id=data["orderId"],
+            amount=data["amount"],
+        )
+        return Response(
+            {
+                "order_id": order.order_id,
+                "status": order.order_status,
+                "final_payment_amt": order.final_payment_amt,
+            }
+        )
+
+
+class PaymentFailView(APIView):
+    def post(self, request):
+        s = FailSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        data = s.validated_data
+        payments.fail_payment(
+            request.user,
+            pg_order_id=data.get("orderId"),
+            code=data.get("code", ""),
+            message=data.get("message", ""),
+        )
+        return Response({})

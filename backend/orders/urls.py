@@ -24,4 +24,13 @@ urlpatterns = [
         views.OrderCancelRequestView.as_view(),
         name="order_cancel_request",
     ),
+    path(
+        "orders/<str:order_id>/payments/",
+        views.PaymentStartView.as_view(),
+        name="payment_start",
+    ),
+    path(
+        "payments/confirm/", views.PaymentConfirmView.as_view(), name="payment_confirm"
+    ),
+    path("payments/fail/", views.PaymentFailView.as_view(), name="payment_fail"),
 ]

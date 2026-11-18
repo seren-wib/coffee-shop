@@ -105,7 +105,8 @@ sequenceDiagram
 
 ### 4.6.4 결제창 실패·이탈 (FR-28)
 
-- 토스는 결제창에서 실패하면 `failUrl`로 `code`, `message`, `orderId`를 붙여 보낸다. 회원이 결제창을 닫은 경우(`PAY_PROCESS_CANCELED`)는 `orderId`가 오지 않는다. 결과 화면은 `POST /api/payments/fail/`로 `{orderId, code, message}`를 보낸다(`orderId`는 선택).
+- 토스는 결제창에서 실패하면 `failUrl`로 `code`, `message`, `orderId`를 붙여 보낸다. 결과 화면은 `POST /api/payments/fail/`로 `{orderId, code, message}`를 보낸다(`orderId`는 선택).
+- 회원이 결제창을 X로 닫으면 `failUrl`로 가지 않는다. SDK의 `requestPayment()`가 `{code: "USER_CANCEL"}` 오류로 끝나고 페이지는 그대로다(3.2절 5단계, 2026-11-19 확인). 주문/결제 화면(SCR-06)은 이 오류를 받아 "결제를 취소했습니다"와 다시 결제 버튼을 보이고, 서버는 부르지 않는다. 결제 기록은 `READY`로 남고 아래처럼 정리된다.
 - 서버(`fail_payment`): `orderId`가 없으면 아무것도 바꾸지 않고 200. 있으면 `pg_order_id`로 찾되 주문이 요청자 것이 아니면 404(NFR-11), `READY`가 아니면 바꾸지 않고 200, `READY`면 `FAILED`와 `failure_reason="<code>: <message>"`로 바꾼다. 주문은 `PENDING`이다.
 - 이 경로는 SRS 6.2 목록에 없다. FR-28 검증("결제 `FAILED` + 실패 사유")을 결제창 실패에서도 만족시키려고 둔 것이라 11.1절에 적었다.
 - 회원이 결제창을 닫고 아무 화면으로도 돌아오지 않으면 결제 기록은 `READY`로 남는다. 다음 결제 시작(4.6.2 3단계)이나 주문 취소(4.5.8)가 정리한다.

@@ -109,10 +109,15 @@
 | `test_fr26_confirm_other_members_payment_is_404` | FR-26, NFR-11 | 다른 회원 토큰 → 404, 가짜 PG 호출 0회 |
 | `test_fr27_amount_mismatch_cancels_at_pg` | FR-27, DR-23 | 다른 금액 승인 → 409 `PAYMENT_MISMATCH`, 결제 `CANCELLED`, 주문 `PENDING`, PG `cancel` 1회 |
 | `test_fr27_cancelled_order_cancels_at_pg` | FR-27, DR-22 | 취소된 주문 → 409 `ORDER_NOT_PENDING`, 주문 `CANCELLED` 유지 |
+| `test_fr27_payment_cancelled_with_order_skips_pg` | FR-27, FR-32 | 결제 대기 주문을 먼저 취소한 뒤 확인 → 409 `ORDER_NOT_PENDING`, PG 호출 0회 |
 | `test_fr28_confirm_failure_records_reason` | FR-28, DR-24 | PG 실패 → 402 `PAYMENT_FAILED`, 결제 `FAILED` + 사유, 주문 `PENDING` |
 | `test_fr28_payment_window_failure_is_recorded` | FR-28 | `POST /api/payments/fail/` → 결제 `FAILED` + 사유, PG 호출 0회 |
+| `test_fr28_failure_without_order_id_changes_nothing` | FR-28 | `orderId` 없는 실패 → 200, 결제 `READY` 그대로 |
+| `test_fr28_failure_for_other_members_payment_is_404` | FR-28, NFR-11 | 다른 회원 결제의 실패 기록 → 404 |
 | `test_fr29_retry_payment_adds_row` | FR-29, DR-24 | 실패 뒤 다시 결제 시작 → 201, 결제 2행 |
 | `test_fr29_paid_order_retry_is_409` | FR-29 | 성공 결제가 있는 주문 → 409 `ALREADY_PAID` |
+| `test_fr25_cancelled_order_cannot_start_payment` | FR-25, DR-22 | 취소된 주문 결제 시작 → 409 `INVALID_STATE` |
+| `test_fr25_other_members_order_is_404` | FR-25, NFR-11 | 다른 회원 주문 결제 시작 → 404 |
 | `test_nfr18_payments_table_has_no_card_columns` | NFR-18 | `payments` 열 이름에 `card`, `number`, `cvc`, `expiry` 없음 |
 
 ### 3.7 관리자 원두 (`products/tests/test_admin_products_api.py`)
