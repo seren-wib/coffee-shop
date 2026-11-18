@@ -49,13 +49,19 @@
 | --- | --- | --- |
 | `test_fr1_list_pages_by_20_without_stopped` | FR-1 | 원두 25개(판매 중지 2개) → 1페이지 20개, `count=23`, `STOPPED` 없음, `SOLD_OUT` 포함 |
 | `test_fr1_list_is_public` | FR-1, NFR-9 | 토큰 없이 200 |
+| `test_fr1_list_item_fields_and_newest_first` | FR-1 | 최근 등록 순, 항목 필드 8개, `lowest_price` = 기본 가격 + 가장 낮은 추가 금액 |
+| `test_fr1_lowest_price_without_options_is_base_price` | FR-1 | 옵션 없는 원두 → `lowest_price` = `base_price` |
+| `test_fr1_page_out_of_range_is_404` | FR-1 | 범위 밖 `?page=5` → 404 `NOT_FOUND`(SDD 7.4) |
 | `test_fr2_search_by_name_part` | FR-2 | `?search=에티` → 이름에 "에티"가 든 원두만 |
 | `test_fr3_filter_by_origin` | FR-3 | `?origin=에티오피아` → 그 원산지만 |
 | `test_fr4_filter_by_price_range` | FR-4 | `?min_price=10000&max_price=20000` → 기본 가격이 범위 안인 것만(경계 포함) |
-| `test_fr4_bad_price_param_is_400` | FR-4 | `?min_price=abc` → 400 |
+| `test_fr4_bad_price_param_is_400` | FR-4 | `?min_price=abc`, `?max_price=-1`, `min_price > max_price` → 400 `VALIDATION_ERROR` |
 | `test_fr5_filter_by_roast_level` | FR-5 | `?roast_level=LIGHT` → 라이트만. 모르는 값 400 |
-| `test_fr6_detail_has_option_prices_and_availability` | FR-6, DR-4 | `GET /api/products/{id}/` 200, 옵션마다 `price`, `is_available` |
+| `test_fr5_filters_combine_with_and` | FR-3 ~ FR-5 | 원산지·로스팅·최고 가격을 함께 → 셋 다 맞는 원두만(SRS 3.1 AND) |
+| `test_fr6_detail_has_option_prices_and_availability` | FR-6, DR-4 | `GET /api/products/{id}/` 200, 옵션마다 `price`, `is_available`, 용량·분쇄도 순서 |
 | `test_fr6_stopped_product_detail_is_404` | FR-6 | 판매 중지 원두 → 404 |
+| `test_fr6_unknown_product_is_404` | FR-6 | 없는 원두 ID → 404 |
+| `test_dr8_sold_out_product_options_are_unavailable` | DR-8, FR-6 | 품절 원두 상세 200, 옵션 `is_available=false` |
 
 ### 3.4 장바구니 (`orders/tests/test_cart_api.py`)
 
