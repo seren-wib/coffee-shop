@@ -21,6 +21,7 @@
 /admin/products/:id        SCR-12 관리자 원두 수정   (관리자)
 /admin/orders              SCR-13 관리자 주문 목록   (관리자)
 /admin/orders/:id          SCR-14 관리자 주문 상세   (관리자)
+/privacy                   SCR-15 개인정보 처리방침  (2026-11-19 추가)
 ```
 
 ### 6.2 API

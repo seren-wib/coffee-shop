@@ -4,7 +4,7 @@
 
 | 파일 | 부품 | FR |
 | --- | --- | --- |
-| [1-auth.md](1-auth.md) | 4.1 회원과 인증 | FR-7 ~ FR-13, FR-54 |
+| [1-auth.md](1-auth.md) | 4.1 회원과 인증 | FR-7 ~ FR-13, FR-54, FR-58 |
 | [2-addresses.md](2-addresses.md) | 4.2 배송지 | FR-14 ~ FR-18 |
 | [3-catalog.md](3-catalog.md) | 4.3 원두 조회 | FR-1 ~ FR-6 |
 | [4-cart.md](4-cart.md) | 4.4 장바구니 | FR-19 ~ FR-22 |
