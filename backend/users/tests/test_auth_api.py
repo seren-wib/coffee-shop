@@ -11,7 +11,7 @@ from rest_framework.throttling import ScopedRateThrottle
 
 from users.models import Role, User
 from users.tests.factories import make_member
-from users.tests.helpers import auth_client
+from common.tests.helpers import auth_client
 
 REGISTER = "/api/auth/register/"
 TOKEN = "/api/auth/token/"

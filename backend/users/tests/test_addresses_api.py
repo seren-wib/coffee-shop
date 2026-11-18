@@ -3,7 +3,7 @@ from rest_framework.test import APITestCase
 
 from users.models import UserAddress
 from users.tests.factories import make_address, make_member
-from users.tests.helpers import auth_client
+from common.tests.helpers import auth_client
 
 URL = "/api/me/addresses/"
 
