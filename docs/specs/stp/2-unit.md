@@ -33,7 +33,8 @@
 | --- | --- | --- |
 | `test_dr9_adding_same_option_merges_quantity` | DR-9 | 같은 옵션 2개 + 3개 → 항목 1행, 수량 5 |
 | `test_dr8_cannot_add_unavailable_option` | DR-8 | 품절·판매 중지 원두, 재고 0 옵션 담기 → 409 예외 |
-| `test_dr14_shipping_fee_boundary` | DR-14, DR-13 | 상품 금액 29,999원 → 배송비 3,000원, 30,000원 → 0원 |
+| `test_dr10_merged_quantity_cannot_exceed_stock` | DR-10, DR-9 | 재고 3에 2개 담은 뒤 2개 더 → 409 `OUT_OF_STOCK`, 수량 2 그대로 |
+| `test_dr14_shipping_fee_boundary` | DR-14, DR-13 | 상품 금액 29,999원 → 배송비 3,000원, 30,000원 → 0원, 0원(빈 장바구니) → 0원 |
 | `test_dr15_final_amount_is_items_plus_fee` | DR-15 | 상품 금액 29,000원 → 최종 32,000원 |
 | `test_dr12_dr18_order_copies_product_and_address` | DR-12, DR-18 | 주문 뒤 원두 이름·가격, 배송지 주소를 바꿔도 주문 항목 단가·주문 주소 그대로 |
 | `test_fr23_nfr14_short_item_rolls_back_whole_order` | FR-23, NFR-14 | 두 항목 중 하나 재고 부족 → 409, 주문 0행, 두 옵션 재고와 장바구니 그대로 |

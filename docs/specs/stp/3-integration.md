@@ -69,8 +69,12 @@
 | --- | --- | --- |
 | `test_fr19_add_item` | FR-19 | `POST /api/cart/items/` 새 옵션 201, 같은 옵션 다시 200, 수량 합침 |
 | `test_fr19_unavailable_option_is_409` | FR-19, DR-8 | 품절 옵션 409 `OUT_OF_STOCK`, 판매 중지 원두 409 `NOT_AVAILABLE` |
+| `test_fr19_rejects_missing_option_and_bad_quantity` | FR-19 | 없는 옵션 404, 수량 0 → 400 `fields.quantity` |
 | `test_fr19_needs_token` | FR-19, NFR-9 | 토큰 없이 401 |
 | `test_fr20_cart_totals` | FR-20, DR-14, DR-15 | `GET /api/cart/` 200, 항목 `price`·`is_available`, 상품 금액 29,000원 → 배송비 3,000원, 30,000원 → 0원 |
+| `test_fr20_item_fields_and_unavailable_items` | FR-20, DR-10 | 항목 필드 12개(SDD 4.4.2), 담은 뒤 재고가 수량보다 줄면 `is_available=false`, `can_order=false` |
+| `test_fr20_empty_cart` | FR-20, DR-14 | 빈 장바구니 `items` 빈 배열, 배송비 0, `can_order=false` |
+| `test_fr20_lists_items_in_added_order_and_only_mine` | FR-20, NFR-11 | 담은 순서, 다른 회원 항목 없음 |
 | `test_fr21_change_quantity` | FR-21, DR-10 | `PATCH` 200. 0개 400, 재고 초과 409 |
 | `test_fr22_remove_item` | FR-22 | `DELETE` 204, 다시 조회하면 없음 |
 | `test_nfr11_other_members_cart_item_is_404` | NFR-11 | 다른 회원 항목 `PATCH`, `DELETE` → 404 |
