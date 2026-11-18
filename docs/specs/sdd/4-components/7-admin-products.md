@@ -85,6 +85,7 @@ def _sync_sold_out(option_id):
 ```
 
 - 비교와 차감이 한 UPDATE 문이라 읽고 비교하고 쓰는 사이에 다른 주문이 끼지 않는다. 0 밑으로는 CHECK 제약도 막는다(5.4절).
+- `decrease_stock`, `increase_stock`은 `quantity`가 1 미만이면 400 `VALIDATION_ERROR`다(음수 차감이 재고를 늘리지 않게). 세 재고 함수 모두 없는 옵션 ID는 404 `NOT_FOUND`이고, `decrease_stock`은 조건부 UPDATE가 0행이면 먼저 409 `OUT_OF_STOCK`이다. 시그니처는 `decrease_stock(option_id, quantity)`, `increase_stock(option_id, quantity)`, `set_stock(option_id, quantity)`, `stop_sales(product_id)`, `resume_sales(product_id)`이고 모두 `None`을 돌려준다(2026-11-19 구현).
 - 호출한 쪽의 트랜잭션 안에서 돈다. 주문의 다른 항목이 실패하면 함께 롤백된다(NFR-14).
 
 ### 4.7.7 재고 복원 `increase_stock` (DR-6)
