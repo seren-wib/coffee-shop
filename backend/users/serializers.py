@@ -6,7 +6,7 @@ from django.core.validators import RegexValidator
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from users.models import User
+from users.models import User, UserAddress
 
 phone_validator = RegexValidator(
     r"^[0-9-]{1,20}$", "연락처는 숫자와 -만, 20자 이하로 입력해 주세요."
@@ -87,3 +87,26 @@ class PasswordChangeSerializer(serializers.Serializer):
 
     def validate_new_password(self, value):
         return _check_password(value, self.context["request"].user)
+
+
+class AddressSerializer(serializers.ModelSerializer):
+    recipient_phone = serializers.CharField(max_length=20, validators=[phone_validator])
+    zipcode = serializers.RegexField(
+        r"^[0-9]{5}$",
+        error_messages={"invalid": "우편번호는 숫자 5자리로 입력해 주세요."},
+    )
+    is_default = serializers.BooleanField(required=False, default=False)
+
+    class Meta:
+        model = UserAddress
+        fields = [
+            "address_id",
+            "recipient_name",
+            "recipient_phone",
+            "zipcode",
+            "base_address",
+            "detail_address",
+            "is_default",
+        ]
+        read_only_fields = ["address_id"]
+        extra_kwargs = {"detail_address": {"required": False, "allow_blank": True}}
