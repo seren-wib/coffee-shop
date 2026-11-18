@@ -35,7 +35,9 @@ coffee-shop/
 │   │   ├── serializers.py        # (예정)
 │   │   ├── services.py           # (예정) 재고 증감, 판매 상태 전환 (DR-5 ~ DR-7)
 │   │   ├── queries.py            # (예정) customer_products(), 검색·필터 함수 (FR-1 ~ FR-5, FR-56)
-│   │   ├── views.py              # (예정) 고객용 + 관리자용
+│   │   ├── origins.py            # 원산지 고정 목록 (4.3.7)
+│   │   ├── views.py              # 고객용 (4.3)
+│   │   ├── admin_views.py        # 관리자용 (4.7)
 │   │   ├── urls.py               # (예정) /api/products/, /api/admin/products/
 │   │   ├── management/commands/
 │   │   │   └── seed_demo.py      # (예정) 시연 데이터 100·50·500 (NFR-3)

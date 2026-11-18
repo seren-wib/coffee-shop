@@ -54,7 +54,8 @@ stateDiagram-v2
 - 경로: `POST /api/admin/products/{id}/options/`.
 - 입력: `weight_size`, `grind_type`, `extra_price`(0 이상), `stock_quantity`(0 이상).
 - 처리(한 트랜잭션): 재고 0으로 INSERT한 뒤 요청의 재고 수량으로 `set_stock`(4.7.8)을 부른다. 재고를 바꾸는 길이 셋뿐이라는 규칙(2.1절)을 지키고, 판매 상태 전환도 `set_stock`이 맡는다. 그래서 옵션 없는 `ON_SALE` 원두에 재고 0 옵션을 처음 넣으면 `SOLD_OUT`이 되고(4.7.0), 재고가 있으면 `SOLD_OUT` → `ON_SALE`이다. 판매 중지 원두면 그대로다.
-- 응답: 201, 옵션.
+- 응답: 201, 관리자 원두 상세(4.7.12). 판매 상태 전환이 같이 보이게 옵션 하나가 아니라 원두 전체를 돌려준다.
+- 서비스: `add_option(product_id, weight_size, grind_type, extra_price, stock_quantity)`. 같은 조합을 먼저 확인하고 409를 낸다. 없는 원두는 404.
 - 오류: 409 `DUPLICATE_OPTION`(같은 원두에 같은 용량·분쇄도, `uq_product_options_combo`, DR-3), 400(음수 추가 금액, 목록 밖 용량·분쇄도).
 
 ### 4.7.5 옵션 추가 금액 수정 (FR-40)
@@ -62,7 +63,8 @@ stateDiagram-v2
 - 경로: `PATCH /api/admin/products/{id}/options/{oid}/`, 본문에 `extra_price`.
 - 처리: UPDATE. 옵션 가격은 계산값이라 상세 응답에 바로 반영된다(DR-4).
 - 용량·분쇄도는 바꾸지 않는다. 바꾸려면 새 옵션을 추가하고 기존 옵션 재고를 0으로 둔다(주문된 옵션은 지우지 못한다, 5.7절).
-- 응답: 200. 오류: 404(다른 원두의 옵션 ID), 400.
+- 응답: 200, 관리자 원두 상세(4.7.12). 오류: 404(다른 원두의 옵션 ID), 400. 본문의 `weight_size`, `grind_type`은 무시한다.
+- 서비스: `update_option(product_id, option_id, extra_price=None, stock_quantity=None)`. 재고가 오면 `set_stock`(4.7.8)을 부른다.
 
 ### 4.7.6 재고 차감 `decrease_stock` (DR-5, NFR-15)
 
@@ -118,14 +120,14 @@ def increase_stock(option_id: int, quantity: int) -> None:
 
 - 경로: `POST /api/admin/products/{id}/stop/`.
 - 처리(`stop_sales`): 4.7.0 표의 조건부 UPDATE. 이미 `STOPPED`이면 0행이고 409 `INVALID_STATE`.
-- 응답: 200, `{product_id, sales_status: "STOPPED"}`.
+- 응답: 200, 관리자 원두 상세(4.7.12, `sales_status: "STOPPED"` 포함).
 - 장바구니에 담긴 그 원두의 옵션은 남지만 `is_available=false`가 되고, 그 항목을 빼기 전까지 주문 생성은 409 `NOT_AVAILABLE`이다(4.4.2, 4.5.3).
 
 ### 4.7.10 판매 재개 (FR-43)
 
 - 경로: `POST /api/admin/products/{id}/resume/`.
 - 처리(`resume_sales`, 한 트랜잭션): 재고가 있는 옵션이 있거나 옵션이 하나도 없으면 `ON_SALE`(4.7.0 마지막 줄과 같은 규칙), 옵션이 있는데 모두 재고 0이면 `SOLD_OUT`으로 `WHERE sales_status='STOPPED'` UPDATE. 0행이면 409.
-- 응답: 200, `{product_id, sales_status}`.
+- 응답: 200, 관리자 원두 상세(4.7.12).
 
 ### 4.7.11 관리자 이름 검색 (FR-56)
 

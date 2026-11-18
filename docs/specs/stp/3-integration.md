@@ -113,16 +113,26 @@
 
 | 테스트 | SRS | 기대 |
 | --- | --- | --- |
-| `test_fr36_list_includes_stopped` | FR-36 | `GET /api/admin/products/` 200, 판매 중지 포함, 옵션별 재고 |
+| `test_fr36_list_includes_stopped` | FR-36 | `GET /api/admin/products/` 200, 판매 중지 포함, 옵션별 재고, `option_count`, `total_stock` |
+| `test_fr36_filter_by_sales_status` | FR-36 | `?sales_status=STOPPED` → 판매 중지만. 모르는 값 400 |
+| `test_fr36_product_without_options_has_zero_totals` | FR-36 | 옵션 없는 원두 → `option_count=0`, `total_stock=0` |
 | `test_fr56_search_by_name_part` | FR-56 | `?search=에티` → 판매 중지 포함 이름 일치만 |
 | `test_fr37_create_product_on_sale` | FR-37 | `POST /api/admin/products/` 201, `ON_SALE` |
+| `test_fr37_create_ignores_sales_status` | FR-37, DR-6 | 본문에 `sales_status=SOLD_OUT` → 무시하고 `ON_SALE` |
+| `test_fr37_create_rejects_bad_input` | FR-37 | 이름 없음, 음수 가격, 모르는 로스팅, 목록 밖 원산지, `http://` 이미지 → 각각 400 `fields`, 0행 |
 | `test_fr38_detail_for_edit_form` | FR-38 | `GET /api/admin/products/{id}/` 200, 판매 중지 원두도 |
-| `test_fr38_update_keeps_old_order_prices` | FR-38, DR-12 | `PATCH` 200, 기존 주문 항목 단가 그대로 |
+| `test_fr38_update_keeps_old_order_prices` | FR-38, DR-12 | `PATCH` 200, 기존 주문 항목 단가 그대로, 본문의 `sales_status` 무시 |
+| `test_fr38_update_rejects_origin_outside_list` | FR-38 | 목록 밖 원산지로 수정 → 400 |
 | `test_fr39_add_option` | FR-39, DR-2 ~ DR-4 | 201. 같은 용량·분쇄도 409 `DUPLICATE_OPTION`, 음수 추가 금액 400 |
+| `test_fr39_first_option_with_zero_stock_marks_sold_out` | FR-39, DR-6 | 옵션 없는 `ON_SALE` 원두에 재고 0 옵션 → 201, `SOLD_OUT`(SDD 4.7.4) |
+| `test_fr39_add_option_to_unknown_product_is_404` | FR-39 | 없는 원두 → 404 |
 | `test_fr40_update_option_extra_price` | FR-40 | `PATCH .../options/{oid}/` 200, 고객 상세 `price` 바뀜 |
+| `test_fr40_option_of_another_product_is_404` | FR-40 | 다른 원두의 옵션 ID → 404 |
+| `test_fr40_option_keeps_size_and_grind` | FR-40 | 본문의 `weight_size`, `grind_type` 무시 |
+| `test_fr40_fr41_price_and_stock_in_one_request` | FR-40, FR-41 | 추가 금액과 재고를 한 요청에 → 200, 둘 다 바뀜 |
 | `test_fr41_stock_change_switches_sales_status` | FR-41, DR-6 | 마지막 재고 0 → `SOLD_OUT`, 1 → `ON_SALE`. 음수 400 |
-| `test_fr42_stop_sales` | FR-42, DR-7 | `POST .../stop/` 200 `STOPPED`, 재고 바꿔도 `STOPPED` |
-| `test_fr43_resume_sales` | FR-43 | `POST .../resume/` 200, 재고에 따라 `ON_SALE` 또는 `SOLD_OUT` |
+| `test_fr42_stop_sales` | FR-42, DR-7 | `POST .../stop/` 200 `STOPPED`, 재고 바꿔도 `STOPPED`, 다시 중지 409 `INVALID_STATE` |
+| `test_fr43_resume_sales` | FR-43 | `POST .../resume/` 200, 재고에 따라 `ON_SALE` 또는 `SOLD_OUT`, `STOPPED` 아닌 원두 409 |
 
 ### 3.8 관리자 주문 (`orders/tests/test_admin_orders_api.py`)
 
