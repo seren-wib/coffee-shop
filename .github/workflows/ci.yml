@@ -1,0 +1,74 @@
+# Backend and frontend checks for every pull request to main and every push to main (STP 7).
+# No repository secrets: tests use the fake values in backend/config/test_settings.py.
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+
+      - name: Install
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Format (black)
+        run: black --check .
+
+      - name: Migrations are up to date
+        run: python manage.py makemigrations --check --dry-run --settings=config.test_settings
+
+      - name: Tests (in-memory SQLite)
+        run: python manage.py test --settings=config.test_settings --exclude-tag=concurrency
+
+      - name: Concurrency tests (file SQLite)
+        run: python manage.py test --settings=config.test_settings_file --tag=concurrency
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+
+      - name: Format (prettier)
+        run: npx prettier --check .
+
+      - name: Lint (oxlint)
+        run: npm run lint
+
+      - name: Tests (vitest)
+        run: npm test
+
+      - name: Build
+        run: VITE_APP_VERSION="${GITHUB_SHA::7}" npm run build
