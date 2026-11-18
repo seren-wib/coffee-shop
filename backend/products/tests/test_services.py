@@ -171,3 +171,16 @@ class SalesStatusTests(TestCase):
             services.resume_sales(product.pk)
         self.assertEqual(ctx.exception.code, "INVALID_STATE")
         self.assertEqual(_status(product), SalesStatus.ON_SALE)
+
+
+class CustomerQueryTests(TestCase):
+    def test_fr1_customer_products_hide_stopped(self):
+        from products import queries
+
+        on_sale = make_product()
+        sold_out = make_product(sales_status=SalesStatus.SOLD_OUT)
+        stopped = make_product(sales_status=SalesStatus.STOPPED)
+        ids = set(queries.customer_products().values_list("pk", flat=True))
+        self.assertIn(on_sale.pk, ids)
+        self.assertIn(sold_out.pk, ids)
+        self.assertNotIn(stopped.pk, ids)
