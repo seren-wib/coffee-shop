@@ -27,7 +27,7 @@
 | `test_fr43_resume_when_not_stopped_is_409` | FR-43 | `ON_SALE` 원두 재개 → 409 `INVALID_STATE`, 상태 그대로 |
 | `test_fr1_customer_products_hide_stopped` | FR-1 | `customer_products()`에 `STOPPED` 없음, `SOLD_OUT` 포함 |
 
-### 2.2 장바구니와 주문 (`orders/tests/test_services.py`, `test_order_number.py`)
+### 2.2 장바구니와 주문 (`orders/tests/test_services.py`(장바구니), `test_order_services.py`(주문·택배사), `test_order_number.py`)
 
 | 테스트 | SRS | 기대 |
 | --- | --- | --- |
@@ -42,7 +42,8 @@
 | `test_dr11_order_number_resets_daily_in_seoul_time` | DR-11 | 2026-11-30 23:59(KST) 주문 `...-005` 다음 2026-12-01 00:01(KST, UTC로는 11-30) 주문 → `ORD-20261201-001` |
 | `test_dr11_order_limit_after_999` | DR-11 | 같은 날 1000번째 → 503 `ORDER_LIMIT` 예외 |
 | `test_dr19_disallowed_transitions_raise_invalid_state` | DR-19 | SRS 2절 전환 표에 없는 (현재, 다음) 쌍 전부 → 409 `INVALID_STATE`, 상태 그대로 |
-| `test_dr20_no_cancel_request_from_shipped` | DR-20 | `SHIPPED`, `DELIVERED`, `CANCELLED`에서 취소 요청 → 409 |
+| `test_dr20_no_cancel_request_from_shipped` | DR-20 | `PENDING`, `SHIPPED`, `DELIVERED`, `CANCEL_REQUESTED`, `CANCELLED`에서 취소 요청 → 409, 상태 그대로 |
+| `test_dr21_cancel_pending_twice_restores_stock_once` | DR-21, FR-32 | 결제 대기 주문 즉시 취소를 두 번 → 두 번째 409, 재고는 한 번만 복구 |
 | `test_dr21_cancel_restores_stock_once` | DR-21 | 같은 주문 취소 승인 서비스를 두 번 부름 → 재고는 주문 수량만큼 한 번만 늘어남, 두 번째는 409 |
 | `test_fr35_tracking_url_strips_dash_and_encodes` | FR-35 | `CJ`, `1234-5678-9012` → 조회 주소에 `123456789012`, 택배사 5곳 모두 주소 생성 |
 

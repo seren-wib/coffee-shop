@@ -87,9 +87,11 @@
 | `test_fr23_nfr14_one_short_item_rejects_all` | FR-23, NFR-14 | 한 항목 재고 부족 → 409, 모든 옵션 재고·장바구니·주문 수 그대로 |
 | `test_fr23_empty_cart_is_400` | FR-23 | 400 `EMPTY_CART` |
 | `test_fr23_new_address_is_copied` | FR-23, DR-18 | 저장 안 한 새 주소로 주문 → 주문에 주소 복사, 배송지 행은 늘지 않음 |
+| `test_fr23_address_is_required_and_must_be_mine` | FR-23, NFR-11 | 배송지 없음 400, 다른 회원 배송지 404, 장바구니 그대로 |
 | `test_nfr16_stopped_product_in_cart_is_409` | NFR-16, DR-8 | 담은 뒤 판매 중지된 원두 → 409 `NOT_AVAILABLE` |
 | `test_fr30_list_own_orders_newest_first` | FR-30, NFR-11 | `GET /api/orders/` 200, 자기 주문만, `created_at` 내림차순 |
-| `test_fr55_filter_own_orders_by_status` | FR-55 | `?status=PAID` → 그 상태만 |
+| `test_fr55_filter_own_orders_by_status` | FR-55 | `?status=PAID` → 그 상태만, 빈 값은 전체, 모르는 값 400 |
+| `test_fr30_needs_token` | FR-30, NFR-9 | 토큰 없이 401 |
 | `test_fr31_order_detail` | FR-31 | 200, 항목·결제·배송지·상태 |
 | `test_fr31_nfr11_other_members_order_is_404` | FR-31, NFR-11 | 404 |
 | `test_fr32_cancel_pending_order` | FR-32 | `POST .../cancel/` 200, `CANCELLED`, 재고 복구 |
