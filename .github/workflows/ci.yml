@@ -71,6 +71,4 @@ jobs:
         run: npm test
 
       - name: Build
-        run: npm run build
-        env:
-          VITE_APP_VERSION: ${{ github.sha }}
+        run: VITE_APP_VERSION="${GITHUB_SHA::7}" npm run build
