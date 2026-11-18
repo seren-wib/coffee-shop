@@ -52,10 +52,11 @@
 | `python manage.py test users --settings=config.test_settings` | 앱 하나만. `orders.tests.test_orders_api` 같은 점 경로로 파일 하나만 |
 | `python manage.py test --settings=config.test_settings_file --tag=concurrency` | 동시 주문 테스트만, 파일 SQLite(NFR-15) |
 | `black --check backend` | 파이썬 형식(NFR-29) |
+| `python manage.py makemigrations --check --dry-run --settings=config.test_settings` | 마이그레이션 빠짐 확인(7.1절) |
 | `cd frontend` 후 `npm test` | 프론트엔드 단위·화면 테스트 한 번 실행(`vitest run`) |
 | `npm run lint` | oxlint(NFR-29) |
 | `npx prettier --check .` | 프론트엔드 형식(NFR-29) |
 | `npm run build` | 운영 빌드가 되는지 |
 
 - 백엔드 명령은 `backend/.venv`를 켠 뒤 실행한다. `black`은 개발 전용 `backend/requirements-dev.txt`에 둔다(운영 서버에는 설치하지 않음).
-- `frontend/package.json`에 `"test": "vitest run"` 스크립트를 더한다.
+- `frontend/package.json`에 `"test": "vitest run"` 스크립트를 더한다. (2026-11-19 #77로 더했다)
