@@ -67,8 +67,8 @@ Vite는 `VITE_`로 시작하는 변수만 빌드 결과에 넣는다. 빌드 결
 
 | 항목 | 개발 | 테스트(자동) | 운영 |
 | --- | --- | --- | --- |
-| 실행 | `python manage.py runserver` + `npm run dev` | `python manage.py test` | gunicorn + nginx |
-| DB | `backend/db.sqlite3` | 메모리 SQLite(테스트마다 새로) | `SQLITE_PATH`, WAL |
+| 실행 | `python manage.py runserver` + `npm run dev` | `python manage.py test --settings=config.test_settings`(STP 1.3절) | gunicorn + nginx |
+| DB | `backend/db.sqlite3` | 메모리 SQLite(테스트마다 새로). 동시 주문 테스트만 파일 SQLite(STP 1.2절) | `SQLITE_PATH`, WAL |
 | PG | 토스 테스트 키 | `FakePaymentsClient` | 토스 테스트 키 |
 | `DEBUG` | `True` | `False` | `False` |
 | `/admin/` | 열림 | 없음 | 없음 |
