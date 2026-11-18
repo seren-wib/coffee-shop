@@ -145,6 +145,7 @@ class OrderApiTests(APITestCase):
             [o["order_id"] for o in res.json()["results"]], [paid.order_id]
         )
         self.assertEqual(self.client.get(ORDERS, {"status": "LOST"}).status_code, 400)
+        self.assertEqual(self.client.get(ORDERS, {"status": ""}).json()["count"], 2)
 
     def test_fr31_order_detail(self):
         order = make_order(self.user, self.option, quantity=2)

@@ -89,12 +89,14 @@ class PasswordChangeSerializer(serializers.Serializer):
         return _check_password(value, self.context["request"].user)
 
 
+zipcode_validator = RegexValidator(
+    r"^[0-9]{5}$", "우편번호는 숫자 5자리로 입력해 주세요."
+)
+
+
 class AddressSerializer(serializers.ModelSerializer):
     recipient_phone = serializers.CharField(max_length=20, validators=[phone_validator])
-    zipcode = serializers.RegexField(
-        r"^[0-9]{5}$",
-        error_messages={"invalid": "우편번호는 숫자 5자리로 입력해 주세요."},
-    )
+    zipcode = serializers.CharField(max_length=10, validators=[zipcode_validator])
     is_default = serializers.BooleanField(required=False, default=False)
 
     class Meta:

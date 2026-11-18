@@ -172,12 +172,12 @@ def _address_snapshot(user, address_id, address):
 @transaction.atomic
 def create_order(user, *, address_id=None, address=None):
     """The whole cart becomes one PENDING order, or nothing changes (FR-23, NFR-14)."""
-    snapshot = _address_snapshot(user, address_id, address)
     items = list(cart_items(user))
     if not items:
         raise DomainError(
             "EMPTY_CART", "주문할 항목이 없습니다.", status.HTTP_400_BAD_REQUEST
         )
+    snapshot = _address_snapshot(user, address_id, address)
 
     # Read under the write lock: the server checks again whatever the screen showed.
     not_available = [
@@ -191,23 +191,20 @@ def create_order(user, *, address_id=None, address=None):
             "주문할 수 없는 원두가 있습니다.",
             details={"cart_item_ids": not_available},
         )
+    # List every short item for the screen (UC-5); decrease_stock still guards each one.
     short = [i.cart_item_id for i in items if i.quantity > i.option.stock_quantity]
     if short:
         raise _short_items(short)
     for item in items:
-        try:
-            decrease_stock(item.option.option_id, item.quantity)
-        except DomainError as e:
-            if e.code != "OUT_OF_STOCK":
-                raise
-            raise _short_items([item.cart_item_id]) from None
+        decrease_stock(item.option.option_id, item.quantity)
 
     total = sum(i.option.price * i.quantity for i in items)
     fee = shipping_fee_for(total)
+    order_id = next_order_id(timezone.localdate())
     try:
         with transaction.atomic():
             order = Order.objects.create(
-                order_id=next_order_id(timezone.localdate()),
+                order_id=order_id,
                 user=user,
                 order_status=OrderStatus.PENDING,
                 total_product_amt=total,
@@ -216,6 +213,10 @@ def create_order(user, *, address_id=None, address=None):
                 **snapshot,
             )
     except IntegrityError:
+        # Only a taken order number is a race worth retrying (SDD 4.5.2); any other
+        # constraint failure is a bug and must surface as a 500 with a logged trace.
+        if not Order.objects.filter(pk=order_id).exists():
+            raise
         raise DomainError("RETRY", "잠시 후 다시 시도해 주세요.") from None
     OrderItem.objects.bulk_create(
         OrderItem(
@@ -247,6 +248,7 @@ def cancel_pending_order(user, order_id):
         pk=order.pk, order_status=OrderStatus.PENDING
     ).update(order_status=OrderStatus.CANCELLED)
     if updated == 0:
+        order.refresh_from_db()
         raise invalid_state(order.order_status, "취소할")
     for item in order.items.all():
         increase_stock(item.option_id, item.quantity)

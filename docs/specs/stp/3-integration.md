@@ -90,7 +90,7 @@
 | `test_fr23_address_is_required_and_must_be_mine` | FR-23, NFR-11 | 배송지 없음 400, 다른 회원 배송지 404, 장바구니 그대로 |
 | `test_nfr16_stopped_product_in_cart_is_409` | NFR-16, DR-8 | 담은 뒤 판매 중지된 원두 → 409 `NOT_AVAILABLE` |
 | `test_fr30_list_own_orders_newest_first` | FR-30, NFR-11 | `GET /api/orders/` 200, 자기 주문만, `created_at` 내림차순 |
-| `test_fr55_filter_own_orders_by_status` | FR-55 | `?status=PAID` → 그 상태만, 모르는 값 400 |
+| `test_fr55_filter_own_orders_by_status` | FR-55 | `?status=PAID` → 그 상태만, 빈 값은 전체, 모르는 값 400 |
 | `test_fr30_needs_token` | FR-30, NFR-9 | 토큰 없이 401 |
 | `test_fr31_order_detail` | FR-31 | 200, 항목·결제·배송지·상태 |
 | `test_fr31_nfr11_other_members_order_is_404` | FR-31, NFR-11 | 404 |

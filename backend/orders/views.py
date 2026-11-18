@@ -58,7 +58,7 @@ class OrderListView(APIView):
             .order_by("-created_at", "-order_id")
         )
         status_filter = request.query_params.get("status")
-        if status_filter is not None:
+        if status_filter:  # empty means all (the “전체” tab)
             if status_filter not in OrderStatus.values:
                 raise ValidationError({"status": ["알 수 없는 주문 상태입니다."]})
             orders = orders.filter(order_status=status_filter)

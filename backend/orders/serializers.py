@@ -11,6 +11,7 @@ from orders.models import (
     Payment,
     PaymentStatus,
 )
+from users.serializers import phone_validator, zipcode_validator
 
 
 class CartAddSerializer(serializers.Serializer):
@@ -61,14 +62,9 @@ class CartSerializer(serializers.Serializer):
 
 class OrderAddressSerializer(serializers.Serializer):
     recipient_name = serializers.CharField(max_length=100)
-    recipient_phone = serializers.RegexField(
-        r"^[0-9-]{1,20}$",
-        error_messages={"invalid": "연락처는 숫자와 -만, 20자 이하로 입력해 주세요."},
-    )
-    zipcode = serializers.RegexField(
-        r"^[0-9]{5}$",
-        error_messages={"invalid": "우편번호는 숫자 5자리로 입력해 주세요."},
-    )
+    # Same rules as the address book (users/serializers.py).
+    recipient_phone = serializers.CharField(max_length=20, validators=[phone_validator])
+    zipcode = serializers.CharField(max_length=10, validators=[zipcode_validator])
     base_address = serializers.CharField(max_length=255)
     detail_address = serializers.CharField(
         max_length=255, required=False, allow_blank=True, allow_null=True
@@ -132,7 +128,7 @@ SHIPPING_STATUSES = (OrderStatus.SHIPPED, OrderStatus.DELIVERED)
 
 class OrderDetailSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="order_status")
-    items = OrderItemLineSerializer(many=True)
+    items = serializers.SerializerMethodField()
     payments = serializers.SerializerMethodField()
     courier_name = serializers.SerializerMethodField()
     tracking_number = serializers.SerializerMethodField()
@@ -168,13 +164,20 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             "can_request_cancel",
         ]
 
+    def to_representation(self, order):
+        # Load payments once; get_payments and get_can_pay both read them.
+        order._payment_rows = list(order.payments.order_by("payment_id"))
+        return super().to_representation(order)
+
     def _shipping(self, order):
         return order.order_status in SHIPPING_STATUSES
 
+    def get_items(self, order):
+        items = order.items.order_by("order_item_id")
+        return OrderItemLineSerializer(items, many=True).data
+
     def get_payments(self, order):
-        return PaymentLineSerializer(
-            order.payments.order_by("payment_id"), many=True
-        ).data
+        return PaymentLineSerializer(order._payment_rows, many=True).data
 
     def get_courier_name(self, order):
         return (
@@ -201,9 +204,8 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         return self._shipping_time(order, order.delivered_at)
 
     def get_can_pay(self, order):
-        return (
-            order.order_status == OrderStatus.PENDING
-            and not order.payments.filter(payment_status=PaymentStatus.SUCCESS).exists()
+        return order.order_status == OrderStatus.PENDING and not any(
+            p.payment_status == PaymentStatus.SUCCESS for p in order._payment_rows
         )
 
     def get_can_cancel(self, order):
