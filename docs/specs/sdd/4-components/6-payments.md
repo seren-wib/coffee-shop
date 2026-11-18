@@ -99,7 +99,10 @@ sequenceDiagram
   7. 그 밖의 PG 실패면 결제를 `FAILED`, `failure_reason="<토스 code>: <토스 message>"`로 바꾼다. 주문은 `PENDING` 그대로다(FR-28, DR-24).
 - 응답: 200 `{order_id, status: "PAID", final_payment_amt}`. 실패는 402 `PAYMENT_FAILED`, 불일치는 409 `PAYMENT_MISMATCH`, 주문이 취소돼 있으면 409 `ORDER_NOT_PENDING`. 모두 `message`에 화면에 보일 사유를 넣는다.
 - 결과 화면(`/checkout/result`): 200이면 주문번호와 "결제가 완료되었습니다", 오류면 사유와 "다시 결제" 버튼(4.6.2를 다시 부름)을 보인다(UC-6 3·4단계).
-- 부분 유니크 제약 `uq_payments_order_success`가 마지막 방어선이다. 동시에 두 승인이 같은 주문을 `SUCCESS`로 만들려 하면 두 번째는 제약 오류로 롤백되고, 그 결제는 5번의 불일치 분기처럼 PG 취소한다.
+- 부분 유니크 제약 `uq_payments_order_success`가 마지막 방어선이다. 동시에 두 승인이 같은 주문을 `SUCCESS`로 만들려 하면 두 번째는 제약 오류로 롤백되고, 그 결제는 5번의 불일치 분기처럼 PG 취소한 뒤 409 `ALREADY_PAID`(사유 "이미 결제된 주문")로 답한다.
+- 승인으로 보는 건 PG 응답 `status`가 `DONE`일 때뿐이다. 그 밖의 상태(가상계좌 `WAITING_FOR_DEPOSIT`, 조회했더니 `CANCELED` 등)와, `ALREADY_PROCESSED_PAYMENT` 뒤 조회한 결제의 `orderId`가 이 시도의 `pg_order_id`와 다른 경우는 7번 실패 분기다.
+- `mark_paid`는 결제 기록을 `READY` → `SUCCESS`로 먼저 바꾸고, 1행일 때만 같은 저장점에서 주문을 `PAID`로 바꾼다. 주문이 0행이면 저장점을 되돌린다. 그래서 승인하는 사이 새 결제 시작(4.6.2 3단계)이 이 시도를 닫았으면 주문은 `PAID`가 되지 않고, 승인한 돈은 PG 취소한 뒤 409 `INVALID_STATE`(사유 "새 결제 시도로 대체")다(2026-11-19 코드 리뷰 반영).
+- PG 응답이 5xx이거나 JSON이 아니거나 연결이 끊기면 승인 여부를 모르는 것으로 보고 6번(`READY` 유지, 502)과 같이 처리한다.
 - 외부 호출 뒤 DB 쓰기가 실패하면(프로세스 종료 등) PG는 승인됐는데 결제 기록이 `READY`로 남을 수 있다. 화면이 같은 값으로 확인 API를 다시 부르면 토스가 `ALREADY_PROCESSED_PAYMENT`로 답하므로, 그 코드면 결제 조회(`GET /v1/payments/{paymentKey}`)로 상태를 가져와 4번을 이어서 한다(5번). 운영 절차는 SMP 3절.
 - 결제 결과는 PG 콜백으로 받지 않는다. 브라우저가 결제창에서 돌아오면 서버가 승인 API를 부른다.
 
