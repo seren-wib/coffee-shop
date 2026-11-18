@@ -2,18 +2,29 @@
 
 업무 규칙을 담은 함수를 API 없이 직접 부른다. 백엔드는 `django.test.TestCase`(메모리 SQLite, 테스트마다 롤백), 프론트엔드는 Vitest다. 함수 이름과 위치는 SDD 2절, 4절을 따른다.
 
-### 2.1 원두와 재고 (`products/tests/test_services.py`)
+### 2.1 원두와 재고 (`products/tests/test_services.py`, DR-4는 `test_models.py`)
 
 | 테스트 | SRS | 기대 |
 | --- | --- | --- |
 | `test_dr4_option_price_is_base_plus_extra` | DR-4, DR-13 | 기본 가격 18,000원 + 추가 금액 4,000원 → 옵션 가격 22,000원(정수) |
 | `test_dr5_decrease_stock_rejects_more_than_left` | DR-5, DR-10 | 재고 2에서 3 차감 → 409 `OUT_OF_STOCK` 예외, 재고 2 그대로 |
 | `test_dr5_set_stock_rejects_negative` | DR-5, FR-41 | `set_stock(-1)` → 400 예외, 재고 그대로 |
+| `test_dr5_decrease_stock_subtracts_in_db` | DR-5 | 재고 5에서 2 차감 → 재고 3 |
+| `test_dr10_decrease_stock_rejects_non_positive_quantity` | DR-10 | 0개 차감 → 400 예외, 재고 그대로 |
+| `test_dr10_increase_stock_rejects_non_positive_quantity` | DR-10 | -1개 복원 → 400 예외, 재고 그대로 |
+| `test_fr41_set_stock_unknown_option_is_404` | FR-41 | 없는 옵션 ID → 404 예외 |
 | `test_dr6_last_stock_sold_marks_product_sold_out` | DR-6 | 판매 중 원두의 마지막 재고 1 차감 → 원두 `SOLD_OUT` |
 | `test_dr6_restock_returns_sold_out_to_on_sale` | DR-6 | 품절 원두 옵션 재고 0 → 3 → 원두 `ON_SALE` |
 | `test_dr6_sold_out_only_when_all_options_empty` | DR-6 | 옵션 둘 중 하나만 0 → `ON_SALE` 유지 |
+| `test_dr6_increase_stock_returns_sold_out_to_on_sale` | DR-6 | 품절 원두 옵션에 2개 복원(취소) → 재고 2, 원두 `ON_SALE` |
+| `test_fr41_set_stock_zero_on_every_option_marks_sold_out` | FR-41, DR-6 | 옵션 둘 중 남은 하나를 0으로 → `SOLD_OUT` |
 | `test_dr7_stopped_product_stays_stopped_on_stock_change` | DR-7, FR-42 | `STOPPED` 원두에 재고 증감 → `STOPPED` 유지 |
+| `test_fr42_stop_sales_from_on_sale_and_sold_out` | FR-42 | `ON_SALE`, `SOLD_OUT` 원두 → `STOPPED` |
+| `test_fr42_stop_sales_twice_is_409` | FR-42 | `STOPPED` 원두 다시 중지 → 409 `INVALID_STATE` |
+| `test_fr42_stop_sales_unknown_product_is_404` | FR-42 | 없는 원두 ID → 404 예외 |
 | `test_fr43_resume_picks_status_from_stock` | FR-43, DR-6 | 재고 있음 → `ON_SALE`, 모든 옵션 0 → `SOLD_OUT` |
+| `test_fr43_resume_without_options_is_on_sale` | FR-43 | 옵션 없는 `STOPPED` 원두 재개 → `ON_SALE`(SDD 4.7.0 마지막 줄) |
+| `test_fr43_resume_when_not_stopped_is_409` | FR-43 | `ON_SALE` 원두 재개 → 409 `INVALID_STATE`, 상태 그대로 |
 | `test_fr1_customer_products_hide_stopped` | FR-1 | `customer_products()`에 `STOPPED` 없음, `SOLD_OUT` 포함 |
 
 ### 2.2 장바구니와 주문 (`orders/tests/test_services.py`, `test_order_number.py`)
