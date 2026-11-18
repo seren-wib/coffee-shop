@@ -115,3 +115,45 @@ def resume_sales(product_id: int) -> None:
     ).update(sales_status=new_status)
     if updated == 0:
         raise _invalid_state_or_not_found(product_id)
+
+
+@transaction.atomic
+def add_option(
+    product_id: int,
+    weight_size: str,
+    grind_type: str,
+    extra_price: int = 0,
+    stock_quantity: int = 0,
+) -> ProductOption:
+    """FR-39: insert with stock 0, then set_stock so the status switch runs (4.7.4)."""
+    if not Product.objects.filter(pk=product_id).exists():
+        raise _not_found()
+    if ProductOption.objects.filter(
+        product_id=product_id, weight_size=weight_size, grind_type=grind_type
+    ).exists():
+        raise DomainError("DUPLICATE_OPTION", "이미 있는 옵션입니다.")
+    option = ProductOption.objects.create(
+        product_id=product_id,
+        weight_size=weight_size,
+        grind_type=grind_type,
+        extra_price=extra_price,
+        stock_quantity=0,
+    )
+    set_stock(option.pk, stock_quantity)
+    return option
+
+
+@transaction.atomic
+def update_option(
+    product_id: int,
+    option_id: int,
+    extra_price: int | None = None,
+    stock_quantity: int | None = None,
+) -> None:
+    """FR-40, FR-41: one PATCH may carry either field or both (4.7.5, 4.7.8)."""
+    if not ProductOption.objects.filter(pk=option_id, product_id=product_id).exists():
+        raise _not_found()
+    if extra_price is not None:
+        ProductOption.objects.filter(pk=option_id).update(extra_price=extra_price)
+    if stock_quantity is not None:
+        set_stock(option_id, stock_quantity)
