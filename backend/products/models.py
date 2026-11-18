@@ -1,30 +1,44 @@
+"""Beans and their options (SDD 5.3, 5.4). Stock and sales status change only in services."""
+
 from django.db import models
+from django.db.models import Q
 
 
-class SalesStatus(models.TextChoices):
-    ON_SALE = "ON_SALE", "On Sale"
-    SOLD_OUT = "SOLD_OUT", "Sold Out"
-    STOPPED = "STOPPED", "Stopped"
+class RoastLevel(models.TextChoices):
+    LIGHT = "LIGHT", "Light"
+    MEDIUM = "MEDIUM", "Medium"
+    DARK = "DARK", "Dark"
+
+
+class WeightSize(models.TextChoices):
+    G200 = "200G", "200g"
+    G500 = "500G", "500g"
+    KG1 = "1KG", "1kg"
 
 
 class GrindType(models.TextChoices):
-    WHOLE_BEAN = "WHOLE_BEAN", "Whole Bean"
-    HAND_DRIP = "HAND_DRIP", "Hand Drip"
+    WHOLE_BEAN = "WHOLE_BEAN", "Whole bean"
+    HAND_DRIP = "HAND_DRIP", "Hand drip"
     ESPRESSO = "ESPRESSO", "Espresso"
+
+
+class SalesStatus(models.TextChoices):
+    ON_SALE = "ON_SALE", "On sale"
+    SOLD_OUT = "SOLD_OUT", "Sold out"
+    STOPPED = "STOPPED", "Stopped"
 
 
 class Product(models.Model):
     product_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200)
     origin = models.CharField(max_length=100)
-    roast_level = models.CharField(max_length=50)
-    base_price = models.PositiveIntegerField()
-    tasting_notes = models.TextField(blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
+    roast_level = models.CharField(max_length=10, choices=RoastLevel.choices)
+    base_price = models.IntegerField()
+    tasting_notes = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    image_url = models.CharField(max_length=500, null=True, blank=True)
     sales_status = models.CharField(
-        max_length=20,
-        choices=SalesStatus.choices,
-        default=SalesStatus.ON_SALE,
+        max_length=10, choices=SalesStatus.choices, default=SalesStatus.ON_SALE
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -37,85 +51,61 @@ class Product(models.Model):
                 name="idx_products_filter",
             ),
         ]
-        ordering = ["-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(roast_level__in=RoastLevel.values),
+                name="ck_products_roast_level",
+            ),
+            models.CheckConstraint(
+                condition=Q(base_price__gte=0), name="ck_products_base_price"
+            ),
+            models.CheckConstraint(
+                condition=Q(sales_status__in=SalesStatus.values),
+                name="ck_products_sales_status",
+            ),
+        ]
 
     def __str__(self):
-        return f"{self.name} ({self.origin})"
-
-    def update_info(
-        self,
-        name=None,
-        origin=None,
-        roast_level=None,
-        base_price=None,
-        tasting_notes=None,
-        description=None,
-    ):
-        if name is not None:
-            self.name = name
-        if origin is not None:
-            self.origin = origin
-        if roast_level is not None:
-            self.roast_level = roast_level
-        if base_price is not None:
-            self.base_price = base_price
-        if tasting_notes is not None:
-            self.tasting_notes = tasting_notes
-        if description is not None:
-            self.description = description
-        self.save()
-
-    def change_sales_status(self, status: str):
-        self.sales_status = status
-        self.save(update_fields=["sales_status"])
-
-    def calculate_price(self, option) -> int:
-        return self.base_price + option.extra_price
+        return self.name
 
 
 class ProductOption(models.Model):
     option_id = models.AutoField(primary_key=True)
     product = models.ForeignKey(
-        Product,
-        on_delete=models.CASCADE,
-        related_name="options",
-        db_column="product_id",
+        Product, on_delete=models.CASCADE, related_name="options"
     )
-    weight_size = models.CharField(max_length=50)  # e.g., '200g', '500g', '1kg'
-    grind_type = models.CharField(
-        max_length=50,
-        choices=GrindType.choices,
-        default=GrindType.WHOLE_BEAN,
-    )
-    extra_price = models.PositiveIntegerField(default=0)
-    stock_quantity = models.PositiveIntegerField(default=0)
+    weight_size = models.CharField(max_length=4, choices=WeightSize.choices)
+    grind_type = models.CharField(max_length=12, choices=GrindType.choices)
+    extra_price = models.IntegerField(default=0)
+    stock_quantity = models.IntegerField(default=0)
 
     class Meta:
         db_table = "product_options"
-        unique_together = ("product", "weight_size", "grind_type")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["product", "weight_size", "grind_type"],
+                name="uq_product_options_combo",
+            ),
+            models.CheckConstraint(
+                condition=Q(weight_size__in=WeightSize.values),
+                name="ck_product_options_weight_size",
+            ),
+            models.CheckConstraint(
+                condition=Q(grind_type__in=GrindType.values),
+                name="ck_product_options_grind_type",
+            ),
+            models.CheckConstraint(
+                condition=Q(extra_price__gte=0), name="ck_product_options_extra_price"
+            ),
+            models.CheckConstraint(
+                condition=Q(stock_quantity__gte=0), name="ck_product_options_stock"
+            ),
+        ]
 
     def __str__(self):
-        return f"{self.product.name} - {self.weight_size} ({self.get_grind_type_display()})"
+        return f"{self.product.name} {self.weight_size} {self.grind_type}"
 
-    def decrease_stock(self, quantity: int) -> bool:
-        if self.stock_quantity >= quantity:
-            self.stock_quantity -= quantity
-            self.save(update_fields=["stock_quantity"])
-            if self.stock_quantity == 0:
-                # If all options out of stock, optionally update product status
-                if not self.product.options.filter(stock_quantity__gt=0).exists():
-                    self.product.change_sales_status(SalesStatus.SOLD_OUT)
-            return True
-        return False
-
-    def increase_stock(self, quantity: int):
-        self.stock_quantity += quantity
-        self.save(update_fields=["stock_quantity"])
-        if (
-            self.product.sales_status == SalesStatus.SOLD_OUT
-            and self.stock_quantity > 0
-        ):
-            self.product.change_sales_status(SalesStatus.ON_SALE)
-
-    def is_available(self, quantity: int) -> bool:
-        return self.stock_quantity >= quantity
+    @property
+    def price(self):
+        # Not stored: changing the base price changes every option price (DR-4).
+        return self.product.base_price + self.extra_price
