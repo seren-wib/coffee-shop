@@ -10,4 +10,18 @@ urlpatterns = [
         views.CartItemDetailView.as_view(),
         name="cart_item_detail",
     ),
+    path("orders/", views.OrderListView.as_view(), name="orders"),
+    path(
+        "orders/<str:order_id>/", views.OrderDetailView.as_view(), name="order_detail"
+    ),
+    path(
+        "orders/<str:order_id>/cancel/",
+        views.OrderCancelView.as_view(),
+        name="order_cancel",
+    ),
+    path(
+        "orders/<str:order_id>/cancel-request/",
+        views.OrderCancelRequestView.as_view(),
+        name="order_cancel_request",
+    ),
 ]

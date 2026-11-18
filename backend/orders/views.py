@@ -1,15 +1,22 @@
-"""Member cart (SDD 4.4). Every view is member-only by the default IsAuthenticated."""
+"""Member cart (SDD 4.4) and orders (SDD 4.5). Member-only by the default IsAuthenticated."""
 
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from common.pagination import StandardPagination
 from orders import services
+from orders.models import Order, OrderStatus
 from orders.serializers import (
+    CancelRequestSerializer,
     CartAddSerializer,
     CartItemRefSerializer,
     CartQuantitySerializer,
     CartSerializer,
+    OrderCreateSerializer,
+    OrderDetailSerializer,
+    OrderSummarySerializer,
 )
 
 
@@ -41,3 +48,52 @@ class CartItemDetailView(APIView):
     def delete(self, request, pk):
         services.remove_cart_item(request.user, pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class OrderListView(APIView):
+    def get(self, request):
+        orders = (
+            Order.objects.filter(user=request.user)
+            .prefetch_related("items")
+            .order_by("-created_at", "-order_id")
+        )
+        status_filter = request.query_params.get("status")
+        if status_filter is not None:
+            if status_filter not in OrderStatus.values:
+                raise ValidationError({"status": ["알 수 없는 주문 상태입니다."]})
+            orders = orders.filter(order_status=status_filter)
+        paginator = StandardPagination()
+        page = paginator.paginate_queryset(orders, request, view=self)
+        return paginator.get_paginated_response(
+            OrderSummarySerializer(page, many=True).data
+        )
+
+    def post(self, request):
+        s = OrderCreateSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        order = services.create_order(request.user, **s.validated_data)
+        return Response(
+            OrderDetailSerializer(order).data, status=status.HTTP_201_CREATED
+        )
+
+
+class OrderDetailView(APIView):
+    def get(self, request, order_id):
+        order = services.own_order(request.user, order_id)
+        return Response(OrderDetailSerializer(order).data)
+
+
+class OrderCancelView(APIView):
+    def post(self, request, order_id):
+        order = services.cancel_pending_order(request.user, order_id)
+        return Response(OrderDetailSerializer(order).data)
+
+
+class OrderCancelRequestView(APIView):
+    def post(self, request, order_id):
+        s = CancelRequestSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        order = services.request_cancel(
+            request.user, order_id, s.validated_data["reason"]
+        )
+        return Response(OrderDetailSerializer(order).data)
