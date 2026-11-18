@@ -144,6 +144,12 @@ class Order(models.Model):
                 ),
                 name="ck_orders_shipped_fields",
             ),
+            # Rejecting a cancel request restores this value (FR-51).
+            models.CheckConstraint(
+                condition=~Q(order_status=OrderStatus.CANCEL_REQUESTED)
+                | Q(status_before_cancel__isnull=False),
+                name="ck_orders_cancel_request_previous",
+            ),
         ]
 
     def __str__(self):

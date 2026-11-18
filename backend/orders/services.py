@@ -4,6 +4,7 @@ from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 
 from common.exceptions import DomainError
 from orders.models import (
@@ -135,6 +136,15 @@ def invalid_state(current, action):
     return DomainError(
         "INVALID_STATE", f"{STATUS_MODIFIER[current]} 주문은 {action} 수 없습니다."
     )
+
+
+def filter_by_status(orders, value):
+    """?status= for member and admin lists: empty means all, unknown is 400."""
+    if not value:
+        return orders
+    if value not in OrderStatus.values:
+        raise ValidationError({"status": ["알 수 없는 주문 상태입니다."]})
+    return orders.filter(order_status=value)
 
 
 def own_order(user, order_id):
@@ -282,8 +292,8 @@ def request_cancel(user, order_id, reason):
 # Admin transitions (SDD 4.8). Every one is a conditional UPDATE on the current status.
 
 
-def _admin_order(order_id):
-    order = Order.objects.filter(order_id=order_id).first()
+def admin_order(order_id):
+    order = Order.objects.select_related("user").filter(order_id=order_id).first()
     if order is None:
         raise _not_found()
     return order
@@ -291,7 +301,7 @@ def _admin_order(order_id):
 
 def _transition(order_id, expected, action, **changes):
     """UPDATE ... WHERE order_status = expected; 0 rows is 409 with the current status."""
-    order = _admin_order(order_id)
+    order = admin_order(order_id)
     updated = Order.objects.filter(pk=order.pk, order_status=expected).update(**changes)
     order.refresh_from_db()
     if updated == 0:
@@ -341,7 +351,7 @@ def approve_cancel(order_id):
     fails the order stays CANCEL_REQUESTED and the admin can press again."""
     from orders.payments import cancel_success_payment
 
-    order = _admin_order(order_id)
+    order = admin_order(order_id)
     if order.order_status != OrderStatus.CANCEL_REQUESTED:
         raise invalid_state(order.order_status, "취소 승인할")
     success = Payment.objects.filter(
@@ -369,9 +379,6 @@ def _close_cancelled(order_id):
 @transaction.atomic
 def reject_cancel(order_id):
     """FR-51. Back to the status before the request; the reason stays on record."""
-    order = _admin_order(order_id)
-    if order.order_status != OrderStatus.CANCEL_REQUESTED:
-        raise invalid_state(order.order_status, "취소 반려할")
     return _transition(
         order_id,
         OrderStatus.CANCEL_REQUESTED,

@@ -259,7 +259,7 @@ class ShipSerializer(serializers.Serializer):
         error_messages={"invalid_choice": "목록에 있는 택배사를 골라 주세요."},
     )
     tracking_number = serializers.RegexField(
-        r"^[0-9-]{1,30}$",
+        r"^(?=.*[0-9])[0-9-]{1,30}$",
         error_messages={"invalid": "송장번호는 숫자와 -만, 30자 이하로 입력해 주세요."},
     )
 

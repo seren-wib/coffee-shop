@@ -1,8 +1,10 @@
-"""Member cart (SDD 4.4), orders (SDD 4.5), payments (SDD 4.6) and admin orders (SDD 4.8). Member-only by the default IsAuthenticated."""
+"""Member cart (SDD 4.4), orders (SDD 4.5), payments (SDD 4.6) and admin orders (4.8).
 
-from rest_framework import status
+Member views rely on the default IsAuthenticated; admin views add IsAdminRole.
+"""
+
 from django.db.models import Q
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,7 +12,7 @@ from rest_framework.views import APIView
 from common.pagination import StandardPagination
 from common.permissions import IsAdminRole
 from orders import payments, services
-from orders.models import Order, OrderStatus
+from orders.models import Order
 from orders.serializers import (
     AdminOrderDetailSerializer,
     AdminOrderSummarySerializer,
@@ -65,11 +67,7 @@ class OrderListView(APIView):
             .prefetch_related("items")
             .order_by("-created_at", "-order_id")
         )
-        status_filter = request.query_params.get("status")
-        if status_filter:  # empty means all (the “전체” tab)
-            if status_filter not in OrderStatus.values:
-                raise ValidationError({"status": ["알 수 없는 주문 상태입니다."]})
-            orders = orders.filter(order_status=status_filter)
+        orders = services.filter_by_status(orders, request.query_params.get("status"))
         paginator = StandardPagination()
         page = paginator.paginate_queryset(orders, request, view=self)
         return paginator.get_paginated_response(
@@ -163,7 +161,6 @@ class AdminView(APIView):
 
 
 def _admin_detail(order):
-    order = Order.objects.select_related("user").get(pk=order.pk)
     return Response(AdminOrderDetailSerializer(order).data)
 
 
@@ -172,11 +169,7 @@ class AdminOrderListView(AdminView):
         orders = Order.objects.select_related("user").order_by(
             "-created_at", "-order_id"
         )
-        status_filter = request.query_params.get("status")
-        if status_filter:
-            if status_filter not in OrderStatus.values:
-                raise ValidationError({"status": ["알 수 없는 주문 상태입니다."]})
-            orders = orders.filter(order_status=status_filter)
+        orders = services.filter_by_status(orders, request.query_params.get("status"))
         search = request.query_params.get("search", "").strip()
         if search:
             orders = orders.filter(
@@ -191,10 +184,7 @@ class AdminOrderListView(AdminView):
 
 class AdminOrderDetailView(AdminView):
     def get(self, request, order_id):
-        order = Order.objects.filter(order_id=order_id).first()
-        if order is None:
-            raise NotFound()
-        return _admin_detail(order)
+        return _admin_detail(services.admin_order(order_id))
 
 
 class AdminPrepareView(AdminView):
