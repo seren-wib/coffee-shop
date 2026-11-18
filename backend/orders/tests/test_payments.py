@@ -1,4 +1,5 @@
 from datetime import datetime, timezone as dt_timezone
+from unittest import mock
 
 from django.test import TestCase
 
@@ -167,3 +168,94 @@ class PaymentServiceTests(TestCase):
         self.assertEqual(ctx.exception.code, "PG_ERROR")
         payment.refresh_from_db()
         self.assertEqual(payment.payment_status, PaymentStatus.SUCCESS)
+
+
+class PaymentRaceTests(TestCase):
+    """Review findings on PR for SDD 4.6: approvals that cannot stand are refunded."""
+
+    def setUp(self):
+        FakePaymentsClient.reset()
+        self.user = make_member()
+        option = make_product(base_price=15000).options.get()
+        self.order = make_order(self.user, option, quantity=2)  # 30,000
+        self.payment = payments.start_payment(self.user, self.order.order_id)
+
+    def _confirm(self):
+        return payments.confirm_payment(
+            self.user,
+            payment_key="tkey_race",
+            pg_order_id=self.payment.pg_order_id,
+            amount=30000,
+        )
+
+    def test_dr24_attempt_replaced_during_approval_is_refunded(self):
+        real_confirm = FakePaymentsClient.confirm
+
+        def confirm_while_new_attempt_starts(client, *args):
+            payments.start_payment(self.user, self.order.order_id)
+            return real_confirm(client, *args)
+
+        with mock.patch.object(
+            FakePaymentsClient, "confirm", confirm_while_new_attempt_starts
+        ):
+            with self.assertRaises(DomainError) as ctx:
+                self._confirm()
+        self.assertEqual(ctx.exception.code, "INVALID_STATE")
+        self.order.refresh_from_db()
+        self.payment.refresh_from_db()
+        self.assertEqual(self.order.order_status, OrderStatus.PENDING)
+        self.assertEqual(self.payment.payment_status, PaymentStatus.CANCELLED)
+        self.assertEqual(self.payment.pg_tid, "tkey_race")
+        self.assertEqual(len(FakePaymentsClient.calls_to("cancel")), 1)
+        self.assertFalse(
+            Payment.objects.filter(payment_status=PaymentStatus.SUCCESS).exists()
+        )
+
+    def test_dr24_second_success_on_same_order_is_refunded_as_already_paid(self):
+        make_payment(self.order, 9, PaymentStatus.SUCCESS, pg_tid="tkey_other")
+        with self.assertRaises(DomainError) as ctx:
+            self._confirm()
+        self.assertEqual(ctx.exception.code, "ALREADY_PAID")
+        self.payment.refresh_from_db()
+        self.assertEqual(self.payment.payment_status, PaymentStatus.CANCELLED)
+        self.assertEqual(self.payment.failure_reason, "이미 결제된 주문")
+        self.assertEqual(len(FakePaymentsClient.calls_to("cancel")), 1)
+
+    def test_fr26_status_other_than_done_is_not_paid(self):
+        FakePaymentsClient.script["confirm"] = [
+            PgResult(ok=True, status="WAITING_FOR_DEPOSIT", total_amount=30000)
+        ]
+        with self.assertRaises(DomainError) as ctx:
+            self._confirm()
+        self.assertEqual(ctx.exception.code, "PAYMENT_FAILED")
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.order_status, OrderStatus.PENDING)
+
+    def test_fr26_already_processed_but_cancelled_at_pg_is_not_paid(self):
+        FakePaymentsClient.script["confirm"] = [
+            PgResult(ok=False, code="ALREADY_PROCESSED_PAYMENT", message="이미 처리")
+        ]
+        FakePaymentsClient.script["get"] = [
+            PgResult(ok=True, status="CANCELED", total_amount=30000)
+        ]
+        with self.assertRaises(DomainError):
+            self._confirm()
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.order_status, OrderStatus.PENDING)
+
+    def test_fr26_already_processed_for_another_order_is_not_paid(self):
+        FakePaymentsClient.script["confirm"] = [
+            PgResult(ok=False, code="ALREADY_PROCESSED_PAYMENT", message="이미 처리")
+        ]
+        FakePaymentsClient.script["get"] = [
+            PgResult(
+                ok=True,
+                status="DONE",
+                total_amount=30000,
+                order_id="ORD-20261120-999-P1",
+            )
+        ]
+        with self.assertRaises(DomainError):
+            self._confirm()
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.order_status, OrderStatus.PENDING)

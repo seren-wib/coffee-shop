@@ -83,3 +83,17 @@ class TossClientTests(SimpleTestCase):
         request = urlopen.call_args.args[0]
         self.assertEqual(request.get_header("Idempotency-key"), "cancel-9")
         self.assertTrue(request.full_url.endswith("/v1/payments/tkey_1/cancel"))
+
+    def test_fr26_unknown_outcomes_raise_pg_error(self):
+        server_error = urllib.error.HTTPError(
+            "url", 502, "Bad Gateway", {}, io.BytesIO(b"<html>bad gateway</html>")
+        )
+        cases = (
+            {"side_effect": server_error},
+            {"return_value": _Response(b"<html>not json</html>")},
+            {"side_effect": ConnectionResetError()},
+        )
+        for kwargs in cases:
+            with mock.patch("orders.pg.urllib.request.urlopen", **kwargs):
+                with self.assertRaises(PgError):
+                    TossPaymentsClient().confirm("tkey_1", "ORD-20261120-001-P1", 1)
