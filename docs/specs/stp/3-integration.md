@@ -153,7 +153,7 @@
 | `test_fr50_pg_error_keeps_cancel_requested` | FR-50 | 가짜 PG 취소 오류 → 502 `PG_ERROR`, 주문 `CANCEL_REQUESTED`, 재고 그대로 |
 | `test_fr51_reject_cancel_restores_previous_status` | FR-51 | 요청 전 `PAID` → `PAID`, `PREPARING` → `PREPARING` |
 
-### 3.9 운영과 공통 (`common/tests/test_common_api.py`, `users/tests/test_commands.py`)
+### 3.9 운영과 공통 (`common/tests/test_common_api.py`, `users/tests/test_commands.py`, `products/tests/test_commands.py`)
 
 | 테스트 | SRS | 기대 |
 | --- | --- | --- |
@@ -164,4 +164,9 @@
 | `test_nfr17_member_with_orders_cannot_be_deleted` | NFR-17 | 주문 있는 회원 `delete()` → `ProtectedError`, 회원 행 그대로 |
 | `test_nfr28_responses_are_json` | NFR-28 | 상태 확인, 목록, 오류 응답 모두 `Content-Type: application/json` |
 | `test_nfr35_logs_have_no_secrets_or_contacts` | NFR-35 | `assertLogs`로 로그인·주문 요청 동안 로그를 모아 비밀번호, 토큰, 연락처, 주소 문자열 0건 |
-| `test_nfr3_seed_demo_counts` | NFR-3 | `seed_demo --products 5 --members 3 --orders 10`(작은 수) 뒤 행 수가 인수와 같고, 같은 시드로 두 번 돌리면 같은 데이터 |
+| `test_nfr3_seed_demo_counts` | NFR-3 | `seed_demo --products 5 --members 3 --orders 14`(작은 수) 뒤 행 수가 인수와 같음, 원두마다 옵션 1 ~ 9개, 회원마다 배송지 1 ~ 3개(기본 1개), `privacy_agreed_at` 채움 |
+| `test_nfr3_same_seed_gives_same_data` | NFR-3 | 같은 인수로 두 번(사이에 비움) → 원두·옵션·재고·회원·배송지·주문·주문 항목이 같음(시각·키·비밀번호 제외) |
+| `test_nfr3_orders_cover_every_status_with_matching_rows` | NFR-3, DR-13 ~ DR-15 | 주문 14건 → 상태 7가지가 2건씩, 금액·배송비·주문번호 형식이 규칙대로, 결제는 `PENDING`→`READY`, `CANCELLED`→`CANCELLED`, 나머지 `SUCCESS` 1건 |
+| `test_nfr3_stock_matches_live_orders` | NFR-3, DR-6 | 시드 뒤 `SOLD_OUT` 원두는 재고 0, `ON_SALE` 원두는 재고 있음 |
+| `test_nfr3_refuses_a_database_with_data` | NFR-3 | 데이터가 있는 DB에서 다시 돌리면 `CommandError` |
+| `test_nfr3_needs_force_when_debug_is_off` | NFR-3 | `DEBUG=False`에서 `--force` 없이 `CommandError`, 0행. `--force`면 돈다 |
