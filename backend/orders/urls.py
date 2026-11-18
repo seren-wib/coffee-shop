@@ -33,4 +33,35 @@ urlpatterns = [
         "payments/confirm/", views.PaymentConfirmView.as_view(), name="payment_confirm"
     ),
     path("payments/fail/", views.PaymentFailView.as_view(), name="payment_fail"),
+    path("admin/orders/", views.AdminOrderListView.as_view(), name="admin_orders"),
+    path(
+        "admin/orders/<str:order_id>/",
+        views.AdminOrderDetailView.as_view(),
+        name="admin_order_detail",
+    ),
+    path(
+        "admin/orders/<str:order_id>/prepare/",
+        views.AdminPrepareView.as_view(),
+        name="admin_order_prepare",
+    ),
+    path(
+        "admin/orders/<str:order_id>/ship/",
+        views.AdminShipView.as_view(),
+        name="admin_order_ship",
+    ),
+    path(
+        "admin/orders/<str:order_id>/deliver/",
+        views.AdminDeliverView.as_view(),
+        name="admin_order_deliver",
+    ),
+    path(
+        "admin/orders/<str:order_id>/cancel-approve/",
+        views.AdminCancelApproveView.as_view(),
+        name="admin_order_cancel_approve",
+    ),
+    path(
+        "admin/orders/<str:order_id>/cancel-reject/",
+        views.AdminCancelRejectView.as_view(),
+        name="admin_order_cancel_reject",
+    ),
 ]

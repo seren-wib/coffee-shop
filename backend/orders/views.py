@@ -1,14 +1,19 @@
-"""Member cart (SDD 4.4), orders (SDD 4.5) and payments (SDD 4.6). Member-only by the default IsAuthenticated."""
+"""Member cart (SDD 4.4), orders (SDD 4.5), payments (SDD 4.6) and admin orders (SDD 4.8). Member-only by the default IsAuthenticated."""
 
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
+from django.db.models import Q
+from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from common.pagination import StandardPagination
+from common.permissions import IsAdminRole
 from orders import payments, services
 from orders.models import Order, OrderStatus
 from orders.serializers import (
+    AdminOrderDetailSerializer,
+    AdminOrderSummarySerializer,
     CancelRequestSerializer,
     CartAddSerializer,
     CartItemRefSerializer,
@@ -19,6 +24,7 @@ from orders.serializers import (
     OrderCreateSerializer,
     OrderDetailSerializer,
     OrderSummarySerializer,
+    ShipSerializer,
 )
 
 
@@ -148,3 +154,71 @@ class PaymentFailView(APIView):
             message=data.get("message", ""),
         )
         return Response({})
+
+
+class AdminView(APIView):
+    """Every /api/admin/orders/ view: token plus DB role ADMIN (NFR-10)."""
+
+    permission_classes = [IsAuthenticated, IsAdminRole]
+
+
+def _admin_detail(order):
+    order = Order.objects.select_related("user").get(pk=order.pk)
+    return Response(AdminOrderDetailSerializer(order).data)
+
+
+class AdminOrderListView(AdminView):
+    def get(self, request):
+        orders = Order.objects.select_related("user").order_by(
+            "-created_at", "-order_id"
+        )
+        status_filter = request.query_params.get("status")
+        if status_filter:
+            if status_filter not in OrderStatus.values:
+                raise ValidationError({"status": ["알 수 없는 주문 상태입니다."]})
+            orders = orders.filter(order_status=status_filter)
+        search = request.query_params.get("search", "").strip()
+        if search:
+            orders = orders.filter(
+                Q(order_id__icontains=search) | Q(user__email__icontains=search)
+            )
+        paginator = StandardPagination()
+        page = paginator.paginate_queryset(orders, request, view=self)
+        return paginator.get_paginated_response(
+            AdminOrderSummarySerializer(page, many=True).data
+        )
+
+
+class AdminOrderDetailView(AdminView):
+    def get(self, request, order_id):
+        order = Order.objects.filter(order_id=order_id).first()
+        if order is None:
+            raise NotFound()
+        return _admin_detail(order)
+
+
+class AdminPrepareView(AdminView):
+    def post(self, request, order_id):
+        return _admin_detail(services.prepare(order_id))
+
+
+class AdminShipView(AdminView):
+    def post(self, request, order_id):
+        s = ShipSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        return _admin_detail(services.ship(order_id, **s.validated_data))
+
+
+class AdminDeliverView(AdminView):
+    def post(self, request, order_id):
+        return _admin_detail(services.deliver(order_id))
+
+
+class AdminCancelApproveView(AdminView):
+    def post(self, request, order_id):
+        return _admin_detail(services.approve_cancel(order_id))
+
+
+class AdminCancelRejectView(AdminView):
+    def post(self, request, order_id):
+        return _admin_detail(services.reject_cancel(order_id))

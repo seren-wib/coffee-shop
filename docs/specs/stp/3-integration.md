@@ -158,7 +158,8 @@
 | `test_fr49_deliver` | FR-49 | 200 `DELIVERED`, `delivered_at` |
 | `test_fr50_approve_cancel` | FR-50, DR-21 | 200 `CANCELLED`, 재고 복구, 결제 `CANCELLED`, PG `cancel` 1회. 두 번째 승인 409, 재고 한 번만 복구 |
 | `test_fr50_pg_error_keeps_cancel_requested` | FR-50 | 가짜 PG 취소 오류 → 502 `PG_ERROR`, 주문 `CANCEL_REQUESTED`, 재고 그대로 |
-| `test_fr51_reject_cancel_restores_previous_status` | FR-51 | 요청 전 `PAID` → `PAID`, `PREPARING` → `PREPARING` |
+| `test_fr51_reject_cancel_restores_previous_status` | FR-51 | 요청 전 `PAID` → `PAID`, `PREPARING` → `PREPARING`, 사유는 남음 |
+| `test_nfr11_admin_routes_take_any_members_order` | FR-46, NFR-10 | 관리자는 어느 회원 주문이든 200, 없는 주문번호 404 |
 
 ### 3.9 운영과 공통 (`common/tests/test_common_api.py`, `users/tests/test_commands.py`, `products/tests/test_commands.py`)
 
@@ -166,6 +167,7 @@
 | --- | --- | --- |
 | `test_fr52_health_ok` | FR-52 | `GET /api/health/` 토큰 없이 200, 본문 `{"status": "ok"}` |
 | `test_fr52_health_503_when_db_fails` | FR-52 | DB 커서를 예외로 바꾼 상태 → 503, 본문에 내부 정보 없음 |
+| `test_fr53_created_admin_can_use_admin_routes` | FR-53, NFR-10 | 명령으로 만든 관리자 토큰으로 `GET /api/admin/orders/` 200 |
 | `test_fr53_create_admin_command` | FR-53 | `call_command("create_admin", ...)` 뒤 그 계정 토큰으로 `GET /api/admin/orders/` 200 |
 | `test_nfr12_error_bodies_have_no_trace` | NFR-12 | `DEBUG=False`에서 없는 경로 404, 일부러 낸 예외 500 본문에 파일 경로·`Traceback` 없음 |
 | `test_nfr17_member_with_orders_cannot_be_deleted` | NFR-17 | 주문 있는 회원 `delete()` → `ProtectedError`, 회원 행 그대로 |
