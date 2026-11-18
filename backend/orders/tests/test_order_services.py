@@ -100,3 +100,58 @@ class CourierTests(TestCase):
             self.assertTrue(couriers.tracking_url(code, "12345").startswith("https://"))
         self.assertEqual(couriers.courier_name("EPOST"), "우체국택배")
         self.assertIsNone(couriers.tracking_url(None, None))
+
+
+class AdminTransitionTests(TestCase):
+    """SDD 4.5.1: any (current, action) pair not in the table is 409 INVALID_STATE."""
+
+    ALLOWED = {
+        "prepare": {OrderStatus.PAID},
+        "ship": {OrderStatus.PREPARING},
+        "deliver": {OrderStatus.SHIPPED},
+        "approve_cancel": {OrderStatus.CANCEL_REQUESTED},
+        "reject_cancel": {OrderStatus.CANCEL_REQUESTED},
+    }
+
+    def setUp(self):
+        self.user = make_member()
+        self.option = make_product(options=[{"stock_quantity": 5}]).options.get()
+
+    def _order(self, status):
+        extra = {}
+        if status in (OrderStatus.SHIPPED, OrderStatus.DELIVERED):
+            extra = {
+                "courier_code": "CJ",
+                "tracking_number": "1",
+                "shipped_at": timezone.now(),
+            }
+        if status == OrderStatus.CANCEL_REQUESTED:
+            extra = {"status_before_cancel": OrderStatus.PAID}
+        return make_order(self.user, self.option, status=status, **extra)
+
+    def _call(self, action, order):
+        if action == "ship":
+            return services.ship(order.order_id, "CJ", "123")
+        return getattr(services, action)(order.order_id)
+
+    def test_dr19_disallowed_transitions_raise_invalid_state(self):
+        for action, allowed in self.ALLOWED.items():
+            for status in OrderStatus.values:
+                if status in allowed:
+                    continue
+                order = self._order(status)
+                with self.assertRaises(
+                    DomainError, msg=f"{action} from {status}"
+                ) as ctx:
+                    self._call(action, order)
+                self.assertEqual(ctx.exception.code, "INVALID_STATE")
+                order.refresh_from_db()
+                self.assertEqual(order.order_status, status)
+
+    def test_dr21_cancel_restores_stock_once(self):
+        order = self._order(OrderStatus.CANCEL_REQUESTED)  # quantity 1
+        services.approve_cancel(order.order_id)
+        with self.assertRaises(DomainError) as ctx:
+            services.approve_cancel(order.order_id)
+        self.assertEqual(ctx.exception.code, "INVALID_STATE")
+        self.assertEqual(ProductOption.objects.get(pk=self.option.pk).stock_quantity, 6)
