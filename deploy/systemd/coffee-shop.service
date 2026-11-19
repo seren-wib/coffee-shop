@@ -1,0 +1,22 @@
+[Unit]
+Description=coffee-shop Django API (gunicorn)
+After=network.target
+
+[Service]
+User=coffee-shop
+Group=coffee-shop
+Environment=DOTENV_PATH=/srv/coffee-shop/.env
+WorkingDirectory=/srv/coffee-shop/current/backend
+ExecStart=/srv/coffee-shop/current/.venv/bin/gunicorn -c /srv/coffee-shop/current/deploy/gunicorn.conf.py config.wsgi
+RuntimeDirectory=coffee-shop
+RuntimeDirectoryMode=0750
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/srv/coffee-shop/data
+
+[Install]
+WantedBy=multi-user.target
