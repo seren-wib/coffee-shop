@@ -120,6 +120,15 @@
 | `test_fr25_other_members_order_is_404` | FR-25, NFR-11 | 다른 회원 주문 결제 시작 → 404 |
 | `test_nfr18_payments_table_has_no_card_columns` | NFR-18 | `payments` 열 이름에 `card`, `number`, `cvc`, `expiry` 없음 |
 
+### 3.6.1 결제 끔 (`orders/tests/test_payments_disabled.py`, `PAYMENTS_ENABLED=False`)
+
+| 테스트 | SRS | 기대 |
+| --- | --- | --- |
+| `test_nfr13_start_payment_is_503_without_a_row` | NFR-13, FR-25 | 결제 시작 503 `PAYMENTS_DISABLED`, 결제 기록 0행, PG 호출 0회 |
+| `test_nfr13_confirm_is_503_and_keeps_ready` | NFR-13, FR-26 | 확인 503, 결제 `READY` 그대로, PG 호출 0회 |
+| `test_nfr13_cancel_approve_is_503_and_keeps_request` | NFR-13, FR-50 | 관리자 취소 승인 503, 주문 `CANCEL_REQUESTED` 그대로, PG 호출 0회 |
+| `test_nfr13_cart_and_orders_still_work` | NFR-13, FR-19 | 결제를 꺼도 장바구니 담기 200·201 |
+
 ### 3.7 관리자 원두 (`products/tests/test_admin_products_api.py`)
 
 | 테스트 | SRS | 기대 |
@@ -169,6 +178,8 @@
 | `test_fr52_health_503_when_db_fails` | FR-52 | DB 커서를 예외로 바꾼 상태 → 503, 본문에 내부 정보 없음 |
 | `test_fr53_created_admin_can_use_admin_routes` | FR-53, NFR-10 | 명령으로 만든 관리자 토큰으로 `GET /api/admin/orders/` 200 |
 | `test_fr53_create_admin_command` | FR-53 | `call_command("create_admin", ...)` 뒤 그 계정 토큰으로 `GET /api/admin/orders/` 200 |
+| `test_nfr12_production_needs_allowed_hosts` (`common/tests/test_production_checks.py`) | NFR-12 | `DEBUG=False`에 `ALLOWED_HOSTS`가 비면 `ImproperlyConfigured` |
+| `test_nfr13_only_test_toss_keys` | NFR-13 | `live_`·접두사 없는 키는 `ImproperlyConfigured`, `test_` 키는 켬, 빈 값은 끔 |
 | `test_nfr12_error_bodies_have_no_trace` | NFR-12 | `DEBUG=False`에서 없는 경로 404, 일부러 낸 예외 500 본문에 파일 경로·`Traceback` 없음 |
 | `test_nfr17_member_with_orders_cannot_be_deleted` | NFR-17 | 주문 있는 회원 `delete()` → `ProtectedError`, 회원 행 그대로 |
 | `test_nfr28_responses_are_json` | NFR-28 | 상태 확인, 목록, 오류 응답 모두 `Content-Type: application/json` |

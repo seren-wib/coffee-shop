@@ -139,6 +139,8 @@ class FakePaymentsClient:
     # 테스트용. 미리 정한 결과(성공, 실패 코드, 다른 금액)를 돌려준다.
 ```
 
+- 결제 끄기: 설정 `PAYMENTS_ENABLED`가 거짓이면(`TOSS_SECRET_KEY`가 비어 있고 클라이언트가 `TossPaymentsClient`일 때, 9.1절) `get_client()`와 결제 시작·확인이 PG를 부르거나 DB를 바꾸기 전에 503 `PAYMENTS_DISABLED`로 멈춘다. 결제 시작은 결제 기록을 만들지 않고, 확인은 결제를 `READY`로 두고, 관리자 취소 승인은 주문을 `CANCEL_REQUESTED`로 둔다. 이 프로젝트 전용 테스트 키가 생기기 전에 운영 서버를 띄우려는 것이다(11.1절, SIP 3.4절) (2026-11-19 추가)
+
 - 어떤 클라이언트를 쓸지는 설정 `PAYMENTS_CLIENT`(점 경로)로 고른다. 테스트 설정은 `FakePaymentsClient`다. 테스트는 토스 서버를 부르지 않는다(STP 1절).
 - `PgResult`는 `{ok, status, total_amount, method, approved_at, code, message}`만 담는다. 응답 원문은 저장하지 않는다(NFR-18).
 - 시크릿 키는 서버 환경 변수 `TOSS_SECRET_KEY`에만 있다. 로그에 `Authorization` 헤더와 `paymentKey` 전체를 남기지 않는다(8.5절).
