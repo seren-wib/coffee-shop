@@ -53,7 +53,8 @@
 | --- | --- | --- |
 | `test_dr24_each_attempt_gets_new_pg_order_id` | DR-24, FR-29 | 같은 주문 두 번째 결제 시작 → 결제 2행, `pg_order_id` `<주문번호>-P1`, `-P2` |
 | `test_dr22_confirm_success_marks_order_paid` | DR-22, FR-26 | 가짜 PG 승인 성공, 금액 같음 → 결제 `SUCCESS`, 주문 `PAID` |
-| `test_dr23_amount_mismatch_cancels_payment` | DR-23, FR-27 | 가짜 PG가 다른 금액 승인 → 가짜 PG `cancel` 1회 호출, 결제 `CANCELLED`, 주문 `PENDING` |
+| `test_dr23_amount_mismatch_closes_without_pg` | DR-23, FR-27 | 시작 금액과 다른 `amount`로 확인 → 409 `PAYMENT_MISMATCH`, PG 호출 0회, 결제 `CANCELLED`(사유 "결제 금액 불일치"), 주문 `PENDING` |
+| `test_dr23_pg_approves_other_amount_cancels_payment` | DR-23, FR-27 | 가짜 PG가 다른 금액 승인 → 가짜 PG `cancel` 1회 호출, 결제 `CANCELLED`, 주문 `PENDING` |
 | `test_dr23_success_on_cancelled_order_is_cancelled` | DR-22, DR-23, FR-27 | 이미 `CANCELLED`인 주문의 승인 성공 → PG `cancel` 1회, 주문 `CANCELLED` 유지 |
 | `test_dr24_failure_keeps_order_pending` | DR-24, FR-28 | 가짜 PG 실패 코드 → 결제 `FAILED` + 실패 사유, 주문 `PENDING` |
 | `test_fr26_timeout_keeps_payment_ready` | FR-26 | 가짜 PG 시간 초과 → 502 `PG_ERROR` 예외, 결제 `READY` 유지 |

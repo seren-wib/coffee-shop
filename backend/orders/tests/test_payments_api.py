@@ -92,9 +92,8 @@ class PaymentApiTests(APITestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(FakePaymentsClient.calls, [])
 
-    def test_fr27_amount_mismatch_cancels_at_pg(self):
+    def test_fr27_amount_mismatch_closes_without_pg(self):
         pg_order_id = self._start().json()["pg_order_id"]
-        FakePaymentsClient.script["confirm"] = [done(100)]
         res = self._confirm(pg_order_id, amount=100)
         self.assertEqual(res.status_code, 409)
         self.assertEqual(res.json()["code"], "PAYMENT_MISMATCH")
@@ -102,7 +101,7 @@ class PaymentApiTests(APITestCase):
         self.assertEqual(payment.payment_status, PaymentStatus.CANCELLED)
         self.order.refresh_from_db()
         self.assertEqual(self.order.order_status, OrderStatus.PENDING)
-        self.assertEqual(len(FakePaymentsClient.calls_to("cancel")), 1)
+        self.assertEqual(FakePaymentsClient.calls, [])
 
     def test_fr27_cancelled_order_cancels_at_pg(self):
         pg_order_id = self._start().json()["pg_order_id"]
