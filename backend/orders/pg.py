@@ -16,6 +16,9 @@ from datetime import datetime
 
 from django.conf import settings
 from django.utils.module_loading import import_string
+from rest_framework import status
+
+from common.exceptions import DomainError
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +56,18 @@ class PgError(Exception):
         self.message = message
 
 
+def ensure_payments_enabled():
+    # Off on a server without TOSS_SECRET_KEY (SIP 3): nothing reaches the PG.
+    if not settings.PAYMENTS_ENABLED:
+        raise DomainError(
+            "PAYMENTS_DISABLED",
+            "지금은 결제를 쓸 수 없습니다.",
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+
+
 def get_client():
+    ensure_payments_enabled()
     return import_string(settings.PAYMENTS_CLIENT)()
 
 

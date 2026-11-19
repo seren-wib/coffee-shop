@@ -4,6 +4,7 @@ import os
 
 os.environ.setdefault("SECRET_KEY", "test-only-secret-key")
 os.environ.setdefault("TOSS_SECRET_KEY", "test_sk_fake")
+os.environ.setdefault("ALLOWED_HOSTS", "testserver,localhost")
 
 from .settings import *  # noqa: E402,F401,F403
 from .settings import REST_FRAMEWORK  # noqa: E402
@@ -11,6 +12,7 @@ from .settings import REST_FRAMEWORK  # noqa: E402
 SECRET_KEY = "test-only-secret-key"
 TOSS_SECRET_KEY = "test_sk_fake"
 PAYMENTS_CLIENT = "orders.pg.FakePaymentsClient"
+PAYMENTS_ENABLED = True
 
 # Fast hashing for tests; NFR-6 tests switch back with override_settings.
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]

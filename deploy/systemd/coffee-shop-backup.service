@@ -1,0 +1,13 @@
+[Unit]
+Description=coffee-shop SQLite daily backup (NFR-25)
+
+[Service]
+Type=oneshot
+User=coffee-shop
+Group=coffee-shop
+ExecStart=/srv/coffee-shop/current/deploy/backup.sh
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/srv/coffee-shop/data /var/backups/coffee-shop

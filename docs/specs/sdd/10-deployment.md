@@ -111,12 +111,12 @@ flowchart LR
   H --> I[migrate]
   I --> J[current 링크 전환]
   J --> K[gunicorn 재시작<br>nginx reload]
-  K --> L{/api/health/ 200<br>푸터 버전 = 태그 커밋}
+  K --> L{/api/health/ 200<br>version.txt = 태그 커밋}
   L -- 예 --> M[완료]
   L -- 아니오 --> N[직전 릴리스로 링크 되돌림<br>백업으로 DB 복원 여부 판단]
 ```
 
-- 배포는 운영자가 서버에서 `deploy/deploy.sh <태그>`를 실행하는 수동 방식이다. 같은 스크립트를 누가 실행해도 같은 결과가 난다(NFR-24). GitHub Actions 자동 배포는 이번 학기엔 쓰지 않는다(11.1절).
+- 배포는 운영자가 서버에서 `deploy/deploy.sh <태그>`를 실행하는 수동 방식이다. 스크립트는 빌드 결과에 `version.txt`(커밋 7자)를 쓰고, nginx가 내주는 그 파일이 태그 커밋인지로 새 릴리스가 떴는지 본다. 화면 푸터 버전(NFR-24)은 사람이 4.2절 체크로 본다(SIP 4절). 처음 한 번 하는 설치는 `deploy/install.sh`다(SIP 3.3절). 같은 스크립트를 누가 실행해도 같은 결과가 난다(NFR-24). GitHub Actions 자동 배포는 이번 학기엔 쓰지 않는다(11.1절).
 - SQLite DB 파일은 배포하지 않는다. 레포에는 DB 파일이 없고(`db.sqlite3`는 커밋 금지), 처음 설치할 때 한 번 `migrate`가 `/srv/coffee-shop/data/db.sqlite3`를 빈 테이블로 만들고 `create_admin`(FR-53)으로 관리자를 넣는다(SIP 3절). 그 뒤 배포는 같은 파일에 새 마이그레이션만 적용하므로 데이터가 남는다. SQLite는 따로 띄우는 서버 프로세스가 없고, gunicorn 안의 Django가 파일을 직접 연다(1.2절).
 - 프론트엔드는 서버에서 빌드한다(Node.js 24는 빌드에만 쓰고, nginx는 빌드 결과 정적 파일만 내준다. SRS 1.4절).
 - `migrate` 전에 백업을 하나 더 만든다. 일일 백업과 섞이지 않게 `/var/backups/coffee-shop/pre-deploy/db-<태그>.sqlite3`로 따로 두고 최근 3개만 남긴다. 마이그레이션이 데이터를 바꾸는 배포를 되돌릴 때 이 파일로 복원한다.

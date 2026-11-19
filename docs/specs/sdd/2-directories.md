@@ -76,10 +76,14 @@ coffee-shop/
 │       │   └── admin/            # (예정) SCR-11 ~ SCR-14
 │       ├── lib/                  # (예정) 금액 형식(NFR-33), 상태 한국어 이름(NFR-30)
 │       └── index.css             # Tailwind 진입점
-├── deploy/                       # (예정) 운영 설정 틀. 주소·키 값은 넣지 않는다
-│   ├── nginx/coffee-shop.conf    # 정적 파일, /api/ 프록시, 실제 IP 헤더
+├── deploy/                       # 운영 설정 틀. 주소·키 값은 넣지 않는다 (SIP 3절)
+│   ├── nginx/                    # 사이트 틀(coffee-shop.conf), 보안 헤더, 쿼리 뺀 로그 형식
 │   ├── systemd/                  # gunicorn 서비스, 백업 서비스와 timer
-│   ├── deploy.sh                 # 릴리스 폴더, 의존성, 빌드, 백업, migrate, 링크 전환 (10.4절)
+│   ├── journald/                 # 로그 200MB 제한
+│   ├── gunicorn.conf.py          # 소켓, 워커 3, 30초
+│   ├── install.sh                # 처음 한 번: 패키지, 스왑, Node.js, 계정, 폴더, nginx, 단위 (SIP 3.3)
+│   ├── cloudflare-real-ip.sh     # Cloudflare 대역 → set_real_ip_from
+│   ├── deploy.sh                 # 릴리스 폴더, 의존성, 빌드, 백업, migrate, 링크 전환, 상태 확인 (10.4절)
 │   └── backup.sh                 # sqlite3 .backup, 7개 남기기 (NFR-25)
 ├── spikes/                       # 설계 전 확인 코드, 스파이크 하나에 폴더 하나 (3절)
 ├── docs/

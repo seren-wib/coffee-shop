@@ -7,10 +7,10 @@
 | 이름 | 종류 | 설정 위치 | 환경 | 쓰임 |
 | --- | --- | --- | --- | --- |
 | `SECRET_KEY` | 시크릿 | 개발: 각자 `.env` / 운영: EC2 `.env` | 개발, 운영 | JWT 서명, Django 서명. 없으면 서버가 뜨지 않는다 |
-| `DEBUG` | 설정 | `.env` | 개발 `True`, 운영 `False` | NFR-12. `True`일 때만 `/admin/` URL을 붙인다(11.1절) |
+| `DEBUG` | 설정 | `.env` | 개발 `True`, 운영 `False` | NFR-12. `True`일 때만 `/admin/` URL을 붙인다(11.1절). `False`인데 `ALLOWED_HOSTS`가 비면 서버가 뜨지 않는다 |
 | `ALLOWED_HOSTS` | 설정 | `.env`, 쉼표로 여러 개 | 개발 `localhost,127.0.0.1`, 운영 도메인(이름은 서버 `.env`에만) | Host 헤더 검사 |
 | `SQLITE_PATH` | 설정 | `.env` | 개발 기본 `backend/db.sqlite3`, 운영은 릴리스 폴더 밖의 데이터 폴더 | DB 파일 위치. 배포로 릴리스 폴더가 바뀌어도 DB는 그대로 |
-| `TOSS_SECRET_KEY` | 시크릿 | `.env` | 개발, 운영(둘 다 테스트 키) | 토스페이먼츠 승인·취소 API Basic 인증(4.6.5) |
+| `TOSS_SECRET_KEY` | 시크릿 | `.env` | 개발, 운영(둘 다 테스트 키) | 토스페이먼츠 승인·취소 API Basic 인증(4.6.5). `test_`로 시작하지 않으면 서버가 뜨지 않는다. 비어 있으면 결제를 끈다(`PAYMENTS_ENABLED`, 503 `PAYMENTS_DISABLED`) (2026-11-19 추가) |
 | `PAYMENTS_CLIENT` | 설정 | `.env`(없으면 `orders.pg.TossPaymentsClient`) | 테스트 설정은 `orders.pg.FakePaymentsClient` | 4.6.5 |
 | `LOG_LEVEL` | 설정 | `.env`(없으면 `INFO`) | 개발, 운영 | 4.9.4 |
 
@@ -38,7 +38,7 @@ Vite는 `VITE_`로 시작하는 변수만 빌드 결과에 넣는다. 빌드 결
 
 | 이름 | 종류 | 설정 위치 | 환경 | 쓰임 |
 | --- | --- | --- | --- | --- |
-| `VITE_TOSS_CLIENT_KEY` | 공개 키 | 개발: `frontend/.env.local` / 운영: 배포 스크립트가 서버 `.env`에서 읽어 빌드에 넘김 | 개발, 운영(테스트 키) | 결제창 SDK 초기화(4.6.2) |
+| `VITE_TOSS_CLIENT_KEY` | 공개 키 | 개발: `frontend/.env.local` / 운영: 서버 `.env`의 같은 이름을 `deploy.sh`가 읽어 빌드에 넘김 | 개발, 운영(테스트 키, 결제를 끈 동안은 비움) | 결제창 SDK 초기화(4.6.2) |
 | `VITE_APP_VERSION` | 설정 | 배포 스크립트가 `git rev-parse --short HEAD`로 넣음 | 운영(개발은 `dev`) | 푸터 버전 표시(NFR-24, 6.0.1절) |
 
 - `frontend/.env.local`은 `.gitignore` 대상이다. 레포에는 `frontend/.env.example`에 이름만 둔다.

@@ -358,6 +358,7 @@ def approve_cancel(order_id):
         order=order, payment_status=PaymentStatus.SUCCESS
     ).first()
     if success is not None:
+        # Raises 503 PAYMENTS_DISABLED before anything changes when payments are off.
         cancel_success_payment(success, "관리자 취소 승인")
     return _close_cancelled(order_id)
 
