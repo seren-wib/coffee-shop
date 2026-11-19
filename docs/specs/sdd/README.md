@@ -8,7 +8,7 @@ Google Docs: https://docs.google.com/document/d/1PlaC-17Gyowrh1pv8trCXmzSOFiTax6
 | --- | --- | --- |
 | [1-architecture.md](1-architecture.md) | 아키텍처: 시스템 맥락, 배포 단위, 통신, 데이터 위치, 백엔드 논리 구조 | NFR-19 ~ NFR-21, NFR-28 |
 | [2-directories.md](2-directories.md) | 디렉터리 구조와 폴더 규칙 | NFR-29, NFR-31, NFR-32 |
-| [3-spikes.md](3-spikes.md) | 스파이크: SQLite 동시 주문, 토스페이먼츠 승인·취소 (3.1은 2026-11-19에 돌림, 3.2는 아직) | NFR-15, FR-25 ~ FR-29 |
+| [3-spikes.md](3-spikes.md) | 스파이크: SQLite 동시 주문, 토스페이먼츠 승인·취소 (둘 다 2026-11-19에 돌림, 3.2는 6단계만 못 잼) | NFR-15, FR-25 ~ FR-29 |
 | [4-components/](4-components/README.md) | 컴포넌트 설계: 부품 9개, 상태 기계, 시퀀스 | FR-1 ~ FR-58 |
 | [5-data-model.md](5-data-model.md) | 데이터 모델: ERD, 테이블 8개, 제약, 택배사 조회 주소 | DR-1 ~ DR-24 |
 | [6-screens.md](6-screens.md) | 화면 설계: 라우트, 레이아웃, 디자인 가이드, 화면 16개 | SCR-01 ~ SCR-15, NFR-30, NFR-33, NFR-34, NFR-36 |

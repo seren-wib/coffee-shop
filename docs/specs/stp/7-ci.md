@@ -36,6 +36,7 @@ GitHub Actions 워크플로 `.github/workflows/ci.yml` 하나다. 2026-11-19 준
 
 ### 7.2 필수 검사
 
-- `main` 브랜치 보호 규칙에서 `backend`, `frontend` 두 상태 검사를 필수로 두고, PR 없이 `main`에 push하지 못하게 한다(CONTRIBUTING). 설정은 레포 관리자(팀장)가 GitHub 레포 Settings → Branches에서 한 번 한다. 워크플로가 처음 한 번 돌아야 검사 이름이 목록에 뜨므로 `ci.yml`을 머지한 다음에 건다. 2026-11-19 `ci.yml` 머지(#77) 뒤 아직 걸지 않았다. 그 전까지는 PR 작성자가 두 작업 통과를 확인하고 머지한다.
+- `main` 브랜치 보호 규칙에서 `backend`, `frontend` 두 상태 검사를 필수로 두고, PR 없이 `main`에 push하지 못하게 한다(CONTRIBUTING). 설정은 레포 관리자(팀장)가 GitHub 레포 Settings → Branches에서 한 번 한다. 워크플로가 처음 한 번 돌아야 검사 이름이 목록에 뜨므로 `ci.yml`을 머지한 다음에 건다.
+- 2026-11-19에 걸었다(레포 관리자 결정). 필수 검사는 `backend`, `frontend` 둘이고, PR 없이는 `main`에 넣지 못하며 필수 승인 수는 0이다. 관리자에게도 똑같이 적용하고(enforce admins), force push와 브랜치 삭제는 막는다. 검사 전에 브랜치를 `main` 최신으로 맞추라는 조건(strict)은 켜지 않았다. (2026-11-19 변경. 이전에는 "아직 걸지 않았다. 그 전까지는 PR 작성자가 두 작업 통과를 확인하고 머지한다")
 - 필수 승인 수는 0이다(CONTRIBUTING). 사람 리뷰는 권장이고, 자동 검사 통과는 필수다.
 - 검사가 실패한 PR은 고쳐서 다시 올린다. 테스트를 지우거나 건너뛰기(`skip`)로 통과시키지 않는다. 일부러 미룬 테스트는 PR 본문에 이유와 함께 적는다.

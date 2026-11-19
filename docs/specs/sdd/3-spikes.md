@@ -37,7 +37,7 @@ SPMP 5.2절 위험 표의 첫 두 행(SQLite 동시 주문, 토스페이먼츠 �
 | 3 | 전액 취소 응답, 같은 결제 두 번째 취소의 오류 코드 | 전액 취소 200, `status: "CANCELED"`, `balanceAmount: 0`, `cancels` 1건(585 ms). 다른 `Idempotency-Key`로 두 번째 취소는 400 `ALREADY_CANCELED_PAYMENT` "이미 취소된 결제 입니다."(215 ms). 조회도 `CANCELED`, `cancels` 1건 |
 | 4 | 결제창 금액과 다른 `amount`로 승인 요청한 응답 | 999원으로 승인 요청하면 403 `FORBIDDEN_REQUEST` "허용되지 않은 요청입니다."(211 ms). 결제는 그대로 남아, 이어서 1,000원으로 보낸 승인은 200 `DONE` |
 | 5 | 실패·이탈 시 `failUrl`에 붙는 값(창 닫기에 `orderId`가 없는지) | 결제창 X로 닫으면 `failUrl`로 가지 않고 `requestPayment()`가 `{"code": "USER_CANCEL", "message": "취소되었습니다."}`로 실패한다. 2회 모두 같음(Claude 데스크톱 앱 내장 브라우저에서 카드사를 고른 직후 1회, Chrome에서 신한 카드사 창을 닫고 돌아온 뒤 1회). 카드사 창만 닫으면(1회) "인증을 취소하셨습니다." 알림 뒤 토스 결제창으로 돌아오고 페이지 이동은 없다 |
-| 6 | 결제 요청 뒤 10분이 지난 `paymentKey`로 승인한 응답 | 못 잼(팀장이 건너뜀). 추정하지 않는다 |
+| 6 | 결제 요청 뒤 10분이 지난 `paymentKey`로 승인한 응답 | 못 잼. 추정하지 않는다 |
 | 7 | 같은 `Idempotency-Key`로 취소를 두 번 보낸 응답 | 1회차 200 `CANCELED`(616 ms), 2회차도 200에 1회차와 같은 본문(`lastTransactionKey`, `canceledAt` 같음, 89 ms). 취소는 1건만 남았다 |
 
 - 5단계에서 창을 닫았을 때는 이동할 페이지가 없으므로 `orderId`가 URL에 붙을 일도 없다. 화면은 `requestPayment()`의 오류를 직접 받아 처리해야 한다. `failUrl`만 보는 설계면 창 닫기를 놓친다.

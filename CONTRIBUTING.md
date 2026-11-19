@@ -29,6 +29,8 @@
 
 - A pull request is required for every change to `main`.
 - Required approvals: 0. Reviews are recommended, not mandatory.
+- `main` is protected: the `backend` and `frontend` CI checks must pass before merging, for
+  admins too. Force pushes and deleting `main` are blocked.
 - If nobody reviews within 24 hours, the author merges.
 - PR title follows the commit message format below (it becomes the squash commit message).
 - The body comes from [.github/pull_request_template.md](.github/pull_request_template.md).
