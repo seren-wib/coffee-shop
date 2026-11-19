@@ -1,8 +1,10 @@
 """Cart and order rules (SDD 4.4, 4.5). Views and serializers call these; they hold no rules."""
 
 from django.db import IntegrityError, transaction
+from django.db.models import F
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 
 from common.exceptions import DomainError
 from orders.models import (
@@ -134,6 +136,15 @@ def invalid_state(current, action):
     return DomainError(
         "INVALID_STATE", f"{STATUS_MODIFIER[current]} 주문은 {action} 수 없습니다."
     )
+
+
+def filter_by_status(orders, value):
+    """?status= for member and admin lists: empty means all, unknown is 400."""
+    if not value:
+        return orders
+    if value not in OrderStatus.values:
+        raise ValidationError({"status": ["알 수 없는 주문 상태입니다."]})
+    return orders.filter(order_status=value)
 
 
 def own_order(user, order_id):
@@ -276,3 +287,102 @@ def request_cancel(user, order_id, reason):
         raise invalid_state(order.order_status, "취소를 요청할")
     order.refresh_from_db()
     return order
+
+
+# Admin transitions (SDD 4.8). Every one is a conditional UPDATE on the current status.
+
+
+def admin_order(order_id):
+    order = Order.objects.select_related("user").filter(order_id=order_id).first()
+    if order is None:
+        raise _not_found()
+    return order
+
+
+def _transition(order_id, expected, action, **changes):
+    """UPDATE ... WHERE order_status = expected; 0 rows is 409 with the current status."""
+    order = admin_order(order_id)
+    updated = Order.objects.filter(pk=order.pk, order_status=expected).update(**changes)
+    order.refresh_from_db()
+    if updated == 0:
+        raise invalid_state(order.order_status, action)
+    return order
+
+
+@transaction.atomic
+def prepare(order_id):
+    """FR-47. A cancel request that got the lock first is not overwritten."""
+    return _transition(
+        order_id,
+        OrderStatus.PAID,
+        "배송 준비로 바꿀",
+        order_status=OrderStatus.PREPARING,
+    )
+
+
+@transaction.atomic
+def ship(order_id, courier_code, tracking_number):
+    """FR-48. Courier, tracking number and shipped time in the same UPDATE."""
+    return _transition(
+        order_id,
+        OrderStatus.PREPARING,
+        "배송 시작할",
+        order_status=OrderStatus.SHIPPED,
+        courier_code=courier_code,
+        tracking_number=tracking_number,
+        shipped_at=timezone.now(),
+    )
+
+
+@transaction.atomic
+def deliver(order_id):
+    """FR-49."""
+    return _transition(
+        order_id,
+        OrderStatus.SHIPPED,
+        "배송 완료로 바꿀",
+        order_status=OrderStatus.DELIVERED,
+        delivered_at=timezone.now(),
+    )
+
+
+def approve_cancel(order_id):
+    """FR-50, DR-21. PG cancel first, outside the transaction (SDD 4.8.7): if the PG
+    fails the order stays CANCEL_REQUESTED and the admin can press again."""
+    from orders.payments import cancel_success_payment
+
+    order = admin_order(order_id)
+    if order.order_status != OrderStatus.CANCEL_REQUESTED:
+        raise invalid_state(order.order_status, "취소 승인할")
+    success = Payment.objects.filter(
+        order=order, payment_status=PaymentStatus.SUCCESS
+    ).first()
+    if success is not None:
+        cancel_success_payment(success, "관리자 취소 승인")
+    return _close_cancelled(order_id)
+
+
+@transaction.atomic
+def _close_cancelled(order_id):
+    order = _transition(
+        order_id,
+        OrderStatus.CANCEL_REQUESTED,
+        "취소 승인할",
+        order_status=OrderStatus.CANCELLED,
+    )
+    # Only the call that moved the order restores stock, so it happens once (DR-21).
+    for item in order.items.all():
+        increase_stock(item.option_id, item.quantity)
+    return order
+
+
+@transaction.atomic
+def reject_cancel(order_id):
+    """FR-51. Back to the status before the request; the reason stays on record."""
+    return _transition(
+        order_id,
+        OrderStatus.CANCEL_REQUESTED,
+        "취소 반려할",
+        order_status=F("status_before_cancel"),
+        status_before_cancel=None,
+    )

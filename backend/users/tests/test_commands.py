@@ -4,6 +4,7 @@ from unittest import mock
 from django.core.management import CommandError, call_command
 from django.test import TestCase
 
+from common.tests.helpers import auth_client
 from users.models import Role, User
 from users.tests.factories import make_member
 
@@ -26,6 +27,11 @@ class CreateAdminTests(TestCase):
         self.assertEqual(user.role, Role.ADMIN)
         self.assertTrue(user.check_password("adminpass1"))
         self.assertIsNone(user.privacy_agreed_at)
+
+    def test_fr53_created_admin_can_use_admin_routes(self):
+        _run("--email", "boss@example.com")
+        client = auth_client(User.objects.get(email="boss@example.com"), "adminpass1")
+        self.assertEqual(client.get("/api/admin/orders/").status_code, 200)
 
     def test_fr53_rejects_short_or_mismatched_password(self):
         with self.assertRaises(CommandError):

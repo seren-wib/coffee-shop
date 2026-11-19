@@ -5,6 +5,7 @@ from rest_framework import serializers
 from orders import couriers, services
 from orders.models import (
     CartItem,
+    Courier,
     Order,
     OrderItem,
     OrderStatus,
@@ -250,3 +251,81 @@ class FailSerializer(serializers.Serializer):
     orderId = serializers.CharField(max_length=64, required=False, allow_blank=True)
     code = serializers.CharField(max_length=100, required=False, allow_blank=True)
     message = serializers.CharField(max_length=400, required=False, allow_blank=True)
+
+
+class ShipSerializer(serializers.Serializer):
+    courier_code = serializers.ChoiceField(
+        choices=Courier.choices,
+        error_messages={"invalid_choice": "목록에 있는 택배사를 골라 주세요."},
+    )
+    tracking_number = serializers.RegexField(
+        r"^(?=.*[0-9])[0-9-]{1,30}$",
+        error_messages={"invalid": "송장번호는 숫자와 -만, 30자 이하로 입력해 주세요."},
+    )
+
+
+class AdminOrderSummarySerializer(serializers.ModelSerializer):
+    member_email = serializers.CharField(source="user.email")
+    member_name = serializers.CharField(source="user.user_name")
+    status = serializers.CharField(source="order_status")
+
+    class Meta:
+        model = Order
+        fields = [
+            "order_id",
+            "created_at",
+            "member_email",
+            "member_name",
+            "final_payment_amt",
+            "status",
+        ]
+
+
+class AdminPaymentLineSerializer(PaymentLineSerializer):
+    pg_tid = serializers.SerializerMethodField()
+
+    class Meta(PaymentLineSerializer.Meta):
+        fields = PaymentLineSerializer.Meta.fields + [
+            "pg_order_id",
+            "pg_tid",
+            "requested_at",
+        ]
+
+    def get_pg_tid(self, payment):
+        # The screen shows only the last 8 characters of a paymentKey (SDD 4.8.3, 8.5).
+        return payment.pg_tid[-8:] if payment.pg_tid else None
+
+
+ALLOWED_ACTIONS = {
+    OrderStatus.PAID: ["prepare"],
+    OrderStatus.PREPARING: ["ship"],
+    OrderStatus.SHIPPED: ["deliver"],
+    OrderStatus.CANCEL_REQUESTED: ["cancel_approve", "cancel_reject"],
+}
+
+
+class AdminOrderDetailSerializer(OrderDetailSerializer):
+    member = serializers.SerializerMethodField()
+    allowed_actions = serializers.SerializerMethodField()
+
+    class Meta(OrderDetailSerializer.Meta):
+        fields = OrderDetailSerializer.Meta.fields + [
+            "member",
+            "status_before_cancel",
+            "allowed_actions",
+        ]
+
+    def get_member(self, order):
+        user = order.user
+        return {
+            "user_id": user.user_id,
+            "email": user.email,
+            "user_name": user.user_name,
+            "phone_number": user.phone_number,
+        }
+
+    def get_payments(self, order):
+        return AdminPaymentLineSerializer(order._payment_rows, many=True).data
+
+    def get_allowed_actions(self, order):
+        return ALLOWED_ACTIONS.get(order.order_status, [])

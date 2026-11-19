@@ -250,6 +250,7 @@ erDiagram
 
 - 인덱스 `idx_orders_status_created(order_status, created_at DESC)`: 관리자 상태 필터(FR-45)와 회원 상태 필터(FR-55).
 - CHECK `ck_orders_shipped_fields`: `order_status IN ('SHIPPED','DELIVERED')`이면 `courier_code`, `tracking_number`, `shipped_at`이 NOT NULL이다(SRS 2.6절 표 "택배사와 송장번호를 등록해야 한다"). 취소 요청은 배송 중 전에만 들어오므로(DR-20) 취소 요청·취소 주문의 이 열은 늘 비어 있다.
+- CHECK `ck_orders_cancel_request_previous`: `order_status = 'CANCEL_REQUESTED'`이면 `status_before_cancel`이 NOT NULL이다. 반려(4.8.8)가 이 값으로 되돌리므로, 시드처럼 서비스를 거치지 않고 넣는 행도 이 값을 채워야 한다(2026-11-19 추가).
 - 주문 상태는 4.5.1절 전환표에 있는 조건부 UPDATE로만 바뀐다. 모델에 `save()`로 상태를 바꾸는 메서드를 두지 않는다(DR-19).
 
 ### 5.7 order_items (주문 항목)
