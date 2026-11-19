@@ -12,7 +12,7 @@ from rest_framework import status
 
 from common.exceptions import DomainError
 from orders.models import Order, OrderStatus, Payment, PaymentMethod, PaymentStatus
-from orders.pg import PgError, PgResult, get_client, masked
+from orders.pg import PgError, PgResult, ensure_payments_enabled, get_client, masked
 from orders.services import own_order
 
 logger = logging.getLogger(__name__)
@@ -48,6 +48,7 @@ def order_name(order):
 @transaction.atomic
 def start_payment(user, order_id):
     """FR-25, FR-29. One open attempt per order: an older READY row is replaced."""
+    ensure_payments_enabled()
     order = own_order(user, order_id)
     if Payment.objects.filter(
         order=order, payment_status=PaymentStatus.SUCCESS
@@ -81,6 +82,7 @@ def _own_payment(user, pg_order_id):
 
 def confirm_payment(user, *, payment_key, pg_order_id, amount):
     """FR-26 ~ FR-28, DR-22 ~ DR-24. Returns the PAID order or raises DomainError."""
+    ensure_payments_enabled()
     payment = _own_payment(user, pg_order_id)
     order = payment.order
     if payment.payment_status == PaymentStatus.SUCCESS:

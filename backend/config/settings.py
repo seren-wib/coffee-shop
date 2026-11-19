@@ -10,6 +10,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from config.checks import check_allowed_hosts, check_toss_secret_key
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(os.environ.get("DOTENV_PATH", BASE_DIR.parent / ".env"))
@@ -21,6 +23,7 @@ DEBUG = os.environ.get("DEBUG", "False") == "True"
 ALLOWED_HOSTS = [
     h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()
 ]
+check_allowed_hosts(debug=DEBUG, hosts=ALLOWED_HOSTS)
 
 
 # Application definition
@@ -125,8 +128,13 @@ SIMPLE_JWT = {
 
 # Payments (SDD 4.6.5)
 
+# Only test keys are accepted. Without a key payments are off (503 PAYMENTS_DISABLED)
+# and the rest of the shop still runs (SIP 3).
 TOSS_SECRET_KEY = os.environ.get("TOSS_SECRET_KEY", "")
-PAYMENTS_CLIENT = os.environ.get("PAYMENTS_CLIENT", "orders.pg.TossPaymentsClient")
+PAYMENTS_CLIENT = os.environ.get("PAYMENTS_CLIENT") or "orders.pg.TossPaymentsClient"
+PAYMENTS_ENABLED = check_toss_secret_key(TOSS_SECRET_KEY) or (
+    PAYMENTS_CLIENT != "orders.pg.TossPaymentsClient"
+)
 
 
 # Internationalization (SDD 9.1, 11.1: store UTC, show and number orders in Asia/Seoul)
