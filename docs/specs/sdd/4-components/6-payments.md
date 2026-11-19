@@ -8,7 +8,8 @@
 stateDiagram-v2
   [*] --> READY: 결제 시작 (회원)
   READY --> SUCCESS: 승인 성공, 금액 일치, 주문 PENDING
-  READY --> CANCELLED: 승인 성공, 금액 다름 또는 주문 이미 취소 (PG 취소)
+  READY --> CANCELLED: 요청 금액 다름 (승인 전, PG 호출 없음)
+  READY --> CANCELLED: 승인 성공, 승인 금액 다름 또는 주문 이미 취소 (PG 취소)
   READY --> FAILED: 승인 실패, 결제창 실패
   READY --> CANCELLED: 결제 대기 주문 즉시 취소 (4.5.8), 새 결제 시도로 대체 (4.6.2)
   SUCCESS --> CANCELLED: 관리자 취소 승인 (PG 취소)
@@ -65,6 +66,10 @@ sequenceDiagram
   TP-->>UI: successUrl?paymentKey&orderId&amount
   UI->>API: POST /api/payments/confirm/ {paymentKey, orderId, amount}
   API->>DB: 결제 기록 READY, 회원 소유 확인
+  opt amount != paid_amount
+    API->>DB: UPDATE payments SET CANCELLED, failure_reason
+    API-->>UI: 409 PAYMENT_MISMATCH (PG 호출 없음)
+  end
   API->>PGAPI: POST /v1/payments/confirm {paymentKey, orderId, amount}
   alt 승인 성공
     PGAPI-->>API: 200 {status: DONE, totalAmount, method, approvedAt}
@@ -89,8 +94,8 @@ sequenceDiagram
 
   1. `pg_order_id`로 결제 기록을 찾는다. 없거나 주문이 다른 회원 것이면 404. 이미 `SUCCESS`면 PG를 다시 부르지 않고 200으로 같은 결과를 돌려준다(새로 고침으로 두 번 부른 경우). `FAILED`·`CANCELLED`면 409 `INVALID_STATE`.
   2. 결제 기록이 결제 대기 주문 취소(4.5.8)로 `CANCELLED`가 된 경우는 PG를 부르지 않고 409 `ORDER_NOT_PENDING`이다. 토스페이먼츠는 서버가 승인 API를 부르기 전에는 돈을 빼지 않고, 승인되지 않은 결제는 10분 뒤 사라진다. 그래서 FR-27의 "PG 취소 요청"이 필요한 건 승인한 뒤 주문이 취소돼 있음을 안 경우(5번)뿐이다.
-  3. 요청 `amount`가 `payment.paid_amount`(시작 때 금액)와 달라도 바로 거절하지 않는다. SRS DR-23과 FR-27의 검증("금액이 다른 확인 요청 후 결제 `CANCELLED`")대로, 승인한 뒤 PG가 알려준 금액으로 판단하고 취소한다.
-  4. 트랜잭션 밖에서 `pg.confirm(paymentKey, orderId, amount)`. 토스는 결제 요청 뒤 10분 안에 승인해야 하므로, 늦게 온 확인 요청은 PG 오류로 7번 분기를 탄다.
+  3. 요청 `amount`가 `payment.paid_amount`(시작 때 금액)와 다르면 PG를 부르지 않고 결제를 `CANCELLED`, `failure_reason="결제 금액 불일치"`로 닫고 409 `PAYMENT_MISMATCH`로 답한다. 주문은 `PENDING` 그대로다(DR-23, FR-27). 토스는 결제창 금액과 다른 승인 요청을 403 `FORBIDDEN_REQUEST`로 거절하고 돈을 빼지 않으므로(3.2절 4단계) 취소할 돈이 없다. 승인 응답의 `totalAmount`가 다를 때의 5번 분기(PG 취소)는 방어용으로 남긴다.
+  4. 트랜잭션 밖에서 `pg.confirm(paymentKey, orderId, amount)`. 토스는 결제 요청 뒤 10분 안에 승인해야 하므로, 늦게 온 확인 요청은 PG 오류로 7번 분기를 탄다. 이 10분 제한과 그때의 응답은 공개 문서 기준이고 스파이크에서 재지 않았다(3.2절 6단계).
   5. PG 성공이면 트랜잭션 안에서:
      - `pg_tid=paymentKey`, `payment_method`(토스 `method`를 5.0.2 열거형으로: 카드 → `CARD`, 간편결제 → `EASY_PAY`, 계좌이체 → `TRANSFER`, 그 밖 → `OTHER`), `paid_amount=totalAmount`를 기록한다.
      - `totalAmount == order.final_payment_amt`이면 `UPDATE orders SET order_status='PAID' WHERE order_id=? AND order_status='PENDING'`. 1행이면 결제를 `SUCCESS`, `approved_at`으로 바꾸고 커밋한다. 이 두 UPDATE가 4.5.1 표의 `mark_paid`다.

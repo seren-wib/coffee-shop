@@ -71,13 +71,27 @@ class PaymentServiceTests(TestCase):
         self.assertEqual(order.order_status, OrderStatus.PAID)
         self.assertEqual(len(FakePaymentsClient.calls_to("confirm")), 1)
 
-    def test_dr23_amount_mismatch_cancels_payment(self):
+    def test_dr23_amount_mismatch_closes_without_pg(self):
+        # Toss refuses a confirm whose amount differs (403 FORBIDDEN_REQUEST, SDD 3.2).
         payment = self._start()
-        FakePaymentsClient.script["confirm"] = [done(100)]
         with self.assertRaises(DomainError) as ctx:
             self._confirm(payment, amount=100)
         self.assertEqual(ctx.exception.code, "PAYMENT_MISMATCH")
         self.assertEqual(ctx.exception.status, 409)
+        self.assertEqual(FakePaymentsClient.calls, [])
+        payment.refresh_from_db()
+        self.order.refresh_from_db()
+        self.assertEqual(payment.payment_status, PaymentStatus.CANCELLED)
+        self.assertEqual(payment.failure_reason, "결제 금액 불일치")
+        self.assertEqual(payment.paid_amount, 30000)
+        self.assertEqual(self.order.order_status, OrderStatus.PENDING)
+
+    def test_dr23_pg_approves_other_amount_cancels_payment(self):
+        payment = self._start()
+        FakePaymentsClient.script["confirm"] = [done(100)]
+        with self.assertRaises(DomainError) as ctx:
+            self._confirm(payment)
+        self.assertEqual(ctx.exception.code, "PAYMENT_MISMATCH")
         cancels = FakePaymentsClient.calls_to("cancel")
         self.assertEqual(len(cancels), 1)
         self.assertEqual(cancels[0]["payment_key"], "tkey_1234567890")

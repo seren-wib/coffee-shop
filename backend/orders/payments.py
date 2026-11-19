@@ -91,6 +91,14 @@ def confirm_payment(user, *, payment_key, pg_order_id, amount):
             # until confirm is called, so there is nothing to cancel at the PG.
             raise _closed(ORDER_GONE)
         raise DomainError("INVALID_STATE", "이미 끝난 결제입니다.")
+    if amount != payment.paid_amount:
+        # Toss refuses a confirm whose amount differs from the payment window
+        # (403 FORBIDDEN_REQUEST, SDD 3.2) and takes no money before confirm,
+        # so close the attempt here without calling the PG (DR-23, FR-27).
+        Payment.objects.filter(
+            pk=payment.pk, payment_status=PaymentStatus.READY
+        ).update(payment_status=PaymentStatus.CANCELLED, failure_reason=MISMATCH)
+        raise _closed(MISMATCH)
 
     client = get_client()
     try:
