@@ -107,7 +107,7 @@
 | `test_fr25_start_payment` | FR-25, DR-15 | `POST /api/orders/{id}/payments/` 201, 결제 `READY` 1행, `amount` = 최종 결제 금액 |
 | `test_fr26_confirm_success` | FR-26, DR-22 | `POST /api/payments/confirm/` 200, 결제 `SUCCESS`, 주문 `PAID` |
 | `test_fr26_confirm_other_members_payment_is_404` | FR-26, NFR-11 | 다른 회원 토큰 → 404, 가짜 PG 호출 0회 |
-| `test_fr27_amount_mismatch_cancels_at_pg` | FR-27, DR-23 | 다른 금액 승인 → 409 `PAYMENT_MISMATCH`, 결제 `CANCELLED`, 주문 `PENDING`, PG `cancel` 1회 |
+| `test_fr27_amount_mismatch_closes_without_pg` | FR-27, DR-23 | 다른 금액으로 확인 → 409 `PAYMENT_MISMATCH`, 결제 `CANCELLED`, 주문 `PENDING`, PG 호출 0회 |
 | `test_fr27_cancelled_order_cancels_at_pg` | FR-27, DR-22 | 취소된 주문 → 409 `ORDER_NOT_PENDING`, 주문 `CANCELLED` 유지 |
 | `test_fr27_payment_cancelled_with_order_skips_pg` | FR-27, FR-32 | 결제 대기 주문을 먼저 취소한 뒤 확인 → 409 `ORDER_NOT_PENDING`, PG 호출 0회 |
 | `test_fr28_confirm_failure_records_reason` | FR-28, DR-24 | PG 실패 → 402 `PAYMENT_FAILED`, 결제 `FAILED` + 사유, 주문 `PENDING` |
