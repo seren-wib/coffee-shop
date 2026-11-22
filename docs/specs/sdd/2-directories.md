@@ -66,8 +66,8 @@ coffee-shop/
 │       ├── api/
 │       │   ├── client.js         # 하나뿐인 axios 인스턴스, 토큰 인터셉터 (NFR-31, FR-10)
 │       │   ├── auth.js           # 경로 영역별 호출 함수. client.js만 쓴다
-│       │   ├── products.js       # (예정)
-│       │   ├── cart.js           # (예정)
+│       │   ├── products.js       # 4.3 원두 조회
+│       │   ├── cart.js           # 4.4 장바구니
 │       │   ├── orders.js         # (예정)
 │       │   └── admin.js          # (예정)
 │       ├── auth/                 # 토큰 저장소, RequireAuth·RequireAdmin 경로 보호

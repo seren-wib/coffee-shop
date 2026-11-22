@@ -86,7 +86,7 @@ React Router(`react-router-dom` 7)로 SRS 6.1 사이트맵의 경로를 그대�
 
 ![SCR-01](../../images/wireframes/wireframes-01.drawio.svg)
 
-- 구성: 검색창(이름), 필터 세 개(원산지 선택, 가격 범위 선택, 로스팅 정도 선택), 초기화 버튼, 원두 카드 격자(4열), 페이지 버튼.
+- 구성: 검색창(이름), 필터 세 개(원산지 선택, 가격 범위 선택, 로스팅 정도 선택), 초기화 버튼, 원두 카드 격자, 페이지 버튼. 격자는 `repeat(auto-fill, minmax(232px, 1fr))`, 간격 24px라 화면이 넓으면 열이 늘어난다(1440px에서 5열, 2026-11-23 디자인 결정).
 - 카드: 이미지, 이름, 원산지·로스팅, `lowest_price`부터 시작하는 가격("15,000원~"), 품절이면 "품절" 배지. 카드를 누르면 `/products/:id`.
 - 데이터: `GET /api/products/?search&origin&min_price&max_price&roast_level&page`(4.3.1 ~ 4.3.5). 조건은 URL 쿼리와 같게 둔다.
 - 가격 선택지: 전체, 1만 원 미만, 1만 ~ 2만 원, 2만 ~ 3만 원, 3만 원 이상. 고르면 `min_price`, `max_price`로 바뀐다.
