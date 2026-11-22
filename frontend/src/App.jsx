@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { setAuthFailureHandler } from "./api/client";
 import { loginPath } from "./auth/next";
-import { RequireAuth } from "./auth/RequireAuth";
+import { RequireAdmin, RequireAuth } from "./auth/RequireAuth";
 import Layout from "./components/Layout";
 import AccountPage from "./pages/AccountPage";
 import AddressPage from "./pages/AddressPage";
@@ -18,7 +18,21 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import ProductListPage from "./pages/ProductListPage";
 import SignupPage from "./pages/SignupPage";
 
-// Route table (SDD 6.0). Screens are added here as their pull requests land.
+// Admin screens load separately so the first customer screen stays small (SDD 6.1, NFR-2).
+const AdminOrderListPage = lazy(
+  () => import("./pages/admin/AdminOrderListPage"),
+);
+const AdminOrderDetailPage = lazy(
+  () => import("./pages/admin/AdminOrderDetailPage"),
+);
+const AdminProductListPage = lazy(
+  () => import("./pages/admin/AdminProductListPage"),
+);
+const AdminProductFormPage = lazy(
+  () => import("./pages/admin/AdminProductFormPage"),
+);
+
+// Route table (SDD 6.0).
 export default function App() {
   const navigate = useNavigate();
 
@@ -46,8 +60,42 @@ export default function App() {
           <Route path="/me" element={<AccountPage />} />
           <Route path="/me/addresses" element={<AddressPage />} />
         </Route>
+        <Route element={<RequireAdmin />}>
+          <Route
+            path="/admin/orders"
+            element={<Lazy page={AdminOrderListPage} />}
+          />
+          <Route
+            path="/admin/orders/:id"
+            element={<Lazy page={AdminOrderDetailPage} />}
+          />
+          <Route
+            path="/admin/products"
+            element={<Lazy page={AdminProductListPage} />}
+          />
+          <Route
+            path="/admin/products/new"
+            element={<Lazy page={AdminProductFormPage} />}
+          />
+          <Route
+            path="/admin/products/:id"
+            element={<Lazy page={AdminProductFormPage} />}
+          />
+        </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
+  );
+}
+
+function Lazy({ page: Page }) {
+  return (
+    <Suspense
+      fallback={
+        <div aria-hidden="true" className="bg-cream-100 m-12 h-60 rounded-xl" />
+      }
+    >
+      <Page />
+    </Suspense>
   );
 }
