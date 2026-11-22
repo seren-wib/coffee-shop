@@ -2,9 +2,13 @@ import { useEffect } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { setAuthFailureHandler } from "./api/client";
 import { loginPath } from "./auth/next";
+import { RequireAuth } from "./auth/RequireAuth";
 import Layout from "./components/Layout";
+import CartPage from "./pages/CartPage";
 import LoginPage from "./pages/LoginPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
+import ProductListPage from "./pages/ProductListPage";
 
 // Route table (SDD 6.0). Screens are added here as their pull requests land.
 export default function App() {
@@ -20,7 +24,12 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
+        <Route path="/" element={<ProductListPage />} />
+        <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route element={<RequireAuth />}>
+          <Route path="/cart" element={<CartPage />} />
+        </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
