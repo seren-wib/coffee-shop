@@ -71,11 +71,11 @@ coffee-shop/
 │       │   ├── orders.js         # 4.5 주문
 │       │   ├── payments.js       # 4.6 결제 시작·확인·실패 기록
 │       │   ├── addresses.js      # 4.2 배송지
-│       │   └── admin.js          # (예정)
+│       │   └── admin.js          # 4.7 관리자 원두, 4.8 관리자 주문
 │       ├── auth/                 # 토큰 저장소, RequireAuth·RequireAdmin 경로 보호
 │       ├── components/           # 헤더, 가격 표시, 상태 배지, 페이지 버튼, 필드 오류
 │       ├── pages/                # 화면 하나에 파일 하나, SCR ID 순서 (6절)
-│       │   └── admin/            # (예정) SCR-11 ~ SCR-14
+│       │   └── admin/            # SCR-11 ~ SCR-14, React.lazy로 따로 받는다
 │       ├── lib/                  # 금액 형식(NFR-33), 상태 한국어 이름(NFR-30), 오류 문구
 │       ├── test/                 # Vitest 설정(jsdom)과 테스트 도우미
 │       └── index.css             # Tailwind 진입점, 디자인 토큰(@theme)
