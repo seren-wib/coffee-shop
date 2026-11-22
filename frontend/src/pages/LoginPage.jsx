@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { login } from "../api/auth";
 import { safeNext } from "../auth/next";
 import { setTokens } from "../auth/tokenStore";
@@ -12,6 +17,8 @@ import { errorMessage, isOffline } from "../lib/errors";
 export default function LoginPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  // Set by the signup screen after a successful registration (UC-2 step 3).
+  const registered = useLocation().state?.registered === true;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -47,6 +54,11 @@ export default function LoginPage() {
           className="flex max-w-[440px] flex-col gap-4"
         >
           <h1 className="mb-2 text-[22px] font-bold">로그인</h1>
+          {registered && !error && (
+            <Notice kind="success">
+              가입이 완료되었습니다. 로그인해 주세요.
+            </Notice>
+          )}
           {error && (
             <Notice kind={isOffline(error) ? "offline" : "error"}>
               {errorMessage(error)}
