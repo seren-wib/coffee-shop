@@ -12,7 +12,7 @@ describe("safeNext", () => {
     expect(safeNext("")).toBe("/");
     expect(safeNext("https://evil.example")).toBe("/");
     expect(safeNext("//evil.example")).toBe("/");
-    expect(safeNext("/\evil.example")).toBe("/");
+    expect(safeNext("/\\evil.example")).toBe("/");
     expect(safeNext("orders")).toBe("/");
   });
 });
