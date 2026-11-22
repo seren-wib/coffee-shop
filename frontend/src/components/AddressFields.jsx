@@ -1,13 +1,5 @@
 import TextField from "./TextField";
 
-export const EMPTY_ADDRESS = {
-  recipient_name: "",
-  recipient_phone: "",
-  zipcode: "",
-  base_address: "",
-  detail_address: "",
-};
-
 // Address inputs shared by checkout (new address) and the address book (SDD 6.6, 6.11).
 // The zip code is typed in; no address search service (SDD 6.11).
 export default function AddressFields({ value, onChange, errors = {} }) {
