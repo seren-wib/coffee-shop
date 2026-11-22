@@ -7,11 +7,22 @@ describe("StatusBadge", () => {
     render(
       <>
         <StatusBadge status="CANCEL_REQUESTED" />
-        <StatusBadge status="SOLD_OUT" />
+        <StatusBadge type="sales" status="SOLD_OUT" />
       </>,
     );
     expect(screen.getByText("취소 요청")).toBeInTheDocument();
     expect(screen.getByText("품절")).toBeInTheDocument();
+  });
+
+  it("tells order and payment cancellation apart", () => {
+    render(
+      <>
+        <StatusBadge status="CANCELLED" />
+        <StatusBadge type="payment" status="CANCELLED" />
+      </>,
+    );
+    expect(screen.getByText("취소")).toBeInTheDocument();
+    expect(screen.getByText("결제 취소")).toBeInTheDocument();
   });
 
   it("falls back to the raw code for an unknown status", () => {
