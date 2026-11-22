@@ -68,7 +68,9 @@ coffee-shop/
 │       │   ├── auth.js           # 경로 영역별 호출 함수. client.js만 쓴다
 │       │   ├── products.js       # 4.3 원두 조회
 │       │   ├── cart.js           # 4.4 장바구니
-│       │   ├── orders.js         # (예정)
+│       │   ├── orders.js         # 4.5 주문
+│       │   ├── payments.js       # 4.6 결제 시작·확인·실패 기록
+│       │   ├── addresses.js      # 4.2 배송지
 │       │   └── admin.js          # (예정)
 │       ├── auth/                 # 토큰 저장소, RequireAuth·RequireAdmin 경로 보호
 │       ├── components/           # 헤더, 가격 표시, 상태 배지, 페이지 버튼, 필드 오류
