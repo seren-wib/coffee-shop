@@ -1,1 +1,45 @@
 @import "tailwindcss";
+
+/*
+ * Design tokens from the BeanShop UI canvas (components sheet and layout rules, 2026-11-23).
+ * The default palette is switched off so only these colors exist (SDD 6.0.2).
+ */
+@theme {
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-cream-100: #efe7dc; /* image placeholder */
+  --color-cream-300: #dccfbf; /* lines, disabled fill */
+  --color-brown-400: #bfae9c; /* muted text on espresso */
+  --color-brown-500: #9c8b7d; /* disabled text */
+  --color-brown-600: #6b5646; /* secondary text */
+  --color-brown-900: #2b1d14; /* body text, login panel */
+  --color-espresso-950: #1c1512; /* header, footer, badges, notice strips */
+  --color-latte-100: #f2e8dc; /* text on espresso */
+  --color-caramel-700: #9a4f1f; /* primary button, body links */
+  --color-caramel-800: #6e3714; /* hover */
+  --color-amber-400: #e0a04a; /* demo banner, current header menu */
+  --color-success: #2f6b3a;
+  --color-error: #b3261e;
+  --color-info: #2c5282;
+
+  /* Status dots on espresso badges and notice strips */
+  --color-dot-green: #9fd8b0;
+  --color-dot-blue: #9dbce8;
+  --color-dot-orange: #f5b98a;
+  --color-dot-red: #f2a79e;
+
+  --font-sans:
+    "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic",
+    system-ui, sans-serif;
+  --font-serif: "Noto Serif KR", serif;
+}
+
+@layer base {
+  body {
+    @apply text-brown-900 bg-white font-sans;
+  }
+
+  a {
+    @apply text-caramel-700 hover:text-caramel-800;
+  }
+}

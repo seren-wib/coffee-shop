@@ -62,20 +62,21 @@ coffee-shop/
 │   ├── vite.config.js            # 개발 서버의 /api 프록시
 │   └── src/
 │       ├── main.jsx              # 라우터 장착
-│       ├── App.jsx               # (예정) 라우트 표 (6.0절)
+│       ├── App.jsx               # 라우트 표 (6.0절)
 │       ├── api/
 │       │   ├── client.js         # 하나뿐인 axios 인스턴스, 토큰 인터셉터 (NFR-31, FR-10)
-│       │   ├── auth.js           # (예정) 경로 영역별 호출 함수. client.js만 쓴다
+│       │   ├── auth.js           # 경로 영역별 호출 함수. client.js만 쓴다
 │       │   ├── products.js       # (예정)
 │       │   ├── cart.js           # (예정)
 │       │   ├── orders.js         # (예정)
 │       │   └── admin.js          # (예정)
-│       ├── auth/                 # (예정) 토큰 저장소, RequireAuth·RequireAdmin 경로 보호
-│       ├── components/           # (예정) 헤더, 가격 표시, 상태 배지, 페이지 버튼, 필드 오류
-│       ├── pages/                # (예정) 화면 하나에 파일 하나, SCR ID 순서 (6절)
+│       ├── auth/                 # 토큰 저장소, RequireAuth·RequireAdmin 경로 보호
+│       ├── components/           # 헤더, 가격 표시, 상태 배지, 페이지 버튼, 필드 오류
+│       ├── pages/                # 화면 하나에 파일 하나, SCR ID 순서 (6절)
 │       │   └── admin/            # (예정) SCR-11 ~ SCR-14
-│       ├── lib/                  # (예정) 금액 형식(NFR-33), 상태 한국어 이름(NFR-30)
-│       └── index.css             # Tailwind 진입점
+│       ├── lib/                  # 금액 형식(NFR-33), 상태 한국어 이름(NFR-30), 오류 문구
+│       ├── test/                 # Vitest 설정(jsdom)과 테스트 도우미
+│       └── index.css             # Tailwind 진입점, 디자인 토큰(@theme)
 ├── deploy/                       # 운영 설정 틀. 주소·키 값은 넣지 않는다 (SIP 3절)
 │   ├── nginx/                    # 사이트 틀(coffee-shop.conf), 보안 헤더, 쿼리 뺀 로그 형식
 │   ├── systemd/                  # gunicorn 서비스, 백업 서비스와 timer
