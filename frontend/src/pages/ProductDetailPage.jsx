@@ -22,33 +22,30 @@ function firstPick(options) {
 // SCR-02 (FR-6, FR-19). Weight buttons, then the grind within that weight.
 export default function ProductDetailPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const [product, setProduct] = useState(null);
-  const [loadError, setLoadError] = useState(null);
-  const [optionId, setOptionId] = useState(null);
-  const [quantity, setQuantity] = useState(1);
-  const [pending, setPending] = useState(false);
-  const [added, setAdded] = useState(false);
-  const [addError, setAddError] = useState(null);
+  // The answer is kept with the id it belongs to, so another id shows the placeholder.
+  const [loaded, setLoaded] = useState({
+    id: null,
+    product: null,
+    error: null,
+  });
 
   useEffect(() => {
     let active = true;
-    setProduct(null);
-    setLoadError(null);
     getProduct(id)
-      .then((data) => {
-        if (!active) return;
-        setProduct(data);
-        setOptionId(firstPick(data.options));
-        setQuantity(1);
+      .then((product) => {
+        if (active) setLoaded({ id, product, error: null });
       })
-      .catch((err) => {
-        if (active) setLoadError(err);
+      .catch((error) => {
+        if (active) setLoaded({ id, product: null, error });
       });
     return () => {
       active = false;
     };
   }, [id]);
+
+  const fresh = loaded.id === id;
+  const product = fresh ? loaded.product : null;
+  const loadError = fresh ? loaded.error : null;
 
   if (loadError?.response?.status === 404) {
     return (
@@ -72,6 +69,18 @@ export default function ProductDetailPage() {
     );
   }
   if (!product) return <DetailPlaceholder />;
+  return <ProductView key={product.product_id} product={product} />;
+}
+
+// Remounted per product (key), so the option choice starts from the first sellable one.
+function ProductView({ product }) {
+  const navigate = useNavigate();
+  const id = product.product_id;
+  const [optionId, setOptionId] = useState(() => firstPick(product.options));
+  const [quantity, setQuantity] = useState(1);
+  const [pending, setPending] = useState(false);
+  const [added, setAdded] = useState(false);
+  const [addError, setAddError] = useState(null);
 
   const selected =
     product.options.find((o) => o.option_id === optionId) ?? null;

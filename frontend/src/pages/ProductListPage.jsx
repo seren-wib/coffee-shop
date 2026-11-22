@@ -59,13 +59,12 @@ export default function ProductListPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const query = params.toString();
-  const [form, setForm] = useState(() => readFilters(params));
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    setForm(readFilters(new URLSearchParams(query)));
-  }, [query]);
+  // The answer is kept with the query it belongs to, so a new query shows the placeholder.
+  const [loaded, setLoaded] = useState({
+    query: null,
+    data: null,
+    error: null,
+  });
 
   useEffect(() => {
     let active = true;
@@ -74,10 +73,9 @@ export default function ProductListPage() {
     for (const key of FILTER_KEYS) {
       if (current.get(key)) apiParams[key] = current.get(key);
     }
-    setError(null);
     listProducts(apiParams)
       .then((data) => {
-        if (active) setResult(data);
+        if (active) setLoaded({ query, data, error: null });
       })
       .catch((err) => {
         if (!active) return;
@@ -89,35 +87,16 @@ export default function ProductListPage() {
           });
           return;
         }
-        setError(err);
-        setResult(null);
+        setLoaded({ query, data: null, error: err });
       });
     return () => {
       active = false;
     };
   }, [query, navigate]);
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    const next = new URLSearchParams();
-    if (form.search.trim()) next.set("search", form.search.trim());
-    if (form.origin) next.set("origin", form.origin);
-    if (form.price) {
-      const [min, max] = form.price.split("-");
-      if (min) next.set("min_price", min);
-      if (max) next.set("max_price", max);
-    }
-    if (form.roast_level) next.set("roast_level", form.roast_level);
-    navigate(next.toString() ? `/?${next}` : "/");
-  }
-
-  function handleReset() {
-    setForm(readFilters(new URLSearchParams()));
-    navigate("/");
-  }
-
-  const set = (key) => (event) =>
-    setForm({ ...form, [key]: event.target.value });
+  const fresh = loaded.query === query;
+  const result = fresh ? loaded.data : null;
+  const error = fresh ? loaded.error : null;
   const page = Number(params.get("page")) || 1;
   const lastPage = result ? Math.max(1, Math.ceil(result.count / 20)) : 1;
 
@@ -132,44 +111,7 @@ export default function ProductListPage() {
         )}
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="border-cream-300 flex flex-wrap items-end gap-3 rounded-lg border p-4"
-      >
-        <TextField
-          label="원두 이름"
-          type="search"
-          placeholder="예: 예가체프"
-          value={form.search}
-          onChange={set("search")}
-          className="flex-[1_1_320px]"
-        />
-        <SelectField
-          label="원산지"
-          options={ORIGIN_OPTIONS}
-          value={form.origin}
-          onChange={set("origin")}
-          className="flex-[0_1_180px]"
-        />
-        <SelectField
-          label="가격"
-          options={PRICE_RANGES}
-          value={form.price}
-          onChange={set("price")}
-          className="flex-[0_1_180px]"
-        />
-        <SelectField
-          label="로스팅"
-          options={ROAST_OPTIONS}
-          value={form.roast_level}
-          onChange={set("roast_level")}
-          className="flex-[0_1_180px]"
-        />
-        <Button type="submit">검색</Button>
-        <Button variant="ghost" onClick={handleReset}>
-          초기화
-        </Button>
-      </form>
+      <FilterForm key={query} initial={readFilters(params)} />
 
       {error && (
         <Notice kind={isOffline(error) ? "offline" : "error"}>
@@ -198,6 +140,69 @@ export default function ProductListPage() {
         </>
       )}
     </div>
+  );
+}
+
+// Remounted per query (key), so the inputs always start from the URL.
+function FilterForm({ initial }) {
+  const navigate = useNavigate();
+  const [form, setForm] = useState(initial);
+  const set = (key) => (event) =>
+    setForm({ ...form, [key]: event.target.value });
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    const next = new URLSearchParams();
+    if (form.search.trim()) next.set("search", form.search.trim());
+    if (form.origin) next.set("origin", form.origin);
+    if (form.price) {
+      const [min, max] = form.price.split("-");
+      if (min) next.set("min_price", min);
+      if (max) next.set("max_price", max);
+    }
+    if (form.roast_level) next.set("roast_level", form.roast_level);
+    navigate(next.toString() ? `/?${next}` : "/");
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="border-cream-300 flex flex-wrap items-end gap-3 rounded-lg border p-4"
+    >
+      <TextField
+        label="원두 이름"
+        type="search"
+        placeholder="예: 예가체프"
+        value={form.search}
+        onChange={set("search")}
+        className="flex-[1_1_320px]"
+      />
+      <SelectField
+        label="원산지"
+        options={ORIGIN_OPTIONS}
+        value={form.origin}
+        onChange={set("origin")}
+        className="flex-[0_1_180px]"
+      />
+      <SelectField
+        label="가격"
+        options={PRICE_RANGES}
+        value={form.price}
+        onChange={set("price")}
+        className="flex-[0_1_180px]"
+      />
+      <SelectField
+        label="로스팅"
+        options={ROAST_OPTIONS}
+        value={form.roast_level}
+        onChange={set("roast_level")}
+        className="flex-[0_1_180px]"
+      />
+      <Button type="submit">검색</Button>
+      <Button variant="ghost" onClick={() => navigate("/")}>
+        초기화
+      </Button>
+    </form>
   );
 }
 
