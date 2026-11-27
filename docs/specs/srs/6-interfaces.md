@@ -88,9 +88,11 @@ POST   /api/admin/orders/{id}/cancel-reject/       취소 반려 (FR-51)
 
 | 대상 | 방향 | 내용 |
 | --- | --- | --- |
-| 결제대행사(PG) | 양방향 | 결제창 호출, 결제 승인 결과 확인, 결제 취소. 테스트 모드만 쓴다(FR-25 ~ FR-29, FR-50) |
+| 결제대행사(PG) | 양방향 | 결제창 호출, 결제 승인 결과 확인, 결제 취소. 테스트 모드만 쓰고 테스트 키만 받는다(FR-25 ~ FR-29, FR-50, NFR-42). 키가 없으면 결제를 끈다(FR-60) (2026-11-27 NFR-42, FR-60 추가) |
 | 택배사 조회 페이지 | 시스템 → 택배사 | 송장번호를 넣은 조회 페이지 링크만 연다. API 연동 없음(FR-35) |
 | Cloudflare | 운영자 → Cloudflare | 도메인 DNS 레코드가 EC2 인스턴스를 가리킨다(NFR-21) |
+| GitHub Actions | 개발자 → GitHub | PR과 `main` push마다 `backend`·`frontend` 검사. 저장소 시크릿 없음(NFR-37, NFR-38) (2026-11-27 추가) |
+| GitHub 레포 | EC2 → GitHub | 배포 명령이 릴리스 태그를 HTTPS로 받아 온다(FR-61, NFR-39) (2026-11-27 추가) |
 
 ### 6.5 통신 인터페이스
 
@@ -99,6 +101,9 @@ flowchart LR
   browser[브라우저] -->|HTTPS 443| cf[Cloudflare 프록시]
   cf -->|HTTPS, Origin 인증서| ec2[EC2 인스턴스]
   ec2 -->|HTTPS| pg[결제대행사]
+  operator[운영자] -->|SSH, 배포 명령| ec2
+  ec2 -->|HTTPS, 태그 받기| github[GitHub]
+  dev[개발자] -->|PR, push| github
   browser -.->|링크| carrier[택배사 조회 페이지]
 ```
 
@@ -106,3 +111,4 @@ flowchart LR
 - 화면과 API가 같은 도메인이라 CORS 설정이 필요 없다(NFR-21).
 - 데이터는 REST·JSON으로 주고받고, 인증은 `Authorization: Bearer <액세스 토큰>` 헤더로 한다(NFR-8, NFR-28).
 - 브라우저는 Cloudflare 프록시에 접속하고, Cloudflare가 EC2로 넘긴다. 프록시와 TLS 방식은 SDD 11절이다.
+- 운영자는 SSH로 EC2에 들어가 배포 명령을 실행하고, 배포 명령은 GitHub에서 릴리스 태그를 받아 온다. GitHub Actions는 운영 서버에 접속하지 않는다(7.1절). (2026-11-27 추가)
