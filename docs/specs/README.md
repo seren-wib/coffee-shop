@@ -7,7 +7,7 @@ Drive 폴더: 내 드라이브 [`projects-docs/coffee-shop`](https://drive.googl
 | 문서 | 폴더 | Google Docs | ID 범위 |
 | --- | --- | --- | --- |
 | 프로젝트 계획서 (SPMP) | [spmp/](spmp/README.md) | [열기](https://docs.google.com/document/d/12f9rIr1QTdR_3I-XFNKyRkMnlw4ITTjanMyF-jLX8vE/edit) | |
-| 요구사항 명세서 (SRS) | [srs/](srs/README.md) | [열기](https://docs.google.com/document/d/1hB4BEwVzEQwhsS1WoaLX-pkCMCrKybRVRqFK8RpknAg/edit) | DR-1 ~ DR-24, FR-1 ~ FR-59, NFR-1 ~ NFR-36, UC-1 ~ UC-14 |
+| 요구사항 명세서 (SRS) | [srs/](srs/README.md) | [열기](https://docs.google.com/document/d/1hB4BEwVzEQwhsS1WoaLX-pkCMCrKybRVRqFK8RpknAg/edit) | DR-1 ~ DR-24, FR-1 ~ FR-59, NFR-1 ~ NFR-43, UC-1 ~ UC-14 |
 | 설계 명세서 (SDD) | [sdd/](sdd/README.md) | [열기](https://docs.google.com/document/d/1PlaC-17Gyowrh1pv8trCXmzSOFiTax6zaEr2K5VWSrA/edit) | |
 | 테스트 계획서 (STP) | [stp/](stp/README.md) | [열기](https://docs.google.com/document/d/1I-p7EKPVUYGA_oiGZJ9TSVgx9cXEb-q9H8rGxYRFb0Q/edit) | |
 | 설치 계획서 (SIP) | [sip/](sip/README.md) | [열기](https://docs.google.com/document/d/1aWak-aiFeJwPIUQ34yuOHpkcLaF5M0V-BJD6rZjnhGc/edit) | |

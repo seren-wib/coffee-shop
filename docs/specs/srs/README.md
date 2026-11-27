@@ -9,7 +9,7 @@ Google Docs: https://docs.google.com/document/d/1hB4BEwVzEQwhsS1WoaLX-pkCMCrKybR
 | [1-overview.md](1-overview.md) | 개요 | |
 | [2-domain.md](2-domain.md) | 도메인 요구사항 | DR-1 ~ DR-24 |
 | [3-functional/](3-functional/README.md) | 기능 요구사항 | FR-1 ~ FR-63 |
-| [4-nonfunctional.md](4-nonfunctional.md) | 비기능 요구사항 | NFR-1 ~ NFR-42 |
+| [4-nonfunctional.md](4-nonfunctional.md) | 비기능 요구사항 | NFR-1 ~ NFR-43 |
 | [5-use-cases.md](5-use-cases.md) | 사용사례 | UC-1 ~ UC-15 |
 | [6-interfaces.md](6-interfaces.md) | 외부 인터페이스 | |
 | [7-decisions.md](7-decisions.md) | 확정과 미결 | |

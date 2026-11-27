@@ -27,7 +27,8 @@ flowchart LR
   guest -->|결제창| pg
   app -->|승인·취소 API| pg
   guest -.->|새 탭 링크| carrier
-  op -->|SSH, 배포| aws
+  op -->|SSH, 설치·관리| aws
+  gha[[GitHub Actions]] -->|OIDC, SSM 배포 명령| aws
   aws --- app
 ```
 

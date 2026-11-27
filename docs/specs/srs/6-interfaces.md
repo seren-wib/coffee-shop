@@ -93,6 +93,7 @@ POST   /api/admin/orders/{id}/cancel-reject/       취소 반려 (FR-51)
 | Cloudflare | 운영자 → Cloudflare | 도메인 DNS 레코드가 EC2 인스턴스를 가리킨다(NFR-21) |
 | GitHub Actions | 개발자 → GitHub | PR과 `main` push마다 `backend`·`frontend` 검사. 저장소 시크릿 없음(NFR-37, NFR-38) (2026-11-27 추가) |
 | GitHub 레포 | EC2 → GitHub | 배포 명령이 릴리스 태그를 HTTPS로 받아 온다(FR-61, NFR-39) (2026-11-27 추가) |
+| AWS STS, SSM | GitHub Actions → AWS → EC2 | `deploy` 워크플로가 OIDC 토큰으로 배포 역할을 받고(STS), 운영 인스턴스에 `AWS-RunShellScript`로 배포 명령을 보낸 뒤 결과를 읽는다(SSM). 장기 키 없음(FR-61, NFR-43) (2026-11-27 추가) |
 
 ### 6.5 통신 인터페이스
 
@@ -101,8 +102,10 @@ flowchart LR
   browser[브라우저] -->|HTTPS 443| cf[Cloudflare 프록시]
   cf -->|HTTPS, Origin 인증서| ec2[EC2 인스턴스]
   ec2 -->|HTTPS| pg[결제대행사]
-  operator[운영자] -->|SSH, 배포 명령| ec2
+  operator[운영자] -->|SSH, 관리 명령| ec2
   ec2 -->|HTTPS, 태그 받기| github[GitHub]
+  github -->|OIDC, 배포 명령| ssm[AWS SSM]
+  ssm -->|에이전트가 받아 실행| ec2
   dev[개발자] -->|PR, push| github
   browser -.->|링크| carrier[택배사 조회 페이지]
 ```
@@ -112,3 +115,4 @@ flowchart LR
 - 데이터는 REST·JSON으로 주고받고, 인증은 `Authorization: Bearer <액세스 토큰>` 헤더로 한다(NFR-8, NFR-28).
 - 브라우저는 Cloudflare 프록시에 접속하고, Cloudflare가 EC2로 넘긴다. 프록시와 TLS 방식은 SDD 11절이다.
 - 운영자는 SSH로 EC2에 들어가 배포 명령을 실행하고, 배포 명령은 GitHub에서 릴리스 태그를 받아 온다. GitHub Actions는 운영 서버에 접속하지 않는다(7.1절). (2026-11-27 추가)
+- (2026-11-27 변경. 위 줄 대신) 배포 명령은 GitHub Actions가 AWS Systems Manager(SSM) Run Command로 보낸다. 서버의 SSM 에이전트가 AWS 쪽으로 나가는 HTTPS 연결로 명령을 받아 실행하므로 GitHub는 서버에 직접 접속하지 않고 22번도 쓰지 않는다. AWS 권한은 실행마다 GitHub OIDC 토큰으로 받는다(NFR-43). 운영자 SSH는 설치, 관리자 계정 생성, 손으로 하는 배포·롤백·복원에 쓴다.
