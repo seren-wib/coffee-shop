@@ -1,5 +1,12 @@
 ## 4.8 관리자 주문·배송·취소
 
+| 항목 | 내용 |
+| --- | --- |
+| 책임 | 관리자가 주문을 조회하고 배송 준비·배송 시작·배송 완료·취소 승인·취소 반려로 상태를 바꾼다 (DR-19 ~ DR-21) |
+| 제공 인터페이스 | `/api/admin/orders/` 아래 경로 7개 (FR-44 ~ FR-51, FR-57) |
+| 의존 | 회원과 인증(`IsAdminRole`), 주문, 결제(`cancel_success_payment`), 관리자 원두·재고(`increase_stock`) |
+| 구현 모듈 | `orders/services.py`, `orders/serializers.py`, `orders/views.py` |
+
 `orders` 앱의 관리자용 뷰. 모든 경로는 `/api/admin/orders/` 아래이고 `IsAuthenticated + IsAdminRole`이다(NFR-10). 상태 전환은 4.5.1 전환표를 따르고, 표에 없는 전환은 409다(SRS 3.7절).
 
 ### 4.8.1 전체 주문 목록 (FR-44)

@@ -1,5 +1,12 @@
 ## 4.2 배송지
 
+| 항목 | 내용 |
+| --- | --- |
+| 책임 | 회원의 배송지를 관리하고 기본 배송지를 정확히 하나로 유지한다 (DR-16, DR-17) |
+| 제공 인터페이스 | `/api/me/addresses/`, `/api/me/addresses/{id}/`, `/api/me/addresses/{id}/default/` (FR-14 ~ FR-18) |
+| 의존 | 회원과 인증 |
+| 구현 모듈 | `users/models.py`의 `UserAddress`, `users/services.py`, `users/serializers.py`, `users/views.py` |
+
 `users` 앱의 `UserAddress`와 `users/services.py`. 핵심 규칙은 "배송지가 있는 회원의 기본 배송지는 정확히 하나"다(DR-16, DR-17). DB의 부분 유니크 제약 `uq_user_addresses_one_default`가 "둘 이상"을 막고, 아래 서비스 함수가 "0개"를 막는다.
 
 ### 4.2.0 기본 배송지 상태

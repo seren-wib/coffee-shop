@@ -1,5 +1,12 @@
 ## 4.4 장바구니
 
+| 항목 | 내용 |
+| --- | --- |
+| 책임 | 회원의 장바구니 항목을 담고 바꾸고 지우며, 지금 가격과 배송비로 금액을 계산한다 (DR-14) |
+| 제공 인터페이스 | `/api/cart/`, `/api/cart/items/`, `/api/cart/items/{id}/` (FR-19 ~ FR-22). 다른 부품이 쓰는 함수 `shipping_fee_for`, `cart_items` |
+| 의존 | 회원과 인증, 관리자 원두·재고(옵션 가격·재고·판매 상태 읽기) |
+| 구현 모듈 | `orders/models.py`의 `CartItem`, `orders/services.py`, `orders/serializers.py`, `orders/views.py` |
+
 `orders` 앱의 `CartItem`과 `orders/services.py`. 회원만 쓴다. 토큰이 없으면 401이고, 화면은 담기를 누른 비회원을 로그인 화면으로 보낸다(SRS 3.3절).
 
 ### 4.4.0 금액 계산 함수

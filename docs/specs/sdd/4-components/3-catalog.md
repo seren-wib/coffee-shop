@@ -1,5 +1,12 @@
 ## 4.3 원두 조회
 
+| 항목 | 내용 |
+| --- | --- |
+| 책임 | 고객에게 원두 목록과 상세를 보여 주고 검색·필터 조건을 적용한다. 판매 중지 원두는 감춘다 (FR-1, FR-6) |
+| 제공 인터페이스 | `/api/products/`, `/api/products/{id}/` (FR-1 ~ FR-6) |
+| 의존 | 없음 (공개 경로) |
+| 구현 모듈 | `products/models.py`의 `Product`, `ProductOption`, `products/queries.py`, `products/serializers.py`, `products/views.py` |
+
 `products` 앱의 고객용 뷰. 비회원과 회원 모두 쓴다(NFR-9 공개 경로). 판매 중지 원두는 고객에게 없는 것처럼 보인다(FR-1, FR-6).
 
 ### 4.3.0 고객용 쿼리셋
