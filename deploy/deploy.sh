@@ -11,10 +11,11 @@ repo=${REPO_URL:-https://github.com/seren-wib/coffee-shop.git}
 app=/srv/coffee-shop
 rel=$app/releases/$tag
 env_file=$app/.env
+[ -f "$env_file" ] || { echo "deploy: $env_file is missing (SIP 3.3)" >&2; exit 1; }
 db=$(sed -n 's/^SQLITE_PATH=//p' "$env_file")
 domain=$(sed -n 's/^ALLOWED_HOSTS=//p' "$env_file" | cut -d, -f1 | tr -d ' ')
 builder=${SUDO_USER:-root}  # build as the operator, not as root or the app account
-previous=$(readlink -f $app/current 2>/dev/null || true)
+previous=$(readlink -e $app/current || true)  # -e: empty on the first deploy, not the link path
 started=$(date +%s)
 
 step() { echo "== $(($(date +%s) - started))s $*"; }

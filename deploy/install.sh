@@ -81,6 +81,6 @@ install -m 644 "$here"/systemd/coffee-shop.service "$here"/systemd/coffee-shop-b
   "$here"/systemd/coffee-shop-backup.timer /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable nginx coffee-shop.service coffee-shop-backup.timer
-systemctl reload nginx || systemctl start nginx
+systemctl restart nginx  # reload leaves old workers holding the removed default site's port 80
 
 echo "install: done. Next: sudo deploy/deploy.sh <release tag> (SIP 2)"
