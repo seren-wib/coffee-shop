@@ -1,6 +1,6 @@
 ## 2. 디렉터리 구조
 
-구현이 끝났을 때의 레포 구조다. `(예정)`은 2026-11-17 현재 레포에 없고 구현(텀프로젝트 마감 2026-11-30 24:00)에서 만드는 것이다. (2026-11-19 변경. 이전에는 출처 없는 날짜 2026-11-22) 2026-11-19에 스파이크(#73)와 CI(#77)로 생긴 파일을 반영했다. 테이블 정의의 원본은 모델과 마이그레이션이고 `backend/schema.sql`은 지운다(11.1절).
+구현이 끝났을 때의 레포 구조다. `(예정)`은 2026-11-17 현재 레포에 없고 구현(텀프로젝트 마감 2026-11-30 23:50)에서 만드는 것이다. (2026-11-19 변경. 이전에는 출처 없는 날짜 2026-11-22. 2026-11-27 변경: 24:00 → 23:50, LMS 마감) 2026-11-19에 스파이크(#73)와 CI(#77)로 생긴 파일을 반영했다. 테이블 정의의 원본은 모델과 마이그레이션이고 `backend/schema.sql`은 지운다(11.1절).
 
 ```
 coffee-shop/
@@ -86,7 +86,7 @@ coffee-shop/
 │   ├── gunicorn.conf.py          # 소켓, 워커 3, 30초
 │   ├── install.sh                # 처음 한 번: 패키지, 스왑, Node.js, 계정, 폴더, nginx, 단위 (SIP 3.3)
 │   ├── cloudflare-real-ip.sh     # Cloudflare 대역 → set_real_ip_from
-│   ├── deploy.sh                 # 릴리스 폴더, 의존성, 빌드, 백업, migrate, 링크 전환, 상태 확인 (10.4절)
+│   ├── deploy.sh                 # 릴리스 폴더, 의존성, 빌드, 백업, migrate, 링크 전환, 상태 확인 (10.4절, FR-61, FR-62)
 │   └── backup.sh                 # sqlite3 .backup, 7개 남기기 (NFR-25)
 ├── spikes/                       # 설계 전 확인 코드, 스파이크 하나에 폴더 하나 (3절)
 ├── docs/
@@ -94,7 +94,7 @@ coffee-shop/
 │   └── specs/                    # 단계 문서 원본 (spmp, srs, sdd, stp, sip, smp)
 ├── .github/
 │   ├── workflows/
-│   │   ├── ci.yml                # backend, frontend 검사 (STP 7절)
+│   │   ├── ci.yml                # backend, frontend 검사 (NFR-37, STP 7절)
 │   │   └── docs-sync.yml         # main의 docs/specs → Google Docs
 │   └── pull_request_template.md
 ├── .env.example                  # 환경 변수 이름만 (NFR-13, 9절)

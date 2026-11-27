@@ -1,6 +1,6 @@
 ## 7. CI
 
-GitHub Actions 워크플로 `.github/workflows/ci.yml` 하나다. 2026-11-19 준비 단계에 테스트 설정(`config/test_settings.py`, `config/test_settings_file.py`), `requirements-dev.txt`와 함께 들어왔다(#77). (2026-11-19 변경. 이전에는 기반 단계에서 설정, 커스텀 사용자 모델과 함께 들어온다고 적었다)
+GitHub Actions 워크플로 `.github/workflows/ci.yml` 하나다. SRS NFR-37(검사), NFR-38(필수 검사·PR로만 `main`), NFR-39(배포 태그는 통과한 커밋에만)를 실현한다(2026-11-27 추가). 2026-11-19 준비 단계에 테스트 설정(`config/test_settings.py`, `config/test_settings_file.py`), `requirements-dev.txt`와 함께 들어왔다(#77). (2026-11-19 변경. 이전에는 기반 단계에서 설정, 커스텀 사용자 모델과 함께 들어온다고 적었다)
 
 | 브랜치 | 어디서 따서 | 어디로 | CI |
 | --- | --- | --- | --- |

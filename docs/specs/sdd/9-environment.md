@@ -10,7 +10,7 @@
 | `DEBUG` | 설정 | `.env` | 개발 `True`, 운영 `False` | NFR-12. `True`일 때만 `/admin/` URL을 붙인다(11.1절). `False`인데 `ALLOWED_HOSTS`가 비면 서버가 뜨지 않는다 |
 | `ALLOWED_HOSTS` | 설정 | `.env`, 쉼표로 여러 개 | 개발 `localhost,127.0.0.1`, 운영 도메인(이름은 서버 `.env`에만) | Host 헤더 검사 |
 | `SQLITE_PATH` | 설정 | `.env` | 개발 기본 `backend/db.sqlite3`, 운영은 릴리스 폴더 밖의 데이터 폴더 | DB 파일 위치. 배포로 릴리스 폴더가 바뀌어도 DB는 그대로 |
-| `TOSS_SECRET_KEY` | 시크릿 | `.env` | 개발, 운영(둘 다 테스트 키) | 토스페이먼츠 승인·취소 API Basic 인증(4.6.5). `test_`로 시작하지 않으면 서버가 뜨지 않는다. 비어 있으면 결제를 끈다(`PAYMENTS_ENABLED`, 503 `PAYMENTS_DISABLED`) (2026-11-19 추가) |
+| `TOSS_SECRET_KEY` | 시크릿 | `.env` | 개발, 운영(둘 다 테스트 키) | 토스페이먼츠 승인·취소 API Basic 인증(4.6.5). `test_`로 시작하지 않으면 서버가 뜨지 않는다. 비어 있으면 결제를 끈다(`PAYMENTS_ENABLED`, 503 `PAYMENTS_DISABLED`) (2026-11-19 추가). NFR-42, FR-60 (2026-11-27 ID 추가) |
 | `PAYMENTS_CLIENT` | 설정 | `.env`(없으면 `orders.pg.TossPaymentsClient`) | 테스트 설정은 `orders.pg.FakePaymentsClient` | 4.6.5 |
 | `LOG_LEVEL` | 설정 | `.env`(없으면 `INFO`) | 개발, 운영 | 4.9.4 |
 
@@ -59,7 +59,7 @@ Vite는 `VITE_`로 시작하는 변수만 빌드 결과에 넣는다. 빌드 결
 | AWS | EC2 인스턴스, Elastic IP, 보안 그룹, EBS | 운영자 |
 | Cloudflare | DNS 영역, 프록시, SSL/TLS 설정, Origin CA 인증서 발급 | 운영자 |
 | 토스페이먼츠 개발자 센터 | 테스트 클라이언트 키, 테스트 시크릿 키 | 운영자 |
-| GitHub | 레포, Actions CI(`ci.yml`의 `backend`·`frontend` 작업, STP 7절). Actions 시크릿은 없다. `main` 브랜치 보호에 두 작업이 필수 검사로 걸려 있다(2026-11-19, STP 7.2절) (2026-11-19 변경. 이전에는 "CI 미도입", 그다음 "필수 검사 등록은 남음") | 팀 |
+| GitHub | 레포, Actions CI(`ci.yml`의 `backend`·`frontend` 작업, STP 7절). Actions 시크릿은 없다. `main` 브랜치 보호에 두 작업이 필수 검사로 걸려 있다(2026-11-19, STP 7.2절) (2026-11-19 변경. 이전에는 "CI 미도입", 그다음 "필수 검사 등록은 남음"). NFR-37, NFR-38 (2026-11-27 ID 추가) | 팀 |
 
 계정 이름과 로그인 정보는 이 문서에 쓰지 않는다. 처음 한 번 하는 설정 절차는 SIP 3절이다.
 
