@@ -9,11 +9,11 @@ Google Docs: https://docs.google.com/document/d/1PlaC-17Gyowrh1pv8trCXmzSOFiTax6
 | [1-architecture.md](1-architecture.md) | 아키텍처: 시스템 맥락, 배포 단위, 통신, 데이터 위치, 백엔드 논리 구조 | NFR-19 ~ NFR-21, NFR-28 |
 | [2-directories.md](2-directories.md) | 디렉터리 구조와 폴더 규칙 | NFR-29, NFR-31, NFR-32 |
 | [3-spikes.md](3-spikes.md) | 스파이크: SQLite 동시 주문, 토스페이먼츠 승인·취소 (둘 다 2026-11-19에 돌림, 3.2는 6단계만 못 잼) | NFR-15, FR-25 ~ FR-29 |
-| [4-components/](4-components/README.md) | 컴포넌트 설계: 부품 9개, 상태 기계, 시퀀스 | FR-1 ~ FR-58 |
+| [4-components/](4-components/README.md) | 컴포넌트 설계: 부품 9개, 상태 기계, 시퀀스 | FR-1 ~ FR-60 |
 | [5-data-model.md](5-data-model.md) | 데이터 모델: ERD, 테이블 8개, 제약, 택배사 조회 주소 | DR-1 ~ DR-24 |
 | [6-screens.md](6-screens.md) | 화면 설계: 라우트, 레이아웃, 디자인 가이드, 화면 16개 | SCR-01 ~ SCR-15, NFR-30, NFR-33, NFR-34, NFR-36 |
 | [7-api.md](7-api.md) | API 설계 규칙: 오류 형식, 경로 묶음별 인증, 페이지네이션 | NFR-9 ~ NFR-11, NFR-28 |
-| [8-security.md](8-security.md) | 보안과 개인정보: 해시, 전송 암호화, 접근 통제, 시크릿, 로그, CSP | NFR-4 ~ NFR-13, NFR-18, NFR-35 |
+| [8-security.md](8-security.md) | 보안과 개인정보: 해시, 전송 암호화, 접근 통제, 시크릿, 로그, CSP | NFR-4 ~ NFR-13, NFR-18, NFR-35, NFR-42 |
 | [9-environment.md](9-environment.md) | 환경과 시크릿: 변수 이름과 설정 위치 | NFR-13 |
-| [10-deployment.md](10-deployment.md) | 배포: 브랜치 모델, 서버 배치, nginx, 배포 흐름, 백업·감시 | NFR-20 ~ NFR-25 |
+| [10-deployment.md](10-deployment.md) | 배포: 브랜치 모델, 서버 배치, nginx, 배포 흐름, 백업·감시 | NFR-20 ~ NFR-25, NFR-37 ~ NFR-41, FR-61 ~ FR-63 |
 | [11-rationale.md](11-rationale.md) | 설계 근거: 확정한 기술 결정과 미결 | |

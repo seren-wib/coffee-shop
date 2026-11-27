@@ -9,7 +9,7 @@
 | [3-catalog.md](3-catalog.md) | 4.3 원두 조회 | FR-1 ~ FR-6 |
 | [4-cart.md](4-cart.md) | 4.4 장바구니 | FR-19 ~ FR-22 |
 | [5-orders.md](5-orders.md) | 4.5 주문 | FR-23, FR-24, FR-30 ~ FR-35, FR-55 |
-| [6-payments.md](6-payments.md) | 4.6 결제 | FR-25 ~ FR-29 |
+| [6-payments.md](6-payments.md) | 4.6 결제 | FR-25 ~ FR-29, FR-60 |
 | [7-admin-products.md](7-admin-products.md) | 4.7 관리자 원두·재고 | FR-36 ~ FR-43, FR-56 |
 | [8-admin-orders.md](8-admin-orders.md) | 4.8 관리자 주문·배송·취소 | FR-44 ~ FR-51, FR-57 |
 | [9-operations.md](9-operations.md) | 4.9 운영 | FR-52, FR-53 |
