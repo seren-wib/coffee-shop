@@ -6,7 +6,7 @@
 
 | 클래스 | 맡는 일 | 메서드 |
 | --- | --- | --- |
-| `DomainError` | 업무 규칙 위반 예외. 오류 코드, 한국어 메시지, HTTP 상태, 부가 정보를 담는다 | `__init__(code, message, status=409, details=None)` |
+| `DomainError` | 업무 규칙 위반 예외. 오류 코드, 한국어 메시지, HTTP 상태, 부가 정보를 담는다 | `__init__(code, message, status=status.HTTP_409_CONFLICT, details=None)` |
 
 #### error_body
 

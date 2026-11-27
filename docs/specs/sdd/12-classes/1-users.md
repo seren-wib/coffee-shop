@@ -22,7 +22,7 @@
 #### change_password
 
 - 시그니처: `change_password(user, new_password)`
-- 반환: 없음. 새 비밀번호를 해시해 저장한다. 예외 없음(현재 비밀번호 확인은 `PasswordChangeSerializer`가 한다).
+- 반환: 없음. 새 비밀번호를 해시해 저장한다. 트랜잭션 밖. 예외 없음(현재 비밀번호 확인은 `PasswordChangeSerializer`가 한다).
 - 요구사항: FR-13
 
 #### create_address

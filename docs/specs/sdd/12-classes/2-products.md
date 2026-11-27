@@ -22,7 +22,7 @@
 #### decrease_stock
 
 - 시그니처: `decrease_stock(option_id: int, quantity: int) -> None`
-- 반환: 없음. 재고가 0이 되면 판매 중인 원두를 품절로 바꾼다. 예외: 400 `VALIDATION_ERROR`(수량이 0 이하), 409 `OUT_OF_STOCK`(재고 부족), 404 `NOT_FOUND`(없는 옵션).
+- 반환: 없음. 재고가 0이 되면 판매 중인 원두를 품절로 바꾼다. 예외: 400 `VALIDATION_ERROR`(수량이 0 이하), 409 `OUT_OF_STOCK`(재고 부족. 없는 옵션도 조건부 UPDATE가 0행이라 같은 오류다).
 - 요구사항: DR-5, DR-6, NFR-14, NFR-15
 
 #### increase_stock
