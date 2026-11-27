@@ -66,3 +66,15 @@
 
 1. UptimeRobot 무료 요금제에 HTTP(S) 감시 하나: `https://<도메인>/api/health/`, 5분 간격.
 2. 날짜: 아직
+
+### 3.6 자동 배포 (FR-61, NFR-43, SDD 10.4) (2026-11-27 추가)
+
+정책 틀은 레포 `deploy/aws/`에 있다. 계정 번호와 인스턴스 ID는 틀에 넣어 쓰고 레포에는 남기지 않는다.
+
+1. IAM OIDC 공급자: URL `https://token.actions.githubusercontent.com`, 대상 `sts.amazonaws.com`.
+2. 배포 역할 `coffee-shop-github-deploy`: 신뢰 정책 `deploy/aws/github-deploy-trust.json`(이 레포 `main`만), 인라인 정책 `deploy/aws/github-deploy-policy.json`(운영 인스턴스 하나에 `AWS-RunShellScript`, 결과 읽기).
+3. 인스턴스 역할 `coffee-shop-ec2-ssm`: AWS 관리형 정책 `AmazonSSMManagedInstanceCore`를 붙이고 인스턴스 프로파일로 EC2에 연결한다. 보안 그룹은 바꾸지 않는다(SSM 에이전트는 나가는 443만 쓴다).
+4. SSM 에이전트: Ubuntu 24.04 AMI에 snap으로 들어 있다. 서버에서 `sudo snap services amazon-ssm-agent`가 active인지, Systems Manager Fleet Manager에 인스턴스가 온라인인지 본다.
+5. GitHub 레포 Settings → Secrets and variables → Actions: 시크릿 `AWS_DEPLOY_ROLE_ARN`, `PROD_INSTANCE_ID`, `PROD_URL`(`https://<도메인>`), 변수 `DEPLOY_ENABLED`=`true`. 시크릿 셋은 자격 증명이 아니라 식별자인데, 공개 실행 로그에서 가리려고 시크릿에 둔다.
+6. 확인: 코드가 바뀐 PR 하나를 머지하고 2절 순서가 끝까지 도는지 본다(STP 8절 1번).
+7. 날짜: 아직

@@ -13,7 +13,8 @@
 | Cloudflare(DNS, 프록시, Origin CA) | $0 | Free 요금제 기능만 쓴다. 출처: [Cloudflare 요금제](https://www.cloudflare.com/plans/) |
 | 토스페이먼츠 테스트 모드 | $0 | 테스트 키는 실제 돈이 오가지 않아 수수료가 없다. 출처: [토스페이먼츠 API 키 문서](https://docs.tosspayments.com/reference/using-api/api-keys) |
 | 외부 감시(UptimeRobot 무료) | $0 | SDD 11.1절. 출처: [UptimeRobot 요금](https://uptimerobot.com/pricing/) |
-| GitHub, GitHub Actions(CI, 문서 동기화) | $0 | 공개 레포의 표준 실행기는 무료다. 출처: [GitHub Actions 요금](https://docs.github.com/en/billing/managing-billing-for-your-products/managing-billing-for-github-actions/about-billing-for-github-actions) |
+| AWS IAM, OIDC 공급자, Systems Manager Run Command(자동 배포, 2026-11-27 추가) | $0 | IAM과 Run Command는 추가 요금이 없다. 출처: [AWS Systems Manager 요금](https://aws.amazon.com/systems-manager/pricing/) |
+| GitHub, GitHub Actions(CI, 문서 동기화, 자동 배포. 2026-11-27 자동 배포 추가) | $0 | 공개 레포의 표준 실행기는 무료다. 출처: [GitHub Actions 요금](https://docs.github.com/en/billing/managing-billing-for-your-products/managing-billing-for-github-actions/about-billing-for-github-actions) |
 | 합계 | 월 약 $14.96(추정) | EC2 + EBS + Elastic IP. 평가가 끝나면 운영 DB와 백업을 지우고(SDD 8.7절) 인스턴스, 볼륨, Elastic IP도 지워 과금을 멈춘다 |
 
 ### 4.2 규모

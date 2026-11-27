@@ -1,0 +1,127 @@
+# Continuous deployment (SDD 10.4, SIP 2, SRS FR-61, NFR-43).
+# When ci passes on a push to main, tag that commit release-YYYYMMDD-N and run
+# deploy/deploy.sh <tag> on the production server through SSM Run Command.
+# Auth is keyless: GitHub OIDC -> IAM role that may only send AWS-RunShellScript to one instance.
+# Secrets hold identifiers, not credentials. They are secrets so the public log masks them:
+#   AWS_DEPLOY_ROLE_ARN  role assumed through OIDC (trust: this repo, refs/heads/main)
+#   PROD_INSTANCE_ID     the EC2 instance
+#   PROD_URL             https://<domain>, used to read version.txt from outside
+# Automatic deploys run only while repository variable DEPLOY_ENABLED is "true" (SIP 3.6).
+# Set it to anything else to pause them, for example during a demo.
+name: deploy
+
+on:
+  workflow_run:
+    workflows: [ci]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write # push the release tag
+  id-token: write # OIDC token for AWS
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false # never stop a deploy halfway
+
+env:
+  AWS_REGION: ap-northeast-2
+
+jobs:
+  deploy:
+    if: >-
+      vars.DEPLOY_ENABLED == 'true' && (
+        github.event_name == 'workflow_dispatch' || (
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      # Automatic runs skip a stale commit, a ci re-run and docs-only changes.
+      # A manual start or a re-run of this workflow always deploys, under a new tag
+      # (deploy.sh refuses a release folder that already exists).
+      - name: Pick commit and tag
+        id: tag
+        env:
+          AUTO: ${{ github.event_name == 'workflow_run' && github.run_attempt == 1 }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          sha=$(git rev-parse HEAD)
+          skip() { echo "::notice::$1"; echo "skip=true" >>"$GITHUB_OUTPUT"; exit 0; }
+          if [ "$AUTO" = true ]; then
+            [ "$RUN_SHA" = "$sha" ] || skip "ci finished for $RUN_SHA but main is at $sha; the newer run deploys"
+            [ -z "$(git tag -l 'release-*' --points-at "$sha")" ] || skip "$sha already has a release tag"
+            last=$(git tag -l 'release-*' --sort=-v:refname | head -n 1)
+            if [ -n "$last" ] && [ -z "$(git diff --name-only "$last" "$sha" | grep -Ev '^docs/|\.md$' || true)" ]; then
+              skip "only docs changed since $last; not deploying"
+            fi
+          fi
+          day=$(TZ=Asia/Seoul date +%Y%m%d)
+          n=$(git tag -l "release-$day-*" | sed "s/^release-$day-//" | sort -n | tail -n 1)
+          tag="release-$day-$(( ${n:-0} + 1 ))"
+          echo "tag=$tag" >>"$GITHUB_OUTPUT"
+          echo "sha=$sha" >>"$GITHUB_OUTPUT"
+          echo "commit=${sha::7}" >>"$GITHUB_OUTPUT"
+
+      # Before the tag, so a refused role leaves no tag behind.
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: steps.tag.outputs.skip != 'true'
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: deploy-${{ github.run_id }}
+
+      - name: Push tag
+        if: steps.tag.outputs.skip != 'true'
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+          SHA: ${{ steps.tag.outputs.sha }}
+        run: |
+          git tag "$TAG" "$SHA"
+          git push origin "refs/tags/$TAG"
+          echo "### $TAG (${SHA::7})" >>"$GITHUB_STEP_SUMMARY"
+
+      - name: Run deploy.sh on the server (SSM)
+        if: steps.tag.outputs.skip != 'true'
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+          INSTANCE: ${{ secrets.PROD_INSTANCE_ID }}
+        run: |
+          # SSM runs as root; deploy.sh builds as DEPLOY_BUILDER, not root.
+          script="cd / && export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+          script="$script && DEPLOY_BUILDER=ubuntu /srv/coffee-shop/current/deploy/deploy.sh $TAG"
+          params=$(jq -nc --arg c "$script" '{commands: [$c], executionTimeout: ["1800"]}')
+          id=$(aws ssm send-command --instance-ids "$INSTANCE" --document-name AWS-RunShellScript \
+            --comment "$TAG" --parameters "$params" --query Command.CommandId --output text)
+          echo "SSM command $id"
+          status=Pending
+          for _ in $(seq 1 190); do
+            sleep 10
+            status=$(aws ssm get-command-invocation --command-id "$id" --instance-id "$INSTANCE" \
+              --query Status --output text 2>/dev/null || echo Pending)
+            case "$status" in Pending|InProgress|Delayed) continue ;; *) break ;; esac
+          done
+          aws ssm get-command-invocation --command-id "$id" --instance-id "$INSTANCE" \
+            --query '[StandardOutputContent, StandardErrorContent]' --output text || true
+          echo "status: $status"
+          [ "$status" = Success ] || { echo "::error::deploy.sh did not succeed ($status); see output above"; exit 1; }
+
+      - name: Check version.txt from outside
+        if: steps.tag.outputs.skip != 'true'
+        env:
+          URL: ${{ secrets.PROD_URL }}
+          COMMIT: ${{ steps.tag.outputs.commit }}
+        run: |
+          for _ in $(seq 1 6); do
+            served=$(curl -fsS "$URL/version.txt?run=$GITHUB_RUN_ID-$RANDOM" || true)
+            [ "$served" = "$COMMIT" ] && { echo "version.txt = $served"; exit 0; }
+            sleep 5
+          done
+          echo "::error::version.txt is '${served:-none}', expected $COMMIT"
+          exit 1

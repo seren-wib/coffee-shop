@@ -51,15 +51,17 @@ Vite는 `VITE_`로 시작하는 변수만 빌드 결과에 넣는다. 빌드 결
 | nginx 사이트 설정 | 설정 | 레포 `deploy/nginx/` 틀에서 도메인을 넣어 EC2에 둔다 | 운영 |
 | systemd 단위(gunicorn, 백업 서비스·timer) | 설정 | 레포 `deploy/systemd/`를 EC2에 복사 | 운영 |
 | SSH 개인 키 | 시크릿 파일 | 운영자 PC | 운영 |
+| `AWS_DEPLOY_ROLE_ARN`, `PROD_INSTANCE_ID`, `PROD_URL` | GitHub Actions 시크릿(식별자, 자격 증명 아님. 공개 실행 로그에서 가리려고 시크릿에 둔다) | 레포 Settings → Secrets and variables → Actions | 운영 배포(`deploy.yml`, 10.4절) (2026-11-27 추가) |
+| `DEPLOY_ENABLED` | GitHub Actions 저장소 변수 | 같은 화면의 Variables | `true`일 때만 자동 배포. 그 밖의 값이나 없음이면 멈춤(SIP 2절) (2026-11-27 추가) |
 
 ### 9.4 외부 서비스 계정 (레포 밖)
 
 | 서비스 | 쓰는 것 | 누가 관리 |
 | --- | --- | --- |
-| AWS | EC2 인스턴스, Elastic IP, 보안 그룹, EBS | 운영자 |
+| AWS | EC2 인스턴스, Elastic IP, 보안 그룹, EBS. 자동 배포용 IAM OIDC 공급자, 배포 역할, 인스턴스 역할(SSM), SSM Run Command (2026-11-27 자동 배포 추가, SIP 3.6절) | 운영자 |
 | Cloudflare | DNS 영역, 프록시, SSL/TLS 설정, Origin CA 인증서 발급 | 운영자 |
 | 토스페이먼츠 개발자 센터 | 테스트 클라이언트 키, 테스트 시크릿 키 | 운영자 |
-| GitHub | 레포, Actions CI(`ci.yml`의 `backend`·`frontend` 작업, STP 7절). Actions 시크릿은 없다. `main` 브랜치 보호에 두 작업이 필수 검사로 걸려 있다(2026-11-19, STP 7.2절) (2026-11-19 변경. 이전에는 "CI 미도입", 그다음 "필수 검사 등록은 남음"). NFR-37, NFR-38 (2026-11-27 ID 추가) | 팀 |
+| GitHub | 레포, Actions CI(`ci.yml`의 `backend`·`frontend` 작업, STP 7절). Actions 시크릿은 없다(2026-11-27 변경: `ci.yml`에는 여전히 없고, `deploy.yml`이 식별자 시크릿 셋을 쓴다. 9.3절). `main` 브랜치 보호에 두 작업이 필수 검사로 걸려 있다(2026-11-19, STP 7.2절) (2026-11-19 변경. 이전에는 "CI 미도입", 그다음 "필수 검사 등록은 남음"). NFR-37, NFR-38 (2026-11-27 ID 추가) | 팀 |
 
 계정 이름과 로그인 정보는 이 문서에 쓰지 않는다. 처음 한 번 하는 설정 절차는 SIP 3절이다.
 

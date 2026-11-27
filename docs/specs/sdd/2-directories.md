@@ -87,6 +87,7 @@ coffee-shop/
 │   ├── install.sh                # 처음 한 번: 패키지, 스왑, Node.js, 계정, 폴더, nginx, 단위 (SIP 3.3)
 │   ├── cloudflare-real-ip.sh     # Cloudflare 대역 → set_real_ip_from
 │   ├── deploy.sh                 # 릴리스 폴더, 의존성, 빌드, 백업, migrate, 링크 전환, 상태 확인 (10.4절, FR-61, FR-62)
+│   ├── aws/                      # 자동 배포 IAM 역할의 신뢰·권한 정책 틀 (SIP 3.6, NFR-43)
 │   └── backup.sh                 # sqlite3 .backup, 7개 남기기 (NFR-25)
 ├── spikes/                       # 설계 전 확인 코드, 스파이크 하나에 폴더 하나 (3절)
 ├── docs/
@@ -95,6 +96,7 @@ coffee-shop/
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci.yml                # backend, frontend 검사 (NFR-37, STP 7절)
+│   │   ├── deploy.yml            # ci 통과 뒤 태그, OIDC, SSM으로 deploy.sh (10.4절, FR-61)
 │   │   └── docs-sync.yml         # main의 docs/specs → Google Docs
 │   └── pull_request_template.md
 ├── .env.example                  # 환경 변수 이름만 (NFR-13, 9절)

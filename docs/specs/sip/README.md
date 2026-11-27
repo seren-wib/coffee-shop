@@ -7,7 +7,7 @@ Google Docs: https://docs.google.com/document/d/1aWak-aiFeJwPIUQ34yuOHpkcLaF5M0V
 | 파일 | 내용 | ID |
 | --- | --- | --- |
 | [1-environments.md](1-environments.md) | 환경 | NFR-22 |
-| [2-deployment.md](2-deployment.md) | 배포 절차 | NFR-24, NFR-39 ~ NFR-41, FR-61 ~ FR-63 |
+| [2-deployment.md](2-deployment.md) | 배포 절차 | NFR-24, NFR-39 ~ NFR-41, NFR-43, FR-61 ~ FR-63 |
 | [3-installation.md](3-installation.md) | 설치 절차 | NFR-4, NFR-13, NFR-25 |
 | [4-installation-test.md](4-installation-test.md) | 설치 테스트 | NFR-1, NFR-3, NFR-12, NFR-22 ~ NFR-25 |
 | [5-compatibility.md](5-compatibility.md) | 호환 확인 기록 | |

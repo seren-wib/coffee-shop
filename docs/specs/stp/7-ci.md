@@ -8,7 +8,7 @@ GitHub Actions 워크플로 `.github/workflows/ci.yml` 하나다. SRS NFR-37(검
 | 작업 브랜치(`cart-api` 같은 이름) | `main` | `main`, PR 스쿼시 머지 | PR을 열거나 커밋을 더할 때마다 `backend`, `frontend` 작업. 둘 다 통과해야 머지 |
 
 - 문서만 바꾼 PR(`docs/**`)도 같은 작업이 돈다. 경로로 건너뛰면 필수 검사가 "대기"로 남아 머지가 막히기 때문이다. 문서 동기화는 따로 `docs-sync.yml`이 `main` push에서 한다.
-- 운영 배포는 CI가 하지 않는다. 운영자가 서버에서 `deploy/deploy.sh <태그>`를 실행한다(SDD 10.4절, 11.1절).
+- 운영 배포는 `ci.yml`이 하지 않는다. `ci`가 `main` push에서 통과하면 `deploy.yml`이 이어서 한다(7.3절, SDD 10.4절). (2026-11-27 변경. 이전에는 "운영자가 서버에서 `deploy/deploy.sh <태그>`를 실행한다")
 
 ### 7.1 작업
 
@@ -40,3 +40,12 @@ GitHub Actions 워크플로 `.github/workflows/ci.yml` 하나다. SRS NFR-37(검
 - 2026-11-19에 걸었다(레포 관리자 결정). 필수 검사는 `backend`, `frontend` 둘이고, PR 없이는 `main`에 넣지 못하며 필수 승인 수는 0이다. 관리자에게도 똑같이 적용하고(enforce admins), force push와 브랜치 삭제는 막는다. 검사 전에 브랜치를 `main` 최신으로 맞추라는 조건(strict)은 켜지 않았다. (2026-11-19 변경. 이전에는 "아직 걸지 않았다. 그 전까지는 PR 작성자가 두 작업 통과를 확인하고 머지한다")
 - 필수 승인 수는 0이다(CONTRIBUTING). 사람 리뷰는 권장이고, 자동 검사 통과는 필수다.
 - 검사가 실패한 PR은 고쳐서 다시 올린다. 테스트를 지우거나 건너뛰기(`skip`)로 통과시키지 않는다. 일부러 미룬 테스트는 PR 본문에 이유와 함께 적는다.
+
+### 7.3 자동 배포 (2026-11-27 추가)
+
+`.github/workflows/deploy.yml`이다. 검사가 아니라 검사 뒤에 도는 배포라 필수 검사에 넣지 않는다(머지 뒤에 돈다). FR-61, NFR-43을 실현하고, 순서와 건너뛰는 조건은 SIP 2절, 설계는 SDD 10.4절이다.
+
+1. 트리거: `ci`의 `workflow_run`(`main`, 완료)과 손으로 시작(`workflow_dispatch`). `ci`가 성공했고 그 실행이 `push`이며 저장소 변수 `DEPLOY_ENABLED`가 `true`일 때만 작업이 돈다. PR의 `ci` 실행은 배포하지 않는다.
+2. 권한: `contents: write`(태그 push), `id-token: write`(OIDC). 시크릿 `AWS_DEPLOY_ROLE_ARN`, `PROD_INSTANCE_ID`, `PROD_URL`은 식별자다.
+3. `concurrency: deploy-production`, `cancel-in-progress: false`.
+4. 단계: `main` 전체 기록 체크아웃 → 태그 이름 고르기 → `aws-actions/configure-aws-credentials` → 태그 push → SSM 배포 명령과 결과 기다리기 → 밖에서 `version.txt` 확인.
