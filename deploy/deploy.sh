@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Deploy one release tag (SDD 10.4, SIP 2). Usage: sudo deploy/deploy.sh release-YYYYMMDD-N
-# Run by the operator over SSH. On a failed health check the previous release comes back.
+# Run by .github/workflows/deploy.yml through SSM after CI passes on main, or by the operator with sudo.
+# On a failed health check the previous release comes back.
 set -euo pipefail
 
 [ "$(id -u)" -eq 0 ] || { echo "deploy: run with sudo" >&2; exit 1; }
@@ -14,7 +15,7 @@ env_file=$app/.env
 [ -f "$env_file" ] || { echo "deploy: $env_file is missing (SIP 3.3)" >&2; exit 1; }
 db=$(sed -n 's/^SQLITE_PATH=//p' "$env_file")
 domain=$(sed -n 's/^ALLOWED_HOSTS=//p' "$env_file" | cut -d, -f1 | tr -d ' ')
-builder=${SUDO_USER:-root}  # build as the operator, not as root or the app account
+builder=${DEPLOY_BUILDER:-${SUDO_USER:-root}}  # build as the operator, not as root or the app account (SSM runs as root)
 previous=$(readlink -e $app/current || true)  # -e: empty on the first deploy, not the link path
 started=$(date +%s)
 
