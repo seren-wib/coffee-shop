@@ -12,3 +12,4 @@
 3. 첫 배포는 `current`가 없는데 `readlink -f`는 없는 경로도 그대로 내준다. 첫 배포에서 상태 확인이 실패하면 `current`가 자기 자신을 가리키는 링크가 된다. `readlink -e`로 바꿔서 첫 배포 실패 때는 되돌리지 않는다(2026-11-27).
 4. gunicorn 27은 기본으로 `$HOME/.gunicorn/`에 제어 소켓을 만들려 한다. 앱 계정은 홈이 없고 `ProtectHome=true`라 시작할 때마다 `Control server error: Permission denied`가 남는다. 제어 소켓을 끈다(`control_socket_disable`, 2026-11-27).
 5. 실패한 태그의 릴리스 폴더는 남는다. 같은 태그로 다시 배포하면 "already exists"로 멈추므로(2.1) 고친 뒤에는 `-N`을 올린 새 태그로 배포한다.
+6. 운영 서버 첫 `install.sh`(2026-11-27) 뒤 `ss -ltn`에 80이 남아 있었다. 기본 사이트를 지우고 `reload`만 하면 옛 워커가 80을 계속 쥔다. `restart`로 바꿨다. 보안 그룹이 80을 막고 있어서 밖에서는 안 보였다.
