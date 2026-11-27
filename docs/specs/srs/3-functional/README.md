@@ -7,8 +7,8 @@
 | [1-catalog.md](1-catalog.md) | 원두 조회 | 1차 | FR-1 ~ FR-6 |
 | [2-account.md](2-account.md) | 회원과 배송지 | 1차 | FR-7 ~ FR-18, FR-54, FR-58 |
 | [3-cart.md](3-cart.md) | 장바구니 | 1차 | FR-19 ~ FR-22 |
-| [4-order-payment.md](4-order-payment.md) | 주문과 결제 | 1차 | FR-23 ~ FR-33, FR-55 |
+| [4-order-payment.md](4-order-payment.md) | 주문과 결제 | 1차 | FR-23 ~ FR-33, FR-55, FR-60 |
 | [5-shipping.md](5-shipping.md) | 배송 조회 | 1차 | FR-34 ~ FR-35 |
 | [6-admin-products.md](6-admin-products.md) | 관리자 원두 관리 | 1차 | FR-36 ~ FR-43, FR-56 |
 | [7-admin-orders.md](7-admin-orders.md) | 관리자 주문·배송·취소 | 1차 | FR-44 ~ FR-51, FR-57 |
-| [8-operations.md](8-operations.md) | 운영 | 1차 | FR-52 ~ FR-53, FR-59 |
+| [8-operations.md](8-operations.md) | 운영 | 1차 | FR-52 ~ FR-53, FR-59, FR-61 ~ FR-63 |
