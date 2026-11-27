@@ -1,5 +1,12 @@
 ## 4.9 운영
 
+| 항목 | 내용 |
+| --- | --- |
+| 책임 | 서버 상태 확인, 관리자 계정 생성, 시연 데이터 생성, 로그를 맡는다 (NFR-3) |
+| 제공 인터페이스 | `/api/health/` (FR-52), 관리 명령 `create_admin` (FR-53), `seed_demo` |
+| 의존 | 회원과 인증, 관리자 원두·재고, 주문 (관리 명령이 이 부품들의 모델과 서비스로 데이터를 만든다) |
+| 구현 모듈 | `common/views.py`, `users/management/commands/create_admin.py`, `products/management/commands/seed_demo.py` |
+
 `common/views.py`, `users/management/commands/create_admin.py`, `products/management/commands/seed_demo.py`.
 
 ### 4.9.1 상태 확인 (FR-52)

@@ -1,5 +1,12 @@
 ## 4.1 회원과 인증
 
+| 항목 | 내용 |
+| --- | --- |
+| 책임 | 가입, 로그인, 토큰 발급·재발급, 내 정보 관리를 맡고 다른 부품이 쓰는 인증과 권한 검사를 제공한다 (NFR-8 ~ NFR-10) |
+| 제공 인터페이스 | `/api/auth/register/`, `/api/auth/token/`, `/api/auth/token/refresh/`, `/api/me/`, `/api/me/password/` (FR-7 ~ FR-13, FR-54, FR-58). 권한 클래스 `IsAdminRole` |
+| 의존 | 없음 |
+| 구현 모듈 | `users/models.py`의 `User`, `users/services.py`, `users/serializers.py`, `users/views.py`, `common/permissions.py`, 프론트엔드 `src/api/client.js`, `src/auth/` |
+
 `users` 앱과 프론트엔드 `src/api/client.js`, `src/auth/`. 인증은 djangorestframework-simplejwt의 JWT다(NFR-8). 사용자 모델은 커스텀 사용자 모델 `users.User`이고 이메일이 로그인 ID다(11.1절, 5.1절).
 
 ### 4.1.0 설정

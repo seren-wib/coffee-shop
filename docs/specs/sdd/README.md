@@ -17,3 +17,4 @@ Google Docs: https://docs.google.com/document/d/1PlaC-17Gyowrh1pv8trCXmzSOFiTax6
 | [9-environment.md](9-environment.md) | 환경과 시크릿: 변수 이름과 설정 위치 | NFR-13 |
 | [10-deployment.md](10-deployment.md) | 배포: 브랜치 모델, 서버 배치, nginx, 배포 흐름, 백업·감시 | NFR-20 ~ NFR-25, NFR-37 ~ NFR-41, NFR-43, FR-61 ~ FR-63 |
 | [11-rationale.md](11-rationale.md) | 설계 근거: 확정한 기술 결정과 미결 | |
+| [12-classes/](12-classes/README.md) | 클래스·모듈 명세: 백엔드 모델, 서비스 함수, 뷰, 시리얼라이저의 시그니처·반환·예외 | FR-1 ~ FR-60, DR, NFR |

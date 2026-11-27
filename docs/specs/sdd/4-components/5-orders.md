@@ -1,5 +1,12 @@
 ## 4.5 주문
 
+| 항목 | 내용 |
+| --- | --- |
+| 책임 | 장바구니를 주문으로 만들고 주문 상태를 전환표대로만 바꾼다. 회원의 조회·취소·취소 요청을 처리한다 (DR-19) |
+| 제공 인터페이스 | `/api/orders/`, `/api/orders/{order_id}/`, `/api/orders/{order_id}/cancel/`, `/api/orders/{order_id}/cancel-request/` (FR-23, FR-24, FR-30 ~ FR-35, FR-55) |
+| 의존 | 회원과 인증, 배송지, 장바구니, 관리자 원두·재고(`decrease_stock`, `increase_stock`) |
+| 구현 모듈 | `orders/models.py`의 `Order`, `OrderItem`, `orders/services.py`, `orders/order_number.py`, `orders/couriers.py`, `orders/serializers.py`, `orders/views.py` |
+
 `orders` 앱의 `Order`, `OrderItem`, `orders/services.py`, `orders/order_number.py`. 주문의 상태는 이 절의 전환표로만 바뀐다(DR-19). 결제로 바뀌는 전환은 4.6절, 관리자가 바꾸는 전환은 4.8절에 있고, 표는 여기 하나로 모은다.
 
 ### 4.5.0 주문 상태 기계

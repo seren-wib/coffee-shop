@@ -1,5 +1,12 @@
 ## 4.6 결제
 
+| 항목 | 내용 |
+| --- | --- |
+| 책임 | 결제 시도를 만들고 PG 승인 결과를 확인해 주문을 결제 완료로 바꾼다. 성립할 수 없는 승인은 PG에서 취소한다 (DR-22 ~ DR-24) |
+| 제공 인터페이스 | `/api/orders/{order_id}/payments/`, `/api/payments/confirm/`, `/api/payments/fail/` (FR-25 ~ FR-29, FR-60). 다른 부품이 쓰는 함수 `cancel_success_payment` |
+| 의존 | 회원과 인증, 주문, 외부 시스템 토스페이먼츠 |
+| 구현 모듈 | `orders/models.py`의 `Payment`, `orders/payments.py`, `orders/pg.py`, `orders/serializers.py`, `orders/views.py`, 프론트엔드 SCR-06과 `/checkout/result` |
+
 `orders/payments.py`(업무 규칙), `orders/pg.py`(토스페이먼츠 호출), 프론트엔드 SCR-06과 `/checkout/result`. PG는 토스페이먼츠 테스트 모드이고, 결제창에서 돌아온 브라우저가 확인 API를 부르면 서버가 PG 승인 API를 부른다. 웹훅은 받지 않는다(SRS 7.1절). 필드 이름과 흐름은 토스페이먼츠 공개 문서 기준이며, 실제 응답은 3.2절 스파이크로 확인한다.
 
 ### 4.6.0 결제 상태 기계 (DR-24)

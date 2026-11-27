@@ -1,5 +1,12 @@
 ## 4.7 관리자 원두·재고
 
+| 항목 | 내용 |
+| --- | --- |
+| 책임 | 관리자가 원두와 옵션을 등록·수정하고 재고와 판매 상태를 바꾼다. 재고와 판매 상태를 바꾸는 유일한 곳이다 (DR-5 ~ DR-7) |
+| 제공 인터페이스 | `/api/admin/products/` 아래 경로 6개 (FR-36 ~ FR-43, FR-56). 다른 부품이 쓰는 함수 `decrease_stock`, `increase_stock` |
+| 의존 | 회원과 인증(`IsAdminRole`) |
+| 구현 모듈 | `products/models.py`, `products/services.py`, `products/queries.py`, `products/serializers.py`, `products/admin_views.py`, `products/origins.py` |
+
 `products` 앱의 관리자용 뷰와 `products/services.py`. 모든 경로는 `/api/admin/products/` 아래이고 `IsAuthenticated + IsAdminRole`이다(NFR-10, 4.1.10). 재고를 바꾸는 함수는 `decrease_stock`, `increase_stock`, `set_stock` 셋이고(2.1절), 판매 상태는 이 셋과 `stop_sales`, `resume_sales`만 바꾼다(5.9절).
 
 ### 4.7.0 판매 상태 기계 (DR-6, DR-7)
