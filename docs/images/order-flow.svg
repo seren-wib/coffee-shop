@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="360" viewBox="0 0 860 360" role="img" aria-label="Order status flow: PENDING to PAID, PREPARING, SHIPPED, DELIVERED; PENDING can be cancelled; PAID and PREPARING can request a cancel, which an admin approves or rejects">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#57606a"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #24292f; }
+    .s { font-size: 14px; font-weight: 600; text-anchor: middle; }
+    .l { font-size: 12px; fill: #57606a; text-anchor: middle; }
+    .t { font-size: 16px; font-weight: 600; }
+    .box { fill: #ffffff; stroke: #57606a; stroke-width: 1.5; }
+    .end { fill: #ffffff; stroke: #1a7f37; stroke-width: 2; }
+    .cx { fill: #ffffff; stroke: #cf222e; stroke-width: 2; }
+    .ln { stroke: #57606a; stroke-width: 1.5; fill: none; marker-end: url(#a); }
+  </style>
+  <rect x="1" y="1" width="858" height="358" rx="16" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text class="t" x="28" y="38">Order status</text>
+
+  <!-- main path -->
+  <rect class="box" x="28" y="120" width="118" height="44" rx="8"/><text class="s" x="87" y="147">PENDING</text>
+  <rect class="box" x="196" y="120" width="118" height="44" rx="8"/><text class="s" x="255" y="147">PAID</text>
+  <rect class="box" x="364" y="120" width="118" height="44" rx="8"/><text class="s" x="423" y="147">PREPARING</text>
+  <rect class="box" x="532" y="120" width="118" height="44" rx="8"/><text class="s" x="591" y="147">SHIPPED</text>
+  <rect class="end" x="700" y="120" width="132" height="44" rx="8"/><text class="s" x="766" y="147">DELIVERED</text>
+
+  <path class="ln" d="M146 142H194"/><text class="l" x="170" y="112">payment</text><text class="l" x="170" y="96">Toss</text>
+  <path class="ln" d="M314 142H362"/><text class="l" x="338" y="112">admin</text>
+  <path class="ln" d="M482 142H530"/><text class="l" x="506" y="96">admin +</text><text class="l" x="506" y="112">tracking no.</text>
+  <path class="ln" d="M650 142H698"/><text class="l" x="674" y="112">admin</text>
+
+  <!-- cancel -->
+  <rect class="box" x="250" y="258" width="178" height="44" rx="8"/><text class="s" x="339" y="285">CANCEL_REQUESTED</text>
+  <rect class="cx" x="28" y="258" width="118" height="44" rx="8"/><text class="s" x="87" y="285">CANCELLED</text>
+
+  <path class="ln" d="M87 164V256"/><text class="l" x="58" y="215">member</text><text class="l" x="58" y="231">cancels</text>
+  <path class="ln" d="M255 164V256"/>
+  <path class="ln" d="M423 164V256"/>
+  <text class="l" x="339" y="215">member requests a cancel</text>
+  <path class="ln" d="M250 280H148"/><text class="l" x="199" y="272">admin approves</text><text class="l" x="199" y="320">refund via Toss</text>
+  <path class="ln" d="M428 280H498" stroke-dasharray="5 4"/>
+  <rect class="box" x="500" y="258" width="250" height="44" rx="8" stroke-dasharray="5 4"/>
+  <text class="s" x="625" y="285">status before the request</text>
+  <text class="l" x="464" y="272">admin</text><text class="l" x="464" y="320">rejects</text>
+  <text class="l" x="625" y="320">PAID or PREPARING again</text>
+</svg>
