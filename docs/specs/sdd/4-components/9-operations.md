@@ -14,7 +14,7 @@
 - 경로: `GET /api/health/`, 공개(`AllowAny`, 인증 클래스 없음).
 - 처리: `connection.cursor().execute("SELECT 1")`.
 - 응답: 200 `{"status": "ok"}`. DB 오류면 503 `{"status": "unavailable"}`. 버전, 호스트 이름, 오류 내용은 넣지 않는다(FR-52, NFR-12).
-- 쓰는 곳: 배포 뒤 확인(NFR-24, FR-61, FR-62), 재부팅 뒤 확인(NFR-22), 외부 감시(NFR-23, 10.5절).
+- 쓰는 곳: 배포 뒤 확인(NFR-24, FR-61, FR-62), 재부팅 뒤 확인(NFR-22), 외부 감시(NFR-23, 11.5절).
 - nginx 접근 로그에서 이 경로는 남기지 않는다(감시 요청이 5분마다 오므로).
 
 ### 4.9.2 관리자 계정 생성 (FR-53)
@@ -38,5 +38,5 @@
 ### 4.9.4 로그
 
 - Django 로그는 표준 출력으로 내보내고 systemd journald가 모은다. 수준은 `LOG_LEVEL`(기본 `INFO`).
-- 요청 본문, `Authorization` 헤더, 비밀번호, 토큰, 연락처, 주소는 로그에 남기지 않는다(NFR-35, 8.5절).
+- 요청 본문, `Authorization` 헤더, 비밀번호, 토큰, 연락처, 주소는 로그에 남기지 않는다(NFR-35, 9.5절).
 - 업무 이벤트는 ID만 남긴다: `order.created order_id=... user_id=...`, `payment.confirmed payment_id=...`, `payment.cancelled payment_id=... reason=AMOUNT_MISMATCH`.

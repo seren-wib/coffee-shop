@@ -1,8 +1,8 @@
-## 12.3 orders 앱
+## 5.3 orders 앱
 
 장바구니, 주문, 결제, 관리자 주문 처리. 4절의 "장바구니", "주문", "결제", "관리자 주문·배송·취소" 부품을 구현한다.
 
-### 12.3.1 모델 `orders/models.py`
+### 5.3.1 모델 `orders/models.py`
 
 | 클래스 | 맡는 일 | 테이블 | 직접 정의한 메서드 |
 | --- | --- | --- | --- |
@@ -15,7 +15,7 @@
 | `OrderItem` | 주문 항목 한 건. 원두 이름, 옵션, 단가를 주문 시점 값으로 복사해 둔다 | `order_items` | |
 | `Payment` | 결제 시도 한 건 | `payments` | |
 
-### 12.3.2 서비스 모듈 `orders/services.py`: 장바구니
+### 5.3.2 서비스 모듈 `orders/services.py`: 장바구니
 
 #### shipping_fee_for
 
@@ -59,7 +59,7 @@
 - 반환: `{items, product_amount, shipping_fee, total_amount, can_order}` 사전. 지금 가격으로 계산한다. 트랜잭션 밖. 예외 없음.
 - 요구사항: FR-20
 
-### 12.3.3 서비스 모듈 `orders/services.py`: 주문
+### 5.3.3 서비스 모듈 `orders/services.py`: 주문
 
 #### invalid_state
 
@@ -106,7 +106,7 @@
 - `_address_snapshot(user, address_id, address)`: 저장된 배송지나 새 주소에서 주문에 복사할 수령인·연락처·주소를 만든다.
 - `_short_items(cart_item_ids)`: 재고가 모자란 항목 ID를 담은 409 `OUT_OF_STOCK` 오류를 만든다.
 
-### 12.3.4 서비스 모듈 `orders/services.py`: 관리자 주문 처리
+### 5.3.4 서비스 모듈 `orders/services.py`: 관리자 주문 처리
 
 #### admin_order
 
@@ -149,7 +149,7 @@
 - `_transition(order_id, expected, action, **changes)`: 지금 상태가 `expected`일 때만 바꾸는 조건부 UPDATE. 바뀐 행이 0이면 409 `INVALID_STATE`.
 - `_close_cancelled(order_id)`: 취소 요청을 취소로 바꾸고, 바꾼 호출만 재고를 되돌린다.
 
-### 12.3.5 주문번호 모듈 `orders/order_number.py`
+### 5.3.5 주문번호 모듈 `orders/order_number.py`
 
 #### next_order_id
 
@@ -157,7 +157,7 @@
 - 반환: `ORD-YYYYMMDD-NNN` 형식의 다음 주문번호. `create_order`의 트랜잭션 안에서 부른다. 예외: 503 `ORDER_LIMIT`(그날 999건 초과).
 - 요구사항: DR-11
 
-### 12.3.6 택배사 모듈 `orders/couriers.py`
+### 5.3.6 택배사 모듈 `orders/couriers.py`
 
 #### courier_name
 
@@ -171,7 +171,7 @@
 - 반환: 택배사 배송 조회 주소. 코드나 송장 번호가 없으면 `None`. 예외 없음.
 - 요구사항: FR-35
 
-### 12.3.7 결제 모듈 `orders/payments.py`
+### 5.3.7 결제 모듈 `orders/payments.py`
 
 PG 호출은 DB 트랜잭션 밖에서 한다. 결제 상태 변경은 `READY` 또는 `SUCCESS`를 조건으로 건 UPDATE다.
 
@@ -214,7 +214,7 @@ PG 호출은 DB 트랜잭션 밖에서 한다. 결제 상태 변경은 `READY` �
 - `_mark_paid(payment, order, payment_key, method, result)`: 결제를 `SUCCESS`로, 주문을 `PAID`로 같은 세이브포인트에서 바꾼다. `PAID` 또는 승인이 성립할 수 없는 사유를 돌려준다.
 - `_not_pending_reason(order)`: 주문이 결제 대기가 아닌 까닭(취소됨, 이미 결제됨)을 돌려준다.
 
-### 12.3.8 PG 모듈 `orders/pg.py`
+### 5.3.8 PG 모듈 `orders/pg.py`
 
 토스페이먼츠와 말하는 유일한 모듈이다.
 
@@ -250,7 +250,7 @@ PG 호출은 DB 트랜잭션 밖에서 한다. 결제 상태 변경은 `READY` �
 
 - `_json(raw)`: PG 응답 본문을 JSON으로 읽는다. 못 읽으면 `PgError`.
 
-### 12.3.9 뷰 `orders/views.py`
+### 5.3.9 뷰 `orders/views.py`
 
 | 클래스 | 경로 | HTTP 메서드 | 부르는 서비스 | 요구사항 |
 | --- | --- | --- | --- | --- |
@@ -275,7 +275,7 @@ PG 호출은 DB 트랜잭션 밖에서 한다. 결제 상태 변경은 `READY` �
 
 - 관리자 뷰는 바꾼 뒤 관리자 주문 상세를 같은 모양으로 돌려준다. 내부 함수 `_admin_detail(order)`가 그 응답을 만든다.
 
-### 12.3.10 시리얼라이저 `orders/serializers.py`
+### 5.3.10 시리얼라이저 `orders/serializers.py`
 
 | 클래스 | 맡는 일 |
 | --- | --- |

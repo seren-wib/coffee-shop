@@ -1,6 +1,6 @@
 ## 2. 디렉터리 구조
 
-구현이 끝났을 때의 레포 구조다. `(예정)`은 2026-11-17 현재 레포에 없고 구현(텀프로젝트 마감 2026-11-30 23:50)에서 만드는 것이다. (2026-11-19 변경. 이전에는 출처 없는 날짜 2026-11-22. 2026-11-27 변경: 24:00 → 23:50, LMS 마감) 2026-11-19에 스파이크(#73)와 CI(#77)로 생긴 파일을 반영했다. 테이블 정의의 원본은 모델과 마이그레이션이고 `backend/schema.sql`은 지운다(11.1절).
+구현이 끝났을 때의 레포 구조다. `(예정)`은 2026-11-17 현재 레포에 없고 구현(텀프로젝트 마감 2026-11-30 23:50)에서 만드는 것이다. (2026-11-19 변경. 이전에는 출처 없는 날짜 2026-11-22. 2026-11-27 변경: 24:00 → 23:50, LMS 마감) 2026-11-19에 스파이크(#73)와 CI(#77)로 생긴 파일을 반영했다. 테이블 정의의 원본은 모델과 마이그레이션이고 `backend/schema.sql`은 지운다(12.1절).
 
 ```
 coffee-shop/
@@ -9,15 +9,15 @@ coffee-shop/
 │   ├── requirements.txt          # 고정 버전 의존성 (NFR-19)
 │   ├── requirements-dev.txt      # 개발·CI 전용(black). 운영 서버에는 설치하지 않음 (STP 1.3절)
 │   ├── config/
-│   │   ├── settings.py           # 환경 변수로 운영·개발을 가른다 (9절)
+│   │   ├── settings.py           # 환경 변수로 운영·개발을 가른다 (10절)
 │   │   ├── test_settings.py      # 테스트 설정: 메모리 SQLite, 가짜 시크릿 (STP 1.2절)
 │   │   ├── test_settings_file.py # 동시 주문 테스트용 파일 SQLite (NFR-15, STP 1.2절)
-│   │   ├── urls.py               # /api/ 경로 묶음. /admin/은 DEBUG일 때만 (11.1절)
+│   │   ├── urls.py               # /api/ 경로 묶음. /admin/은 DEBUG일 때만 (12.1절)
 │   │   └── wsgi.py               # gunicorn 진입점
 │   ├── common/                   # (예정) 앱 공통
 │   │   ├── permissions.py        # IsAdminRole (NFR-10)
-│   │   ├── pagination.py         # PageNumberPagination 20 (FR-1, 7.4절)
-│   │   ├── exceptions.py         # 오류 응답 형식, 업무 예외 → 상태 코드 (7.2절)
+│   │   ├── pagination.py         # PageNumberPagination 20 (FR-1, 8.4절)
+│   │   ├── exceptions.py         # 오류 응답 형식, 업무 예외 → 상태 코드 (8.2절)
 │   │   └── views.py              # GET /api/health/ (FR-52)
 │   ├── users/
 │   │   ├── models.py             # User(커스텀 사용자 모델), UserAddress
@@ -50,7 +50,7 @@ coffee-shop/
 │       ├── order_number.py       # (예정) ORD-YYYYMMDD-NNN 생성 (DR-11)
 │       ├── payments.py           # (예정) 결제 시작·확인·취소 (DR-22 ~ DR-24)
 │       ├── pg.py                 # (예정) TossPaymentsClient, 테스트용 FakePaymentsClient
-│       ├── couriers.py           # (예정) 택배사 목록과 조회 주소 (FR-35, 5.10절)
+│       ├── couriers.py           # (예정) 택배사 목록과 조회 주소 (FR-35, 6.10절)
 │       ├── views.py              # (예정) 회원용 + 관리자용
 │       ├── urls.py               # (예정) /api/cart/, /api/orders/, /api/payments/, /api/admin/orders/
 │       └── tests/                # (예정)
@@ -58,11 +58,11 @@ coffee-shop/
 │   ├── index.html
 │   ├── package.json              # npm 스크립트: dev, build, lint(oxlint), test(vitest)
 │   ├── .oxlintrc.json            # oxlint 설정 (NFR-29)
-│   ├── .env.example              # (예정) VITE_ 변수 이름만 (9.2절)
+│   ├── .env.example              # (예정) VITE_ 변수 이름만 (10.2절)
 │   ├── vite.config.js            # 개발 서버의 /api 프록시
 │   └── src/
 │       ├── main.jsx              # 라우터 장착
-│       ├── App.jsx               # 라우트 표 (6.0절)
+│       ├── App.jsx               # 라우트 표 (7.0절)
 │       ├── api/
 │       │   ├── client.js         # 하나뿐인 axios 인스턴스, 토큰 인터셉터 (NFR-31, FR-10)
 │       │   ├── auth.js           # 경로 영역별 호출 함수. client.js만 쓴다
@@ -74,7 +74,7 @@ coffee-shop/
 │       │   └── admin.js          # 4.7 관리자 원두, 4.8 관리자 주문
 │       ├── auth/                 # 토큰 저장소, RequireAuth·RequireAdmin 경로 보호
 │       ├── components/           # 헤더, 가격 표시, 상태 배지, 페이지 버튼, 필드 오류
-│       ├── pages/                # 화면 하나에 파일 하나, SCR ID 순서 (6절)
+│       ├── pages/                # 화면 하나에 파일 하나, SCR ID 순서 (7절)
 │       │   └── admin/            # SCR-11 ~ SCR-14, React.lazy로 따로 받는다
 │       ├── lib/                  # 금액 형식(NFR-33), 상태 한국어 이름(NFR-30), 오류 문구
 │       ├── test/                 # Vitest 설정(jsdom)과 테스트 도우미
@@ -86,7 +86,7 @@ coffee-shop/
 │   ├── gunicorn.conf.py          # 소켓, 워커 3, 30초
 │   ├── install.sh                # 처음 한 번: 패키지, 스왑, Node.js, 계정, 폴더, nginx, 단위 (SIP 3.3)
 │   ├── cloudflare-real-ip.sh     # Cloudflare 대역 → set_real_ip_from
-│   ├── deploy.sh                 # 릴리스 폴더, 의존성, 빌드, 백업, migrate, 링크 전환, 상태 확인 (10.4절, FR-61, FR-62)
+│   ├── deploy.sh                 # 릴리스 폴더, 의존성, 빌드, 백업, migrate, 링크 전환, 상태 확인 (11.4절, FR-61, FR-62)
 │   ├── aws/                      # 자동 배포 IAM 역할의 신뢰·권한 정책 틀 (SIP 3.6, NFR-43)
 │   └── backup.sh                 # sqlite3 .backup, 7개 남기기 (NFR-25)
 ├── spikes/                       # 설계 전 확인 코드, 스파이크 하나에 폴더 하나 (3절)
@@ -96,10 +96,10 @@ coffee-shop/
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci.yml                # backend, frontend 검사 (NFR-37, STP 7절)
-│   │   ├── deploy.yml            # ci 통과 뒤 태그, OIDC, SSM으로 deploy.sh (10.4절, FR-61)
+│   │   ├── deploy.yml            # ci 통과 뒤 태그, OIDC, SSM으로 deploy.sh (11.4절, FR-61)
 │   │   └── docs-sync.yml         # main의 docs/specs → Google Docs
 │   └── pull_request_template.md
-├── .env.example                  # 환경 변수 이름만 (NFR-13, 9절)
+├── .env.example                  # 환경 변수 이름만 (NFR-13, 10절)
 ├── .editorconfig, .gitattributes, .prettierrc, pyproject.toml   # 형식 규칙 (NFR-29)
 ├── CONTRIBUTING.md
 └── README.md

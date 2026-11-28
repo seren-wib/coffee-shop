@@ -7,7 +7,7 @@
 | 의존 | 없음 |
 | 구현 모듈 | `users/models.py`의 `User`, `users/services.py`, `users/serializers.py`, `users/views.py`, `common/permissions.py`, 프론트엔드 `src/api/client.js`, `src/auth/` |
 
-`users` 앱과 프론트엔드 `src/api/client.js`, `src/auth/`. 인증은 djangorestframework-simplejwt의 JWT다(NFR-8). 사용자 모델은 커스텀 사용자 모델 `users.User`이고 이메일이 로그인 ID다(11.1절, 5.1절).
+`users` 앱과 프론트엔드 `src/api/client.js`, `src/auth/`. 인증은 djangorestframework-simplejwt의 JWT다(NFR-8). 사용자 모델은 커스텀 사용자 모델 `users.User`이고 이메일이 로그인 ID다(12.1절, 6.1절).
 
 ### 4.1.0 설정
 
@@ -25,8 +25,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "common.pagination.StandardPagination",
     "EXCEPTION_HANDLER": "common.exceptions.api_exception_handler",
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],  # NFR-28
-    "DEFAULT_THROTTLE_RATES": {"login": "10/min", "register": "20/hour"},  # 8.3절
-    "NUM_PROXIES": 1,   # nginx가 X-Forwarded-For를 클라이언트 IP로 덮어쓴다 (10.3절)
+    "DEFAULT_THROTTLE_RATES": {"login": "10/min", "register": "20/hour"},  # 9.3절
+    "NUM_PROXIES": 1,   # nginx가 X-Forwarded-For를 클라이언트 IP로 덮어쓴다 (11.3절)
 }
 
 SIMPLE_JWT = {
@@ -44,7 +44,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 ```
 
-- 공개 경로(목록·상세, 가입, 로그인, 재발급, 상태 확인)만 뷰에서 `permission_classes = [AllowAny]`로 연다(NFR-9, 7.3절).
+- 공개 경로(목록·상세, 가입, 로그인, 재발급, 상태 확인)만 뷰에서 `permission_classes = [AllowAny]`로 연다(NFR-9, 8.3절).
 - 비밀번호 해시는 Django 기본 `PBKDF2PasswordHasher`(`pbkdf2_sha256`)다. `PASSWORD_HASHERS`는 바꾸지 않는다(NFR-6).
 - 액세스 토큰에는 `user_id`, `role` 클레임을 넣는다. `role`은 화면에서 관리자 메뉴를 보일지 정하는 데만 쓰고, 서버의 권한 판단은 늘 DB의 `role`로 한다(NFR-10).
 
@@ -57,10 +57,10 @@ AUTH_PASSWORD_VALIDATORS = [
   2. `validate_password(password)`로 8자 이상인지 본다.
   3. 같은 이메일이 있으면 400 `VALIDATION_ERROR`, `fields.email`에 "이미 가입된 이메일입니다".
   4. `privacy_agreed`가 `true`가 아니면(빠짐, `false`) 400 `VALIDATION_ERROR`, `fields.privacy_agreed`에 "개인정보 수집·이용에 동의해야 가입할 수 있습니다"(FR-58).
-  5. `User.objects.create_user(email, password, ...)`가 `set_password`로 해시하고 `role=MEMBER`, `privacy_agreed_at=timezone.now()`로 저장한다. `privacy_agreed` 값 자체는 열로 두지 않는다(5.1절).
+  5. `User.objects.create_user(email, password, ...)`가 `set_password`로 해시하고 `role=MEMBER`, `privacy_agreed_at=timezone.now()`로 저장한다. `privacy_agreed` 값 자체는 열로 두지 않는다(6.1절).
 - 응답: 201, `{user_id, email, user_name, phone_number, role}`. 비밀번호와 해시는 응답에 없다.
 - 오류: 400(형식, 7자 비밀번호, 겹치는 이메일, 동의 없음), 429(IP당 시간당 20회 초과).
-- 요청 제한: `throttle_classes = [ScopedRateThrottle]`, `throttle_scope = "register"`(8.3절).
+- 요청 제한: `throttle_classes = [ScopedRateThrottle]`, `throttle_scope = "register"`(9.3절).
 - 화면(SCR-04): 비밀번호 확인 칸이 비밀번호와 다르거나 동의 칸이 비어 있으면 요청을 보내지 않고 칸 옆에 오류를 보인다. 성공하면 로그인 화면으로 보낸다(UC-2).
 - 관리 명령(FR-53)으로 만든 관리자 계정은 이 경로를 지나지 않으므로 `privacy_agreed_at`이 NULL이다.
 
@@ -71,7 +71,7 @@ AUTH_PASSWORD_VALIDATORS = [
 - 처리: `authenticate(email=..., password=...)`. 없는 이메일, 틀린 비밀번호, 비활성 계정이 모두 같은 분기로 간다.
 - 응답: 200, `{access, refresh, user: {user_id, email, user_name, role}}`.
 - 오류: 401, 본문은 늘 `{"code": "INVALID_CREDENTIALS", "message": "이메일 또는 비밀번호가 올바르지 않습니다."}`. 이메일이 있는지 알려주지 않는다(NFR-7).
-- 요청 제한: `throttle_classes = [ScopedRateThrottle]`, `throttle_scope = "login"`. IP당 분당 10회를 넘으면 429 `THROTTLED`(8.3절). 테스트 설정은 `DEFAULT_THROTTLE_RATES`를 크게 잡아 FR-8 테스트가 429에 걸리지 않게 한다.
+- 요청 제한: `throttle_classes = [ScopedRateThrottle]`, `throttle_scope = "login"`. IP당 분당 10회를 넘으면 429 `THROTTLED`(9.3절). 테스트 설정은 `DEFAULT_THROTTLE_RATES`를 크게 잡아 FR-8 테스트가 429에 걸리지 않게 한다.
 - `last_login`은 갱신하지 않는다(`UPDATE_LAST_LOGIN=False`, 기본값). 로그인마다 쓰기 잠금을 잡지 않으려는 것이다.
 
 ### 4.1.3 액세스 토큰 재발급 (FR-9)
@@ -80,7 +80,7 @@ AUTH_PASSWORD_VALIDATORS = [
 - 입력: `refresh`.
 - 응답: 200, `{access}`.
 - 오류: 401 `INVALID_TOKEN`(만료, 서명 위조, 형식 오류).
-- 리프레시 토큰은 돌려쓰기(rotation)와 폐기 목록(blacklist)을 쓰지 않는다. 7일이 지나면 다시 로그인한다. 폐기 목록이 없으므로 로그아웃은 브라우저에서 토큰을 지우는 것으로 끝난다(FR-54, 11.1절).
+- 리프레시 토큰은 돌려쓰기(rotation)와 폐기 목록(blacklist)을 쓰지 않는다. 7일이 지나면 다시 로그인한다. 폐기 목록이 없으므로 로그아웃은 브라우저에서 토큰을 지우는 것으로 끝난다(FR-54, 12.1절).
 
 ### 4.1.4 프론트엔드 401 처리와 재요청 (FR-10)
 
@@ -121,12 +121,12 @@ sequenceDiagram
 
 - 액세스 토큰과 리프레시 토큰은 `localStorage`의 `coffee.access`, `coffee.refresh`에 둔다. 새로 고침해도 로그인이 유지된다.
 - `src/auth/tokenStore.js` 한 파일만 이 키를 읽고 쓴다. 다른 파일은 `getAccess()`, `setTokens()`, `clearTokens()`만 부른다.
-- `localStorage`는 페이지의 스크립트가 읽을 수 있어서 XSS에 약하다. CSP와 출력 이스케이프(8.6절)로 막는다. httpOnly 쿠키를 쓰지 않은 이유는 11.1절.
+- `localStorage`는 페이지의 스크립트가 읽을 수 있어서 XSS에 약하다. CSP와 출력 이스케이프(9.6절)로 막는다. httpOnly 쿠키를 쓰지 않은 이유는 12.1절.
 
 ### 4.1.6 로그아웃 (FR-54)
 
 - 서버 호출 없이 `clearTokens()`로 두 토큰을 지우고 원두 목록(`/`)으로 보낸다(UC-3 4단계).
-- 회원 전용 화면은 `RequireAuth`가 토큰이 없으면 `/login?next=...`로 보낸다(6.0절).
+- 회원 전용 화면은 `RequireAuth`가 토큰이 없으면 `/login?next=...`로 보낸다(7.0절).
 
 ### 4.1.7 내 정보 조회 (FR-11)
 
