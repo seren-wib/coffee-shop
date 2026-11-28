@@ -1,8 +1,8 @@
-## 12.2 products 앱
+## 5.2 products 앱
 
 원두, 옵션, 재고, 판매 상태. 4절의 "원두 조회", "관리자 원두·재고" 부품을 구현한다.
 
-### 12.2.1 모델 `products/models.py`
+### 5.2.1 모델 `products/models.py`
 
 | 클래스 | 맡는 일 | 테이블 | 직접 정의한 메서드 |
 | --- | --- | --- | --- |
@@ -15,7 +15,7 @@
 
 `products/origins.py`는 원산지 고정 목록을 담은 상수 모듈이다. 클래스와 함수가 없다.
 
-### 12.2.2 서비스 모듈 `products/services.py`
+### 5.2.2 서비스 모듈 `products/services.py`
 
 재고(`product_options.stock_quantity`)와 판매 상태(`products.sales_status`)를 바꾸는 함수는 이 모듈에만 있다. 모든 변경은 조건부 UPDATE다.
 
@@ -70,7 +70,7 @@
 - `_mark_on_sale_if_sold_out(product_id)`: 품절을 판매 중으로 바꾼다.
 - `_invalid_state_or_not_found(product_id)`: 원두가 없으면 404, 있으면 409 `INVALID_STATE` 오류를 만든다.
 
-### 12.2.3 조회 모듈 `products/queries.py`
+### 5.2.3 조회 모듈 `products/queries.py`
 
 읽기 전용 쿼리셋을 만든다. 트랜잭션을 열지 않는다.
 
@@ -109,7 +109,7 @@
 - `_rank(field, values)`: 열거형 값의 순서대로 정렬하는 `Case` 식을 만든다.
 - `_price_param(params, name)`: 가격 조건을 정수로 읽는다. 음수이거나 정수가 아니면 400.
 
-### 12.2.4 뷰 `products/views.py`, `products/admin_views.py`
+### 5.2.4 뷰 `products/views.py`, `products/admin_views.py`
 
 | 클래스 | 경로 | HTTP 메서드 | 부르는 함수 | 요구사항 |
 | --- | --- | --- | --- | --- |
@@ -125,7 +125,7 @@
 - `ProductListView`, `ProductDetailView`는 공개 경로(`AllowAny`)다(NFR-9). 관리자 뷰 여섯 개는 `IsAuthenticated`와 `IsAdminRole`을 함께 건다(NFR-10).
 - 관리자 뷰는 바꾼 뒤 원두 상세를 같은 모양으로 돌려준다. 내부 함수 `_detail(product_id, status_code=200)`이 그 응답을 만든다.
 
-### 12.2.5 시리얼라이저 `products/serializers.py`
+### 5.2.5 시리얼라이저 `products/serializers.py`
 
 | 클래스 | 맡는 일 |
 | --- | --- |
@@ -138,7 +138,7 @@
 | `AdminOptionCreateSerializer` | 옵션 추가 입력 검증 |
 | `AdminOptionUpdateSerializer` | 옵션 수정 입력 검증. 추가 금액과 재고만 받는다 |
 
-### 12.2.6 관리 명령
+### 5.2.6 관리 명령
 
 | 클래스 | 파일 | 메서드 | 맡는 일 | 요구사항 |
 | --- | --- | --- | --- | --- |

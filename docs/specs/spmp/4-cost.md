@@ -6,20 +6,20 @@
 
 | 항목 | 비용 | 비고 |
 | --- | --- | --- |
-| EC2 t3.micro 온디맨드, 서울(Linux) | 시간당 $0.013, 월 약 $9.49(추정) | 사양은 SDD 10.2절. 출처: [AWS EC2 온디맨드 요금](https://aws.amazon.com/ec2/pricing/on-demand/), 서울 값은 [aws-pricing.com t3.micro](https://aws-pricing.com/t3.micro.html)에서 확인(제3자 집계) |
+| EC2 t3.micro 온디맨드, 서울(Linux) | 시간당 $0.013, 월 약 $9.49(추정) | 사양은 SDD 11.2절. 출처: [AWS EC2 온디맨드 요금](https://aws.amazon.com/ec2/pricing/on-demand/), 서울 값은 [aws-pricing.com t3.micro](https://aws-pricing.com/t3.micro.html)에서 확인(제3자 집계) |
 | EBS gp3 20GiB, 서울 | GB-월 $0.0912, 월 약 $1.82(추정) | 기본 IOPS·처리량 안에서 쓴다. 출처: [AWS EBS 요금](https://aws.amazon.com/ebs/pricing/), 서울 값은 같은 페이지가 읽는 AWS 공개 가격 데이터 |
 | Elastic IP(공인 IPv4 하나) | 시간당 $0.005, 월 약 $3.65(추정) | 2024-02-01부터 사용 중인 주소도 과금. 출처: [AWS 공인 IPv4 요금 공지](https://aws.amazon.com/blogs/aws/new-aws-public-ipv4-address-charge-public-ip-insights/) |
-| 도메인 | 이 프로젝트로 늘어나는 비용 0 | 운영자가 이미 가진 Cloudflare 영역의 도메인을 쓴다(SDD 11.1절). 등록·갱신비는 이 프로젝트 비용에 넣지 않았다 |
+| 도메인 | 이 프로젝트로 늘어나는 비용 0 | 운영자가 이미 가진 Cloudflare 영역의 도메인을 쓴다(SDD 12.1절). 등록·갱신비는 이 프로젝트 비용에 넣지 않았다 |
 | Cloudflare(DNS, 프록시, Origin CA) | $0 | Free 요금제 기능만 쓴다. 출처: [Cloudflare 요금제](https://www.cloudflare.com/plans/) |
 | 토스페이먼츠 테스트 모드 | $0 | 테스트 키는 실제 돈이 오가지 않아 수수료가 없다. 출처: [토스페이먼츠 API 키 문서](https://docs.tosspayments.com/reference/using-api/api-keys) |
-| 외부 감시(UptimeRobot 무료) | $0 | SDD 11.1절. 출처: [UptimeRobot 요금](https://uptimerobot.com/pricing/) |
+| 외부 감시(UptimeRobot 무료) | $0 | SDD 12.1절. 출처: [UptimeRobot 요금](https://uptimerobot.com/pricing/) |
 | AWS IAM, OIDC 공급자, Systems Manager Run Command(자동 배포, 2026-11-27 추가) | $0 | IAM과 Run Command는 추가 요금이 없다. 출처: [AWS Systems Manager 요금](https://aws.amazon.com/systems-manager/pricing/) |
 | GitHub, GitHub Actions(CI, 문서 동기화, 자동 배포. 2026-11-27 자동 배포 추가) | $0 | 공개 레포의 표준 실행기는 무료다. 출처: [GitHub Actions 요금](https://docs.github.com/en/billing/managing-billing-for-your-products/managing-billing-for-github-actions/about-billing-for-github-actions) |
-| 합계 | 월 약 $14.96(추정) | EC2 + EBS + Elastic IP. 평가가 끝나면 운영 DB와 백업을 지우고(SDD 8.7절) 인스턴스, 볼륨, Elastic IP도 지워 과금을 멈춘다 |
+| 합계 | 월 약 $14.96(추정) | EC2 + EBS + Elastic IP. 평가가 끝나면 운영 DB와 백업을 지우고(SDD 9.7절) 인스턴스, 볼륨, Elastic IP도 지워 과금을 멈춘다 |
 
 ### 4.2 규모
 
-기능 점수는 SRS 6.2절 API 목록과 SDD 5절 테이블로 센 미보정 기능 점수다. 가중치는 IFPUG 평균값(EI 4, EO 5, EQ 4, ILF 10, EIF 7)을 일괄로 썼고, 항목별 복잡도는 따지지 않았다(추정).
+기능 점수는 SRS 6.2절 API 목록과 SDD 6절 테이블로 센 미보정 기능 점수다. 가중치는 IFPUG 평균값(EI 4, EO 5, EQ 4, ILF 10, EIF 7)을 일괄로 썼고, 항목별 복잡도는 따지지 않았다(추정).
 
 | 차수 | EI | EO | EQ | ILF | EIF | LOC |
 | --- | --- | --- | --- | --- | --- | --- |

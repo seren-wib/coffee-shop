@@ -1,4 +1,4 @@
-"""Start-up checks for values read from .env (SDD 9.1). Plain functions so tests can call them."""
+"""Start-up checks for values read from .env (SDD 10.1). Plain functions so tests can call them."""
 
 from django.core.exceptions import ImproperlyConfigured
 

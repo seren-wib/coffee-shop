@@ -1,4 +1,4 @@
-"""Members and their addresses (SDD 5.1, 5.2). Rules that change rows live in services."""
+"""Members and their addresses (SDD 6.1, 6.2). Rules that change rows live in services."""
 
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -55,7 +55,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @property
     def is_staff(self):
-        # Only the development /admin/ site reads this (SDD 5.1).
+        # Only the development /admin/ site reads this (SDD 6.1).
         return self.role == Role.ADMIN
 
 

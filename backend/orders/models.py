@@ -1,6 +1,6 @@
-"""Cart, orders, order items and payments (SDD 5.5 ~ 5.8).
+"""Cart, orders, order items and payments (SDD 6.5 ~ 6.8).
 
-Status columns change only through conditional UPDATEs in services (SDD 4.0, 5.9),
+Status columns change only through conditional UPDATEs in services (SDD 4.0, 6.9),
 so the models have no methods that change status.
 """
 

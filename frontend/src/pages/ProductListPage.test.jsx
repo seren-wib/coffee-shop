@@ -55,7 +55,7 @@ describe("ProductListPage", () => {
     expect(within(soldOut).getByText("품절")).toBeInTheDocument();
   });
 
-  it("sends the URL conditions to the API (SDD 6.0.3)", async () => {
+  it("sends the URL conditions to the API (SDD 7.0.3)", async () => {
     const calls = fakeApi({ "GET /products/": page([bean()]) });
     renderAt(
       "/?search=예가&origin=케냐&roast_level=DARK&min_price=10000&max_price=19999&page=2",

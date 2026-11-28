@@ -1,4 +1,4 @@
-"""Page size 20, fixed (SDD 7.4, FR-1)."""
+"""Page size 20, fixed (SDD 8.4, FR-1)."""
 
 from urllib.parse import urlsplit, urlunsplit
 

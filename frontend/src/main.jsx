@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-// Fonts are bundled, not loaded from a CDN: the CSP allows fonts from 'self' only (SDD 8.6).
+// Fonts are bundled, not loaded from a CDN: the CSP allows fonts from 'self' only (SDD 9.6).
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "@fontsource/noto-serif-kr/korean-700.css";
 import "@fontsource/noto-serif-kr/latin-700.css";

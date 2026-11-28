@@ -9,7 +9,7 @@ Spike for SDD 3.1. Run on 2026-11-19.
 - A minimal Django project (`spike/`, `shop/`) with only the tables `create_order` touches.
   `shop/services.py` is SDD 4.5.3 `create_order` with `decrease_stock` and `_sync_sold_out`
   (4.7.6), `next_order_id` (4.5.2) and `shipping_fee_for` (4.4) as written in the SDD.
-- `DATABASES` copies SDD 9.1 (`transaction_mode`, `timeout=20`, `init_command` setting WAL and
+- `DATABASES` copies SDD 10.1 (`transaction_mode`, `timeout=20`, `init_command` setting WAL and
   `synchronous=NORMAL`). `SPIKE_TX_MODE` switches between `IMMEDIATE` and `DEFERRED`.
 - No auth. The `X-User-Id` header picks the member. `CONN_MAX_AGE` is the default 0, so each
   request opens its own connection, as the real settings will.

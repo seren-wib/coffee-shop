@@ -1,8 +1,8 @@
-## 12.1 users 앱
+## 5.1 users 앱
 
 회원, 인증, 배송지. 4절의 "회원과 인증", "배송지" 부품을 구현한다.
 
-### 12.1.1 모델 `users/models.py`
+### 5.1.1 모델 `users/models.py`
 
 | 클래스 | 맡는 일 | 테이블 | 직접 정의한 메서드 |
 | --- | --- | --- | --- |
@@ -11,7 +11,7 @@
 | `User` | 회원 계정. 이메일이 로그인 ID다 | `users` | `is_staff`(속성): 역할이 `ADMIN`이면 참. 개발 환경 관리 사이트만 읽는다 |
 | `UserAddress` | 회원 한 명의 배송지 한 건 | `user_addresses` | |
 
-### 12.1.2 서비스 모듈 `users/services.py`
+### 5.1.2 서비스 모듈 `users/services.py`
 
 #### register_member
 
@@ -54,7 +54,7 @@
 - `_own_address(user, address_id)`: 회원 소유로 먼저 거른 뒤 배송지를 찾는다. 없으면 404(NFR-11).
 - `_clear_default(user)`: 그 회원의 기본 배송지 표시를 푼다.
 
-### 12.1.3 뷰 `users/views.py`
+### 5.1.3 뷰 `users/views.py`
 
 | 클래스 | 경로 | HTTP 메서드 | 부르는 서비스 | 요구사항 |
 | --- | --- | --- | --- | --- |
@@ -70,7 +70,7 @@
 - `RegisterView`, `LoginView`, `RefreshView`는 공개 경로(`AllowAny`)다. `RegisterView`와 `LoginView`에는 요청 수 제한이 걸린다.
 - `LoginView`는 없는 이메일, 틀린 비밀번호, 비활성 계정을 모두 401 `INVALID_CREDENTIALS` 한 가지로 답한다(NFR-7). `RefreshView`는 토큰 오류를 401 `INVALID_TOKEN`으로 답한다.
 
-### 12.1.4 시리얼라이저 `users/serializers.py`
+### 5.1.4 시리얼라이저 `users/serializers.py`
 
 | 클래스 | 맡는 일 |
 | --- | --- |
@@ -84,7 +84,7 @@
 
 - `_check_password(value, user=None)`: Django 비밀번호 검증기를 돌리고 실패 메시지를 시리얼라이저 오류로 바꾼다.
 
-### 12.1.5 관리 명령
+### 5.1.5 관리 명령
 
 | 클래스 | 파일 | 메서드 | 맡는 일 | 요구사항 |
 | --- | --- | --- | --- | --- |

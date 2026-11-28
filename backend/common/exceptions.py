@@ -1,4 +1,4 @@
-"""Business errors and the API error shape (SDD 4.0, 7.2)."""
+"""Business errors and the API error shape (SDD 4.0, 8.2)."""
 
 from django.http import Http404
 from rest_framework import exceptions, status

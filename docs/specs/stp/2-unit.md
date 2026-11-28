@@ -87,7 +87,7 @@
 | 테스트 | SRS | 기대 |
 | --- | --- | --- |
 | `NFR-33 formats won with thousands separator` (`src/lib/format.test.js`) | NFR-33 | `formatWon(29000)` → `29,000원`, `formatWon(0)` → `0원` |
-| `NFR-30 labels every status in Korean` (`src/lib/labels.test.js`) | NFR-30 | SDD 5.0.2 열거형 값마다 한국어 이름이 있음(빈 값 0개) |
+| `NFR-30 labels every status in Korean` (`src/lib/labels.test.js`) | NFR-30 | SDD 6.0.2 열거형 값마다 한국어 이름이 있음(빈 값 0개) |
 | `FR-10 retries the original request once after refresh` (`src/api/client.test.js`) | FR-10 | 가짜 어댑터: 401 → 재발급 200 → 원 요청 다시 200. 원 요청 2회, 재발급 1회 |
 | `FR-10 shares one refresh across concurrent 401s` | FR-10 | 동시 요청 3개가 401 → 재발급 요청 1회 |
 | `FR-10 does not refresh on login 401` | FR-10, NFR-7 | `/auth/token/` 401 → 재발급 0회, 오류 그대로 |

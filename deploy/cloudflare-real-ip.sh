@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Write /etc/nginx/cloudflare-real-ip.conf from Cloudflare's published ranges (SDD 10.3, 11.1).
+# Write /etc/nginx/cloudflare-real-ip.conf from Cloudflare's published ranges (SDD 11.3, 12.1).
 # Run again when Cloudflare changes its ranges, then `nginx -t && systemctl reload nginx`.
 set -euo pipefail
 

@@ -1,4 +1,4 @@
-"""Health check and JSON error pages for requests DRF does not handle (SDD 4.9.1, 7.2)."""
+"""Health check and JSON error pages for requests DRF does not handle (SDD 4.9.1, 8.2)."""
 
 import logging
 

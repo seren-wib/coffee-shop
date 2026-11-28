@@ -1,4 +1,4 @@
-"""URL configuration for the coffee-shop backend. Everything lives under /api/ (SDD 7.1)."""
+"""URL configuration for the coffee-shop backend. Everything lives under /api/ (SDD 8.1)."""
 
 from django.conf import settings
 from django.contrib import admin
@@ -13,7 +13,7 @@ urlpatterns = [
     path("api/", include("orders.urls")),
 ]
 
-# The Django admin exists only in development (SDD 11.1).
+# The Django admin exists only in development (SDD 12.1).
 if settings.DEBUG:
     urlpatterns.append(path("admin/", admin.site.urls))
 

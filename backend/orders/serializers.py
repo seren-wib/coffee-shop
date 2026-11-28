@@ -241,7 +241,7 @@ class OrderSummarySerializer(serializers.ModelSerializer):
 
 
 class ConfirmSerializer(serializers.Serializer):
-    # Toss's own names, passed through from successUrl (SDD 7.1).
+    # Toss's own names, passed through from successUrl (SDD 8.1).
     paymentKey = serializers.CharField(max_length=200)
     orderId = serializers.CharField(max_length=64)
     amount = serializers.IntegerField(min_value=0)
@@ -292,7 +292,7 @@ class AdminPaymentLineSerializer(PaymentLineSerializer):
         ]
 
     def get_pg_tid(self, payment):
-        # The screen shows only the last 8 characters of a paymentKey (SDD 4.8.3, 8.5).
+        # The screen shows only the last 8 characters of a paymentKey (SDD 4.8.3, 9.5).
         return payment.pg_tid[-8:] if payment.pg_tid else None
 
 

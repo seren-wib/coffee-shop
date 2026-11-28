@@ -9,7 +9,7 @@ import { errorMessage, isOffline } from "../lib/errors";
 import { formatWon } from "../lib/format";
 import { GRIND_TYPE, WEIGHT_SIZE, label } from "../lib/labels";
 
-// SCR-05 (FR-20 ~ FR-22). Amounts and can_order come from the server as is (SDD 6.0.3).
+// SCR-05 (FR-20 ~ FR-22). Amounts and can_order come from the server as is (SDD 7.0.3).
 export default function CartPage() {
   const navigate = useNavigate();
   const [cart, setCart] = useState(null);

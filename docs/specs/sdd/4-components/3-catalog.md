@@ -25,7 +25,7 @@ def customer_products():
 
 - 경로: `GET /api/products/`, 공개.
 - 입력: `page`(기본 1). 검색·필터는 4.3.2 ~ 4.3.5.
-- 응답: 200, 7.4절 페이지 형식. `results` 항목은 `{product_id, name, origin, roast_level, base_price, lowest_price, image_url, sales_status}`. `lowest_price`는 옵션 가격 중 가장 낮은 값이다(옵션이 없으면 `base_price`).
+- 응답: 200, 8.4절 페이지 형식. `results` 항목은 `{product_id, name, origin, roast_level, base_price, lowest_price, image_url, sales_status}`. `lowest_price`는 옵션 가격 중 가장 낮은 값이다(옵션이 없으면 `base_price`).
 - 페이지 크기는 20 고정이다. `page_size` 매개변수는 받지 않는다.
 - 결과가 없으면 `results: []`, 화면은 "조건에 맞는 원두가 없습니다"를 보인다(UC-1 2단계).
 
@@ -61,5 +61,5 @@ def customer_products():
 
 ### 4.3.7 원산지 선택 목록
 
-- FR-3의 선택 목록은 별도 API 없이 프론트엔드 `src/lib/origins.js`의 고정 배열로 둔다. 시드 데이터(NFR-3)도 이 배열에서만 원산지를 고른다. 관리자 원두 등록·수정도 이 목록에서만 고른다(4.7.2절). 같은 배열을 백엔드 `products/origins.py`에도 두고 시리얼라이저가 검증한다. 원산지를 더하려면 두 파일을 같은 PR에서 고친다(11.1절).
+- FR-3의 선택 목록은 별도 API 없이 프론트엔드 `src/lib/origins.js`의 고정 배열로 둔다. 시드 데이터(NFR-3)도 이 배열에서만 원산지를 고른다. 관리자 원두 등록·수정도 이 목록에서만 고른다(4.7.2절). 같은 배열을 백엔드 `products/origins.py`에도 두고 시리얼라이저가 검증한다. 원산지를 더하려면 두 파일을 같은 PR에서 고친다(12.1절).
 - 목록(2026-11-19 정함, 10개, 화면 순서): 에티오피아, 케냐, 르완다, 콜롬비아, 브라질, 과테말라, 코스타리카, 파나마, 인도네시아, 베트남. 고객 원산지 필터(FR-3)는 목록 밖 값도 400 없이 0건으로 답한다(검증은 등록·수정에서만).

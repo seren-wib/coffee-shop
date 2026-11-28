@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 
-const PAGE_SIZE = 20; // SDD 7.4, fixed on the server
+const PAGE_SIZE = 20; // SDD 8.4, fixed on the server
 const WINDOW = 10;
 
 // No boxes: the current page is bold with a 2px underline (layout rules board).

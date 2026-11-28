@@ -2,9 +2,9 @@
 
 The key is read from the development .env (TOSS_SECRET_KEY=test_sk_...): the file
 named by DOTENV_PATH, else the repository root .env, else the main checkout's .env
-when run from a git worktree (SDD 9). The file is git-ignored. Only test keys are accepted. Each call appends one JSON
+when run from a git worktree (SDD 10). The file is git-ignored. Only test keys are accepted. Each call appends one JSON
 line to results/calls.jsonl with the step label, HTTP status and a whitelist
-of response fields; paymentKey is masked (SDD 4.6.5, 8.5).
+of response fields; paymentKey is masked (SDD 4.6.5, 9.5).
 
 Usage:
   python toss.py --step 2 confirm PAYMENT_KEY ORDER_ID AMOUNT

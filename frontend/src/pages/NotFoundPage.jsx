@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-// Unknown path (SDD 6.0, NFR-30).
+// Unknown path (SDD 7.0, NFR-30).
 export default function NotFoundPage() {
   return (
     <div className="flex flex-col gap-3 px-12 pt-10 pb-14">

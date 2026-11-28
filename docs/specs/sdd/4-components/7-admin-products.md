@@ -7,7 +7,7 @@
 | 의존 | 회원과 인증(`IsAdminRole`) |
 | 구현 모듈 | `products/models.py`, `products/services.py`, `products/queries.py`, `products/serializers.py`, `products/admin_views.py`, `products/origins.py` |
 
-`products` 앱의 관리자용 뷰와 `products/services.py`. 모든 경로는 `/api/admin/products/` 아래이고 `IsAuthenticated + IsAdminRole`이다(NFR-10, 4.1.10). 재고를 바꾸는 함수는 `decrease_stock`, `increase_stock`, `set_stock` 셋이고(2.1절), 판매 상태는 이 셋과 `stop_sales`, `resume_sales`만 바꾼다(5.9절).
+`products` 앱의 관리자용 뷰와 `products/services.py`. 모든 경로는 `/api/admin/products/` 아래이고 `IsAuthenticated + IsAdminRole`이다(NFR-10, 4.1.10). 재고를 바꾸는 함수는 `decrease_stock`, `increase_stock`, `set_stock` 셋이고(2.1절), 판매 상태는 이 셋과 `stop_sales`, `resume_sales`만 바꾼다(6.9절).
 
 ### 4.7.0 판매 상태 기계 (DR-6, DR-7)
 
@@ -38,7 +38,7 @@ stateDiagram-v2
 
 - 경로: `GET /api/admin/products/`.
 - 입력: `search`(4.7.11), `sales_status`(선택, 3개 값 중 하나), `page`.
-- 응답: 200, 7.4절 페이지 형식. 항목은 `{product_id, name, origin, roast_level, base_price, sales_status, option_count, total_stock, options: [{option_id, weight_size, grind_type, extra_price, stock_quantity}]}`. 판매 중지 원두를 포함한다.
+- 응답: 200, 8.4절 페이지 형식. 항목은 `{product_id, name, origin, roast_level, base_price, sales_status, option_count, total_stock, options: [{option_id, weight_size, grind_type, extra_price, stock_quantity}]}`. 판매 중지 원두를 포함한다.
 - 화면(SCR-11)의 상태 필터는 `sales_status` 매개변수다.
 
 ### 4.7.2 원두 등록 (FR-37)
@@ -69,7 +69,7 @@ stateDiagram-v2
 
 - 경로: `PATCH /api/admin/products/{id}/options/{oid}/`, 본문에 `extra_price`.
 - 처리: UPDATE. 옵션 가격은 계산값이라 상세 응답에 바로 반영된다(DR-4).
-- 용량·분쇄도는 바꾸지 않는다. 바꾸려면 새 옵션을 추가하고 기존 옵션 재고를 0으로 둔다(주문된 옵션은 지우지 못한다, 5.7절).
+- 용량·분쇄도는 바꾸지 않는다. 바꾸려면 새 옵션을 추가하고 기존 옵션 재고를 0으로 둔다(주문된 옵션은 지우지 못한다, 6.7절).
 - 응답: 200, 관리자 원두 상세(4.7.12). 오류: 404(다른 원두의 옵션 ID), 400. 본문의 `weight_size`, `grind_type`은 무시한다.
 - 서비스: `update_option(product_id, option_id, extra_price=None, stock_quantity=None)`. 재고가 오면 `set_stock`(4.7.8)을 부른다.
 
@@ -93,7 +93,7 @@ def _sync_sold_out(option_id):
                .update(sales_status=SalesStatus.SOLD_OUT)
 ```
 
-- 비교와 차감이 한 UPDATE 문이라 읽고 비교하고 쓰는 사이에 다른 주문이 끼지 않는다. 0 밑으로는 CHECK 제약도 막는다(5.4절).
+- 비교와 차감이 한 UPDATE 문이라 읽고 비교하고 쓰는 사이에 다른 주문이 끼지 않는다. 0 밑으로는 CHECK 제약도 막는다(6.4절).
 - `decrease_stock`, `increase_stock`은 `quantity`가 1 미만이면 400 `VALIDATION_ERROR`다(음수 차감이 재고를 늘리지 않게). 세 재고 함수 모두 없는 옵션 ID는 404 `NOT_FOUND`이고, `decrease_stock`은 조건부 UPDATE가 0행이면 먼저 409 `OUT_OF_STOCK`이다. 시그니처는 `decrease_stock(option_id, quantity)`, `increase_stock(option_id, quantity)`, `set_stock(option_id, quantity)`, `stop_sales(product_id)`, `resume_sales(product_id)`이고 모두 `None`을 돌려준다(2026-11-19 구현).
 - 호출한 쪽의 트랜잭션 안에서 돈다. 주문의 다른 항목이 실패하면 함께 롤백된다(NFR-14).
 
@@ -121,7 +121,7 @@ def increase_stock(option_id: int, quantity: int) -> None:
   - 새 값이 1 이상이면 `SOLD_OUT` → `ON_SALE`.
   - `STOPPED`는 그대로(DR-7).
 - 오류: 400(음수, DR-5).
-- 관리자가 "늘리기·줄이기"를 고르는 대신 새 수량을 넣는다. 화면(SCR-12)은 재고 칸에 지금 값을 채워 두고 바꾼 값을 보낸다. 관리자가 화면을 보는 사이 주문으로 재고가 줄었다면 관리자 값으로 덮인다. 시연 규모에선 받아들이고, 11.1절에 남겼다.
+- 관리자가 "늘리기·줄이기"를 고르는 대신 새 수량을 넣는다. 화면(SCR-12)은 재고 칸에 지금 값을 채워 두고 바꾼 값을 보낸다. 관리자가 화면을 보는 사이 주문으로 재고가 줄었다면 관리자 값으로 덮인다. 시연 규모에선 받아들이고, 12.1절에 남겼다.
 
 ### 4.7.9 판매 중지 (FR-42)
 
@@ -142,7 +142,7 @@ def increase_stock(option_id: int, quantity: int) -> None:
 
 ### 4.7.12 관리자 원두 상세 (FR-37 ~ FR-41)
 
-- 경로: `GET /api/admin/products/{id}/`(SRS 6.2에 없음, 7.7절).
+- 경로: `GET /api/admin/products/{id}/`(SRS 6.2에 없음, 8.7절).
 - 응답: 200, `{product_id, name, origin, roast_level, base_price, tasting_notes, description, image_url, sales_status, created_at, options: [{option_id, weight_size, grind_type, extra_price, price, stock_quantity, is_available}]}`. 판매 중지 원두도 돌려준다.
 - 4.7.2 ~ 4.7.5, 4.7.8 ~ 4.7.10의 응답 본문도 이 모양이다. 그래서 등록 응답에서 `sales_status=ON_SALE`을 확인할 수 있다(FR-37 검증).
 - 오류: 404(없는 ID).

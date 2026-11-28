@@ -59,7 +59,7 @@ def next_order_id(today: date) -> str:
     return f"{prefix}{seq:03d}"
 ```
 
-- `today`는 `timezone.localdate()`, 곧 Asia/Seoul 날짜다(11.1절). UTC 자정이 아니라 한국 자정에 001로 돌아간다.
+- `today`는 `timezone.localdate()`, 곧 Asia/Seoul 날짜다(12.1절). UTC 자정이 아니라 한국 자정에 001로 돌아간다.
 - `create_order` 트랜잭션 안에서 부른다. 트랜잭션이 IMMEDIATE로 쓰기 잠금을 먼저 잡으므로 두 주문이 같은 번호를 읽지 않는다. 그래도 겹치면 PK 충돌로 트랜잭션 전체가 롤백되고 500이 아니라 409 `RETRY`로 답한다(화면은 "다시 시도해 주세요").
 - 일련번호가 세 자리라 하루 999건이 상한이다(DR-11). 시연 규모(주문 500건 전체, NFR-3)에서는 닿지 않는다.
 
@@ -101,7 +101,7 @@ flowchart TD
   6. 배송지 복사: `recipient_name`, `recipient_phone`, `shipping_address = f"({zipcode}) {base_address} {detail_address}".strip()`(DR-18). 저장된 배송지는 `user=request.user`로 찾고, 없으면 404.
 - 응답: 201, 4.5.6의 주문 상세 모양(`status=PENDING`).
 - 오류: 400(`EMPTY_CART`, 배송지 형식), 404(다른 회원 배송지), 409(`NOT_AVAILABLE`, `OUT_OF_STOCK`, `RETRY`), 503(`ORDER_LIMIT`, 4.5.2). 409 본문의 `details.cart_item_ids`에 문제 항목을 넣어 화면이 어느 항목인지 보인다(UC-5 4단계). 재고·장바구니는 요청 전 그대로다(FR-23, NFR-14).
-- SRS FR-23의 "주문 가능한 모든 항목"은 화면 쪽 규칙으로 읽는다. 장바구니 화면은 주문할 수 없는 항목이 있으면 주문하기를 끄고 그 항목을 빼라고 안내한다(6.5절). 그래서 서버에 도착하는 주문은 늘 장바구니 전체이고, 섞여 있으면 409다. 이 해석은 11.1절에 적었다.
+- SRS FR-23의 "주문 가능한 모든 항목"은 화면 쪽 규칙으로 읽는다. 장바구니 화면은 주문할 수 없는 항목이 있으면 주문하기를 끄고 그 항목을 빼라고 안내한다(7.5절). 그래서 서버에 도착하는 주문은 늘 장바구니 전체이고, 섞여 있으면 409다. 이 해석은 12.1절에 적었다.
 - 동시성: 재고 1개 옵션에 동시 주문이 들어와도 쓰기 트랜잭션이 하나씩 돌고, 두 번째부터는 조건부 UPDATE가 0행이라 409다(NFR-15). 3.1절 스파이크에서 확인했다(2026-11-19, IMMEDIATE 30라운드 모두 201 1건·409 9건·500 0건).
 - 주문번호는 호출자가 넘기지 않고 이 함수가 만든다(4.5.2).
 
@@ -115,7 +115,7 @@ flowchart TD
 - 경로: `GET /api/orders/`, 회원.
 - 입력: `status`(선택, `OrderStatus` 값 하나), `page`.
 - 처리: `Order.objects.filter(user=request.user)`, `status`가 있으면 `order_status=status`, `order_by("-created_at")`. 다른 값이면 400.
-- 응답: 200, 7.4절 페이지 형식. 항목은 `{order_id, created_at, final_payment_amt, status, item_count, first_item_name}`.
+- 응답: 200, 8.4절 페이지 형식. 항목은 `{order_id, created_at, final_payment_amt, status, item_count, first_item_name}`.
 - 화면(SCR-07)은 상태 탭(전체, 결제 대기, 결제 완료, 배송 준비, 배송 중, 배송 완료, 취소 요청, 취소)으로 `status`를 바꾼다.
 
 ### 4.5.6 내 주문 상세 (FR-31, FR-34)
@@ -155,14 +155,14 @@ flowchart TD
 ```
 
 - 날짜는 Asia/Seoul 오프셋을 붙인 ISO 8601로 내보낸다(`USE_TZ=True`, `TIME_ZONE="Asia/Seoul"`).
-- `courier_name`, `tracking_number`, `tracking_url`, `shipped_at`, `delivered_at`은 배송 중·배송 완료일 때만 값이 있다(FR-34). `courier_name`은 `courier_code`의 한국어 이름이다(5.10절).
+- `courier_name`, `tracking_number`, `tracking_url`, `shipped_at`, `delivered_at`은 배송 중·배송 완료일 때만 값이 있다(FR-34). `courier_name`은 `courier_code`의 한국어 이름이다(6.10절).
 - `can_pay = status == PENDING and 성공 결제 없음`(FR-29), `can_cancel = status == PENDING`(FR-32), `can_request_cancel = status in (PAID, PREPARING)`(FR-33). 화면은 이 값으로 버튼을 켜고 끈다. 서버는 버튼과 관계없이 4.5.1 전환표로 다시 막는다.
 - 오류: 404(다른 회원 주문, NFR-11).
 
 ### 4.5.7 배송 조회 링크 (FR-35, UC-8)
 
 - 주문 상세 화면(SCR-08)은 `tracking_url`이 있으면 "배송 조회" 링크를 `<a href={tracking_url} target="_blank" rel="noopener noreferrer">`로 그린다.
-- 주소는 서버가 5.10절 표로 만든다. 프론트엔드는 주소 규칙을 모른다.
+- 주소는 서버가 6.10절 표로 만든다. 프론트엔드는 주소 규칙을 모른다.
 
 ### 4.5.8 결제 대기 주문 즉시 취소 (FR-32)
 

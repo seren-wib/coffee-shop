@@ -115,7 +115,7 @@ describe("CartPage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("marks items that cannot be ordered and turns ordering off (SDD 6.5)", async () => {
+  it("marks items that cannot be ordered and turns ordering off (SDD 7.5)", async () => {
     fakeApi({
       "GET /cart/": cart([
         item(),

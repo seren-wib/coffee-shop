@@ -82,7 +82,7 @@ describe("CheckoutPage", () => {
     ).toBeEnabled();
   });
 
-  it("creates the order with the chosen address, then opens payment (SDD 6.6)", async () => {
+  it("creates the order with the chosen address, then opens payment (SDD 7.6)", async () => {
     const calls = fakeApi({
       "GET /cart/": { data: cart },
       "GET /me/addresses/": { data: [address({ is_default: true })] },

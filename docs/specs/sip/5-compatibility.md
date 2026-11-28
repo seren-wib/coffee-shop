@@ -7,7 +7,7 @@
 
 ### 5.1 발견
 
-1. nginx 오류 로그(`coffee-shop.error.log`)는 업스트림 오류 때 요청 줄을 쿼리 문자열째 남긴다. 접근 로그와 달리 형식을 바꿀 수 없다. 오류 로그는 서버 안에만 두고 밖으로 복사하지 않는다(SDD 8.5).
+1. nginx 오류 로그(`coffee-shop.error.log`)는 업스트림 오류 때 요청 줄을 쿼리 문자열째 남긴다. 접근 로그와 달리 형식을 바꿀 수 없다. 오류 로그는 서버 안에만 두고 밖으로 복사하지 않는다(SDD 9.5).
 2. `deploy/*.sh`가 git에 실행 권한 없이(100644) 들어가 있었다. 서버에서 `sudo deploy/install.sh`, 그 안의 `cloudflare-real-ip.sh`, 백업 타이머의 `backup.sh`가 모두 Permission denied로 실패한다. 실행 권한을 줬다(2026-11-27).
 3. 첫 배포는 `current`가 없는데 `readlink -f`는 없는 경로도 그대로 내준다. 첫 배포에서 상태 확인이 실패하면 `current`가 자기 자신을 가리키는 링크가 된다. `readlink -e`로 바꿔서 첫 배포 실패 때는 되돌리지 않는다(2026-11-27).
 4. gunicorn 27은 기본으로 `$HOME/.gunicorn/`에 제어 소켓을 만들려 한다. 앱 계정은 홈이 없고 `ProtectHome=true`라 시작할 때마다 `Control server error: Permission denied`가 남는다. 제어 소켓을 끈다(`control_socket_disable`, 2026-11-27).

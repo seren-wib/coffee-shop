@@ -1,4 +1,4 @@
-"""Beans and their options (SDD 5.3, 5.4). Stock and sales status change only in services."""
+"""Beans and their options (SDD 6.3, 6.4). Stock and sales status change only in services."""
 
 from django.db import models
 from django.db.models import Q

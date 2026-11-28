@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy one release tag (SDD 10.4, SIP 2). Usage: sudo deploy/deploy.sh release-YYYYMMDD-N
+# Deploy one release tag (SDD 11.4, SIP 2). Usage: sudo deploy/deploy.sh release-YYYYMMDD-N
 # Run by .github/workflows/deploy.yml through SSM after CI passes on main, or by the operator with sudo.
 # On a failed health check the previous release comes back.
 set -euo pipefail

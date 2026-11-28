@@ -7,7 +7,7 @@ Spike for SDD 3.2. Run on 2026-11-19 (all steps except 6, the 10-minute expiry).
 ## Keys
 
 Both keys come from the development `.env`, the same file `backend/config/settings.py` reads
-(SDD 9): the file named by `DOTENV_PATH`, else the repository root `.env`, else the main
+(SDD 10): the file named by `DOTENV_PATH`, else the repository root `.env`, else the main
 checkout's `.env` when run from a git worktree. Only test keys (`test_...`) are accepted.
 
 ```

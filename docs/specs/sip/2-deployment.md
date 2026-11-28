@@ -1,6 +1,6 @@
 ## 2. 배포 절차
 
-`main`에 머지하면 `.github/workflows/deploy.yml`이 배포한다(FR-61, SDD 10.4절). 사람이 하는 일은 PR 머지뿐이다. 처음 한 번은 3절 설치(3.6절 자동 배포 설정 포함)와 2.3절 수동 배포 한 번이 먼저다. 시연 시간에는 배포하지 않는다(재시작 중 수십 초 502). 그동안은 저장소 변수 `DEPLOY_ENABLED`를 `false`로 바꿔 둔다. (2026-11-27 변경. 이전에는 "운영자가 SSH로 서버에 들어가 한다"였고, 그 절차는 2.3절로 옮겼다)
+`main`에 머지하면 `.github/workflows/deploy.yml`이 배포한다(FR-61, SDD 11.4절). 사람이 하는 일은 PR 머지뿐이다. 처음 한 번은 3절 설치(3.6절 자동 배포 설정 포함)와 2.3절 수동 배포 한 번이 먼저다. 시연 시간에는 배포하지 않는다(재시작 중 수십 초 502). 그동안은 저장소 변수 `DEPLOY_ENABLED`를 `false`로 바꿔 둔다. (2026-11-27 변경. 이전에는 "운영자가 SSH로 서버에 들어가 한다"였고, 그 절차는 2.3절로 옮겼다)
 
 1. GitHub: PR이 `main`에 머지되면 `ci`가 그 커밋으로 `backend`·`frontend`를 돌린다.
 2. GitHub: `ci`가 성공하면 `deploy` 워크플로가 시작한다. 배포는 한 번에 하나만 돈다.
@@ -66,7 +66,7 @@
    ```
 
 3. 서버: `sudo /srv/coffee-shop/current/deploy/deploy.sh release-YYYYMMDD-1`. 첫 배포는 `current`가 없으므로 3.3절에서 받은 클론의 `deploy/deploy.sh`를 쓴다.
-4. 스크립트가 하는 일(SDD 10.4절, 자동 배포도 같다):
+4. 스크립트가 하는 일(SDD 11.4절, 자동 배포도 같다):
    1. `releases/<태그>`에 태그를 클론하고, 그 커밋이 `main`에 있는지 본다.
    2. `.venv`를 만들고 `backend/requirements.txt`를 설치한다.
    3. `npm ci`, `VITE_APP_VERSION=<커밋 7자>`로 `npm run build`, `dist/version.txt`에 커밋을 쓴다.
