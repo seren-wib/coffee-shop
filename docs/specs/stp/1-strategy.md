@@ -35,8 +35,8 @@
 
 - 테스트에서 외부 호출 없음. 토스페이먼츠는 설정 `PAYMENTS_CLIENT`를 `orders.pg.FakePaymentsClient`로 바꿔 부르지 않는다(SDD 4.6.5). 가짜 클라이언트는 테스트가 정한 결과(승인 성공, 실패 코드, 다른 금액, 시간 초과, 이미 취소됨)를 돌려주고, 받은 호출(`confirm`, `cancel`의 인수)을 기록해서 테스트가 확인한다. 택배사는 링크만 만들므로(FR-35) 호출할 것이 없다. 메일은 보내지 않는다.
 - 실제 토스 테스트 서버로 확인할 것(승인·취소 응답 형식, 중복 취소, 다른 금액 승인)은 테스트가 아니라 스파이크(SDD 3.2절)와 리허설(8절)에서 한다.
-- 테스트 DB는 운영과 같은 SQLite 엔진이다. Django 테스트 러너가 메모리 SQLite에 마이그레이션을 전부 적용해 만들고, 테스트마다 트랜잭션을 롤백한다(SDD 9.5). 운영과 같은 제약(`Meta.constraints`, CHECK, 부분 유니크 인덱스)이 마이그레이션으로 들어가므로 제약 위반도 테스트에서 똑같이 난다.
-- 메모리 DB에는 WAL과 파일 잠금이 없다. 그래서 동시 주문(NFR-15)만 파일 SQLite에 운영과 같은 옵션(`transaction_mode="IMMEDIATE"`, WAL, `timeout=20`, SDD 9.1)으로 따로 돌린다. 이 테스트는 `@tag("concurrency")`를 달고, 테스트 DB 이름(`DATABASES["default"]["TEST"]["NAME"]`)을 임시 파일로 바꾼 설정 `config/test_settings_file.py`에서만 돈다. 이 테스트의 기대값(성공 1, 재고 0, 잠금 오류 0)은 스파이크 `sqlite-concurrent-order`(SDD 3.1절) 결과와 같아야 한다.
+- 테스트 DB는 운영과 같은 SQLite 엔진이다. Django 테스트 러너가 메모리 SQLite에 마이그레이션을 전부 적용해 만들고, 테스트마다 트랜잭션을 롤백한다(SDD 10.5). 운영과 같은 제약(`Meta.constraints`, CHECK, 부분 유니크 인덱스)이 마이그레이션으로 들어가므로 제약 위반도 테스트에서 똑같이 난다.
+- 메모리 DB에는 WAL과 파일 잠금이 없다. 그래서 동시 주문(NFR-15)만 파일 SQLite에 운영과 같은 옵션(`transaction_mode="IMMEDIATE"`, WAL, `timeout=20`, SDD 10.1)으로 따로 돌린다. 이 테스트는 `@tag("concurrency")`를 달고, 테스트 DB 이름(`DATABASES["default"]["TEST"]["NAME"]`)을 임시 파일로 바꾼 설정 `config/test_settings_file.py`에서만 돈다. 이 테스트의 기대값(성공 1, 재고 0, 잠금 오류 0)은 스파이크 `sqlite-concurrent-order`(SDD 3.1절) 결과와 같아야 한다.
 - 시간은 고정한다. 백엔드는 `unittest.mock.patch("django.utils.timezone.now")`로 시각을 정한다(주문번호 날짜 DR-11, 자정 전후 Asia/Seoul). 프론트엔드는 `vi.useFakeTimers()`와 `vi.setSystemTime()`을 쓴다. 토큰 만료(NFR-8)는 기다리지 않고 만료 시각이 지난 토큰을 만들어 보낸다.
 - 시크릿은 가짜 값만. 테스트 설정 `backend/config/test_settings.py`가 `SECRET_KEY`, `TOSS_SECRET_KEY`에 테스트 전용 문자열을 넣는다. CI에는 Actions 시크릿이 없다(7절).
 - 테스트 설정은 `config/settings.py`를 가져온 뒤 다음만 바꾼다: `PAYMENTS_CLIENT = "orders.pg.FakePaymentsClient"`, `DEFAULT_THROTTLE_RATES`를 크게(로그인·가입 테스트가 429에 걸리지 않게, SDD 4.1.2), `PASSWORD_HASHERS`를 `MD5PasswordHasher`로(속도). 해시 형식을 보는 NFR-6 테스트만 `override_settings`로 운영 해셔(`PBKDF2PasswordHasher`)를 다시 쓴다.

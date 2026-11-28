@@ -81,7 +81,7 @@ POST   /api/admin/orders/{id}/cancel-reject/       취소 반려 (FR-51)
 
 ### 6.3 하드웨어 인터페이스
 
-- 서버: AWS EC2 인스턴스 한 대(NFR-20). 인스턴스 종류와 구성은 SDD 11절이다.
+- 서버: AWS EC2 인스턴스 한 대(NFR-20). 인스턴스 종류와 구성은 SDD 12절이다.
 - 사용자 단말: 최신 Chrome이 도는 데스크톱 PC(NFR-26).
 
 ### 6.4 소프트웨어 인터페이스
@@ -113,6 +113,6 @@ flowchart LR
 - 브라우저는 도메인 하나에 HTTPS(443)로 접속한다. 80번 요청은 HTTPS로 넘긴다(NFR-4).
 - 화면과 API가 같은 도메인이라 CORS 설정이 필요 없다(NFR-21).
 - 데이터는 REST·JSON으로 주고받고, 인증은 `Authorization: Bearer <액세스 토큰>` 헤더로 한다(NFR-8, NFR-28).
-- 브라우저는 Cloudflare 프록시에 접속하고, Cloudflare가 EC2로 넘긴다. 프록시와 TLS 방식은 SDD 11절이다.
+- 브라우저는 Cloudflare 프록시에 접속하고, Cloudflare가 EC2로 넘긴다. 프록시와 TLS 방식은 SDD 12절이다.
 - 운영자는 SSH로 EC2에 들어가 배포 명령을 실행하고, 배포 명령은 GitHub에서 릴리스 태그를 받아 온다. GitHub Actions는 운영 서버에 접속하지 않는다(7.1절). (2026-11-27 추가)
 - (2026-11-27 변경. 위 줄 대신) 배포 명령은 GitHub Actions가 AWS Systems Manager(SSM) Run Command로 보낸다. 서버의 SSM 에이전트가 AWS 쪽으로 나가는 HTTPS 연결로 명령을 받아 실행하므로 GitHub는 서버에 직접 접속하지 않고 22번도 쓰지 않는다. AWS 권한은 실행마다 GitHub OIDC 토큰으로 받는다(NFR-43). 운영자 SSH는 설치, 관리자 계정 생성, 손으로 하는 배포·롤백·복원에 쓴다.

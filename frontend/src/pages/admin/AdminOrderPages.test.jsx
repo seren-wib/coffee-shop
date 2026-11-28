@@ -83,7 +83,7 @@ const detail = (overrides) => ({
 });
 
 describe("AdminOrderListPage", () => {
-  it("lists orders with member and status, and counts cancel requests (FR-44, SDD 6.14)", async () => {
+  it("lists orders with member and status, and counts cancel requests (FR-44, SDD 7.14)", async () => {
     fakeApi({
       "GET /admin/orders/": (config) =>
         config.params.status === "CANCEL_REQUESTED"

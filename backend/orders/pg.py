@@ -72,7 +72,7 @@ def get_client():
 
 
 def masked(payment_key):
-    # Logs keep only the last 8 characters of a paymentKey (SDD 8.5).
+    # Logs keep only the last 8 characters of a paymentKey (SDD 9.5).
     return f"...{payment_key[-8:]}" if payment_key else payment_key
 
 

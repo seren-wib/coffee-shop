@@ -142,7 +142,7 @@ describe("ProductDetailPage", () => {
     expect(calls.at(-1).data).toEqual({ option_id: 2, quantity: 1 });
   });
 
-  it("sends a guest to login and back (SDD 6.2)", async () => {
+  it("sends a guest to login and back (SDD 7.2)", async () => {
     fakeApi({ "GET /products/5/": { data: product } });
     renderAt("/products/5");
     await userEvent.click(

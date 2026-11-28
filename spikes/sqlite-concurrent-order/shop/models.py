@@ -1,4 +1,4 @@
-"""Only the columns create_order touches (SDD 5.4).
+"""Only the columns create_order touches (SDD 6.4).
 
 No auth: a Member row stands in for the user, picked by the X-User-Id header.
 """

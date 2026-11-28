@@ -74,7 +74,7 @@ one Google Doc and submitted from there. The compiled document is not committed.
   section: `spmp/` (project plan), `srs/` (requirements), `sdd/` (design), `stp/` (test plan),
   `sip/` (installation plan), `smp/` (maintenance plan). Start from `docs/specs/README.md`.
 - Which change goes where: a requirement goes to `srs/`, a design or technical choice to `sdd/`
-  (its reason to `sdd/11-rationale.md`), a requirement-level policy to `srs/7-decisions.md`,
+  (its reason to `sdd/12-rationale.md`), a requirement-level policy to `srs/7-decisions.md`,
   scope and schedule to `spmp/`.
 - Requirements carry IDs (`DR-n`, `FR-n`, `NFR-n`, `UC-n`). One FR holds one function and one
   NFR one measurable condition. IDs are never renumbered or reused once merged; a dropped one

@@ -2,7 +2,7 @@
 
 /*
  * Design tokens from the BeanShop UI canvas (components sheet and layout rules, 2026-11-23).
- * The default palette is switched off so only these colors exist (SDD 6.0.2).
+ * The default palette is switched off so only these colors exist (SDD 7.0.2).
  */
 @theme {
   --color-*: initial;

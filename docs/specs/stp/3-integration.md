@@ -1,6 +1,6 @@
 ## 3. 통합 테스트
 
-`/api/` 경로를 HTTP 요청 그대로 부르고 상태 코드, 응답 본문, 저장된 행을 확인한다. 기대 열의 상태 코드와 오류 코드는 SDD 7.2절을 따른다.
+`/api/` 경로를 HTTP 요청 그대로 부르고 상태 코드, 응답 본문, 저장된 행을 확인한다. 기대 열의 상태 코드와 오류 코드는 SDD 8.2절을 따른다.
 
 - 앱과 DB: 파일마다 DRF `APITestCase`를 상속한다. 테스트 러너가 실행 시작 때 메모리 SQLite에 마이그레이션을 한 번 적용하고, 테스트마다 트랜잭션을 열었다가 롤백한다. 공통 데이터는 `setUpTestData`에서 `tests/factories.py` 함수로 만든다.
 - 인증: `APIClient`에 `force_authenticate`를 쓰지 않고, 로그인 API(`/api/auth/token/`)에서 받은 실제 액세스 토큰을 `Authorization: Bearer`로 붙인다. 권한 클래스와 JWT 설정까지 함께 확인하기 위해서다. 헬퍼 `auth_client(user)`가 이 일을 한다.
@@ -27,9 +27,9 @@
 | `test_fr12_me_update_keeps_email` | FR-12 | `PATCH /api/me/`에 `user_name`, `email` → 200, 이름만 바뀜 |
 | `test_fr13_password_change` | FR-13 | 맞는 현재 비밀번호 → 204, 옛 비밀번호 로그인 401, 새 비밀번호 200 |
 | `test_fr13_wrong_current_password_is_400` | FR-13 | 400, `fields.current_password` |
-| `test_nfr9_every_private_route_needs_token` | NFR-9 | URL 설정의 모든 `/api/` 경로 중 공개 6개(SDD 7.3) 밖은 토큰 없이 401 |
+| `test_nfr9_every_private_route_needs_token` | NFR-9 | URL 설정의 모든 `/api/` 경로 중 공개 6개(SDD 8.3) 밖은 토큰 없이 401 |
 | `test_nfr10_member_token_on_admin_routes_is_403` | NFR-10 | `/api/admin/` 아래 모든 경로에 회원 토큰 → 403 |
-| `test_login_throttle_returns_429` | NFR-7(SDD 8.3절) | 한도를 낮춘 `override_settings`에서 11번째 로그인 → 429 `THROTTLED` |
+| `test_login_throttle_returns_429` | NFR-7(SDD 9.3절) | 한도를 낮춘 `override_settings`에서 11번째 로그인 → 429 `THROTTLED` |
 
 ### 3.2 배송지 (`users/tests/test_addresses_api.py`)
 
@@ -51,7 +51,7 @@
 | `test_fr1_list_is_public` | FR-1, NFR-9 | 토큰 없이 200 |
 | `test_fr1_list_item_fields_and_newest_first` | FR-1 | 최근 등록 순, 항목 필드 8개, `lowest_price` = 기본 가격 + 가장 낮은 추가 금액 |
 | `test_fr1_lowest_price_without_options_is_base_price` | FR-1 | 옵션 없는 원두 → `lowest_price` = `base_price` |
-| `test_fr1_page_out_of_range_is_404` | FR-1 | 범위 밖 `?page=5` → 404 `NOT_FOUND`(SDD 7.4) |
+| `test_fr1_page_out_of_range_is_404` | FR-1 | 범위 밖 `?page=5` → 404 `NOT_FOUND`(SDD 8.4) |
 | `test_fr2_search_by_name_part` | FR-2 | `?search=에티` → 이름에 "에티"가 든 원두만 |
 | `test_fr3_filter_by_origin` | FR-3 | `?origin=에티오피아` → 그 원산지만 |
 | `test_fr4_filter_by_price_range` | FR-4 | `?min_price=10000&max_price=20000` → 기본 가격이 범위 안인 것만(경계 포함) |

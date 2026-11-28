@@ -1,6 +1,6 @@
 // The client key is read from the development .env and injected at dev time.
 // File: DOTENV_PATH, else the repository root .env, else the main checkout's .env
-// when run from a git worktree (SDD 9). TOSS_CLIENT_KEY=test_ck_...
+// when run from a git worktree (SDD 10). TOSS_CLIENT_KEY=test_ck_...
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";

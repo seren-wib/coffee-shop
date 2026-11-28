@@ -1,4 +1,4 @@
-"""Django settings for the coffee-shop backend (SDD 9).
+"""Django settings for the coffee-shop backend (SDD 10).
 
 Values come from the .env file named by DOTENV_PATH (production: set by the systemd
 unit), or the repository root .env in development. Only names live in .env.example.
@@ -73,7 +73,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 
-# Database (SDD 9.1, 4.0, 3.1). ATOMIC_REQUESTS stays off: with IMMEDIATE it would take
+# Database (SDD 10.1, 4.0, 3.1). ATOMIC_REQUESTS stays off: with IMMEDIATE it would take
 # the write lock for reads too. Transactions are opened only in service functions.
 
 DATABASES = {
@@ -91,7 +91,7 @@ DATABASES = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# Auth (SDD 4.1.0, 8.1)
+# Auth (SDD 4.1.0, 9.1)
 
 AUTH_USER_MODEL = "users.User"
 
@@ -137,7 +137,7 @@ PAYMENTS_ENABLED = check_toss_secret_key(TOSS_SECRET_KEY) or (
 )
 
 
-# Internationalization (SDD 9.1, 11.1: store UTC, show and number orders in Asia/Seoul)
+# Internationalization (SDD 10.1, 12.1: store UTC, show and number orders in Asia/Seoul)
 
 LANGUAGE_CODE = "ko-kr"
 TIME_ZONE = "Asia/Seoul"
@@ -150,7 +150,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 
-# Security (SDD 8.2)
+# Security (SDD 9.2)
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = False
@@ -158,7 +158,7 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 
 
-# Logging (SDD 4.9.4, 8.5): stdout only, collected by journald.
+# Logging (SDD 4.9.4, 9.5): stdout only, collected by journald.
 
 LOGGING = {
     "version": 1,

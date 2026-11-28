@@ -30,7 +30,7 @@ const ACCOUNT_LINK =
   "cursor-pointer text-sm text-latte-100 underline underline-offset-4 hover:text-white";
 
 export default function Header() {
-  // Login state is read from tokenStore on every render (SDD 6.0.3).
+  // Login state is read from tokenStore on every render (SDD 7.0.3).
   // Login and logout both navigate, and the route change re-renders the header.
   const { pathname } = useLocation();
   const navigate = useNavigate();

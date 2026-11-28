@@ -37,7 +37,7 @@ export default function AddressPage() {
     };
   }, []);
 
-  // A change is followed by a fresh GET (SDD 6.0.3).
+  // A change is followed by a fresh GET (SDD 7.0.3).
   async function run(action, { savedNotice = false } = {}) {
     setBusy(true);
     setError(null);

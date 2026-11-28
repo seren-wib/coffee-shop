@@ -1,4 +1,4 @@
-"""Fixed courier list and tracking links (SDD 5.10, FR-35). The front end knows no URLs."""
+"""Fixed courier list and tracking links (SDD 6.10, FR-35). The front end knows no URLs."""
 
 from urllib.parse import quote
 

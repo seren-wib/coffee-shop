@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Daily SQLite backup (SDD 10.5, NFR-25). Keeps the newest 7 files.
+# Daily SQLite backup (SDD 11.5, NFR-25). Keeps the newest 7 files.
 # `.backup` copies a consistent DB even in WAL mode; plain cp is not used.
 set -euo pipefail
 

@@ -1,4 +1,4 @@
-# Continuous deployment (SDD 10.4, SIP 2, SRS FR-61, NFR-43).
+# Continuous deployment (SDD 11.4, SIP 2, SRS FR-61, NFR-43).
 # When ci passes on a push to main, tag that commit release-YYYYMMDD-N and run
 # deploy/deploy.sh <tag> on the production server through SSM Run Command.
 # Auth is keyless: GitHub OIDC -> IAM role that may only send AWS-RunShellScript to one instance.

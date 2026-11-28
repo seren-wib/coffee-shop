@@ -1,7 +1,7 @@
 import TextField from "./TextField";
 
-// Address inputs shared by checkout (new address) and the address book (SDD 6.6, 6.11).
-// The zip code is typed in; no address search service (SDD 6.11).
+// Address inputs shared by checkout (new address) and the address book (SDD 7.6, 7.11).
+// The zip code is typed in; no address search service (SDD 7.11).
 export default function AddressFields({ value, onChange, errors = {} }) {
   const set = (key) => (event) =>
     onChange({ ...value, [key]: event.target.value });

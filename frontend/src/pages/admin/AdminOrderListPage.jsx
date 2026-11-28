@@ -42,7 +42,7 @@ export default function AdminOrderListPage() {
     };
   }, [query]);
 
-  // The cancel request tab carries a count badge (SDD 6.14), read once when the screen opens.
+  // The cancel request tab carries a count badge (SDD 7.14), read once when the screen opens.
   useEffect(() => {
     let active = true;
     listAdminOrders({ status: "CANCEL_REQUESTED" }).then(

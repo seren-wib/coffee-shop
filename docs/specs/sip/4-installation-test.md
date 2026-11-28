@@ -5,8 +5,8 @@
 - ☐ `curl -I http://<도메인>/` → 301 또는 308, `Location`이 `https://`(NFR-4)
 - ☐ `curl https://<도메인>/api/health/` → 200 `{"status": "ok"}`(FR-52)
 - ☐ 없는 경로 `https://<도메인>/api/nope/` → 404 JSON, 본문에 파일 경로·`Traceback` 없음(NFR-12)
-- ☐ `https://<도메인>/admin/` → 화면(SPA `index.html`)이고 Django 관리 화면이 아님. nginx는 `/api/`만 gunicorn으로 넘기고, Django 관리 경로는 `DEBUG=False`라 없다(SDD 11.1)
-- ☐ 응답 헤더에 CSP, `X-Content-Type-Options: nosniff`, `Referrer-Policy`(SDD 8.6)
+- ☐ `https://<도메인>/admin/` → 화면(SPA `index.html`)이고 Django 관리 화면이 아님. nginx는 `/api/`만 gunicorn으로 넘기고, Django 관리 경로는 `DEBUG=False`라 없다(SDD 12.1)
+- ☐ 응답 헤더에 CSP, `X-Content-Type-Options: nosniff`, `Referrer-Policy`(SDD 9.6)
 - ☐ 서버에서 `ss -ltn`: 443과 22만 바깥에 열림. gunicorn은 유닉스 소켓뿐
 - ☐ `sudo -u coffee-shop sqlite3 /srv/coffee-shop/data/db.sqlite3 "PRAGMA journal_mode;"` → `wal`
 - ☐ `seed_demo` 뒤 NFR-1: 원두 목록·검색·필터 경로 각각 20회, 서버 응답 시간 p95 500 ms 이하(NFR-3 데이터). 잰 명령과 값은 5절

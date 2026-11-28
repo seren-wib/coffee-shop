@@ -1,6 +1,6 @@
 """Minimal settings for the SQLite concurrent order spike (SDD 3.1).
 
-The DATABASES block copies SDD 9.1. SPIKE_TX_MODE switches transaction_mode
+The DATABASES block copies SDD 10.1. SPIKE_TX_MODE switches transaction_mode
 so the same code runs once with IMMEDIATE and once with DEFERRED (the default).
 """
 import os

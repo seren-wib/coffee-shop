@@ -1,4 +1,4 @@
-// Korean display names for the enum codes the API returns (SDD 5.0.2, NFR-30).
+// Korean display names for the enum codes the API returns (SDD 6.0.2, NFR-30).
 export const ROLE = { MEMBER: "회원", ADMIN: "관리자" };
 
 export const ROAST_LEVEL = { LIGHT: "라이트", MEDIUM: "미디엄", DARK: "다크" };

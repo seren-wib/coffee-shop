@@ -21,7 +21,7 @@ const FILTER_KEYS = [
   "page",
 ];
 
-// Price choices map to min_price/max_price on the base price (SDD 6.1, 4.3.4).
+// Price choices map to min_price/max_price on the base price (SDD 7.1, 4.3.4).
 const PRICE_RANGES = [
   { value: "", label: "전체" },
   { value: "-9999", label: "1만 원 미만" },
@@ -80,7 +80,7 @@ export default function ProductListPage() {
       .catch((err) => {
         if (!active) return;
         if (err.response?.status === 404 && apiParams.page) {
-          // Out-of-range page: back to page 1 with the same conditions (SDD 7.4).
+          // Out-of-range page: back to page 1 with the same conditions (SDD 8.4).
           current.delete("page");
           navigate(current.toString() ? `/?${current}` : "/", {
             replace: true,

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # First-time server setup on Ubuntu 24.04 (SIP 3.3). Safe to run again.
 # Run from a clone of this repository: sudo deploy/install.sh
-# Needs, before it runs: /srv/coffee-shop/.env (SDD 9.1) and the Cloudflare Origin CA
+# Needs, before it runs: /srv/coffee-shop/.env (SDD 10.1) and the Cloudflare Origin CA
 # certificate and key in /etc/nginx/ssl/. It does not deploy; run deploy.sh <tag> after it.
 set -euo pipefail
 
@@ -17,14 +17,14 @@ echo "== packages"
 apt-get update -q
 DEBIAN_FRONTEND=noninteractive apt-get install -y -q nginx python3-venv sqlite3 git curl xz-utils
 
-echo "== swap 1GiB (SDD 10.2)"
+echo "== swap 1GiB (SDD 11.2)"
 if ! swapon --show=NAME --noheadings | grep -qx /swapfile; then
   [ -f /swapfile ] || { fallocate -l 1G /swapfile; chmod 600 /swapfile; mkswap /swapfile; }
   swapon /swapfile
   grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' >>/etc/fstab
 fi
 
-echo "== Node.js 24 (build only, SDD 10.4)"
+echo "== Node.js 24 (build only, SDD 11.4)"
 if ! node --version 2>/dev/null | grep -q '^v24\.'; then
   base=https://nodejs.org/dist/latest-v24.x
   sums=$(curl -fsS "$base/SHASUMS256.txt")
@@ -39,7 +39,7 @@ if ! node --version 2>/dev/null | grep -q '^v24\.'; then
 fi
 node --version
 
-echo "== app account and folders (SDD 10.2)"
+echo "== app account and folders (SDD 11.2)"
 id coffee-shop >/dev/null 2>&1 || useradd --system --no-create-home --shell /usr/sbin/nologin coffee-shop
 usermod -aG coffee-shop www-data
 install -d -m 755 $app $app/releases

@@ -1,4 +1,4 @@
-// Dates in Asia/Seoul (SDD 6.0.2): "YYYY-MM-DD HH:mm", lists show the date only.
+// Dates in Asia/Seoul (SDD 7.0.2): "YYYY-MM-DD HH:mm", lists show the date only.
 const parts = new Intl.DateTimeFormat("en-CA", {
   timeZone: "Asia/Seoul",
   year: "numeric",

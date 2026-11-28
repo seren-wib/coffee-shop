@@ -1,7 +1,7 @@
 """Stock and sales status (SDD 4.7.0, 4.7.6 ~ 4.7.10).
 
 These are the only functions that change product_options.stock_quantity and
-products.sales_status (SDD 2.1, 5.9). Every change is a conditional UPDATE, so a
+products.sales_status (SDD 2.1, 6.9). Every change is a conditional UPDATE, so a
 STOPPED product is never overwritten by an automatic switch (DR-7).
 """
 

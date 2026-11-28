@@ -7,7 +7,7 @@ import { errorMessage } from "../lib/errors";
 import { formatWon } from "../lib/format";
 import { orderIdFromPgOrderId, payErrorMessage, payOrder } from "../lib/pay";
 
-// Payment result (SDD 6.7, FR-26 ~ FR-28). Toss sends the browser here from successUrl or failUrl.
+// Payment result (SDD 7.7, FR-26 ~ FR-28). Toss sends the browser here from successUrl or failUrl.
 export default function CheckoutResultPage() {
   const [params] = useSearchParams();
   const failed = params.get("fail") === "1";

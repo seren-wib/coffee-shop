@@ -18,7 +18,7 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import ProductListPage from "./pages/ProductListPage";
 import SignupPage from "./pages/SignupPage";
 
-// Admin screens load separately so the first customer screen stays small (SDD 6.1, NFR-2).
+// Admin screens load separately so the first customer screen stays small (SDD 7.1, NFR-2).
 const AdminOrderListPage = lazy(
   () => import("./pages/admin/AdminOrderListPage"),
 );
@@ -32,7 +32,7 @@ const AdminProductFormPage = lazy(
   () => import("./pages/admin/AdminProductFormPage"),
 );
 
-// Route table (SDD 6.0).
+// Route table (SDD 7.0).
 export default function App() {
   const navigate = useNavigate();
 

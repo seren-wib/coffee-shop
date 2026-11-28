@@ -50,7 +50,7 @@ export default function AdminOrderDetailPage() {
     };
   }, [id]);
 
-  // An action is followed by a fresh GET (SDD 6.0.3).
+  // An action is followed by a fresh GET (SDD 7.0.3).
   async function run(action, body) {
     setBusy(true);
     setActionError(null);
